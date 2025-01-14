@@ -1,0 +1,7 @@
+\contentsline {section}{\numberline {1}Chapter 1 - Optimization Models}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Tuesday 01/14/2025}{2}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Modeling Overview}{2}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2}Example Problem}{2}{subsubsection.1.1.2}%
+\contentsline {subsubsection}{\numberline {1.1.3}General Optimization Definitions}{2}{subsubsection.1.1.3}%
+\contentsline {subsubsection}{\numberline {1.1.4}Specific Model Criteria}{3}{subsubsection.1.1.4}%
+\contentsline {subsubsection}{\numberline {1.1.5}Optimization Concepts}{4}{subsubsection.1.1.5}%
