@@ -1,0 +1,222 @@
+\section{Chapter 2 - Mathematics Review}
+\subsection{Thursday 01/16/2025}
+\subsubsection{Chapter Math Outline}
+The chapters over the next few lessons will include some math that will be used in different chapters.
+\begin{itemize}
+  \item Chapter 1: Linear algebra
+  \subitem Matrices
+  \subitem Eigenvalues
+  \item Chapter 2: Convex Analysis
+  \subitem Convexity
+  \subitem Quadratic forms
+  \subitem Taylor Series
+\end{itemize}
+
+\subsubsection{Linear Algebra Review}
+A vector $\textbf{x} \in \mathbb{R}^n$ is defined as
+\begin{align}
+  \textbf{x} = 
+  \begin{bmatrix}
+     x_1 \\
+     x_2 \\
+     \vdots \\
+     x_n
+  \end{bmatrix}
+\end{align}
+This vector represents a direction and magnitude in $n$ dimensions. \\
+The $l2$-norm of a vector is defned as
+\begin{equation}
+  \| \textbf{x} \|_2 = \sqrt{x_1^2 + x_2^2 + \dots x_n^2}
+\end{equation}
+Vector addition is defined as 
+\begin{align}
+  \textbf{x} + \textbf{y} = 
+  \begin{bmatrix}
+     x_1 \\ 
+     x_2 \\ 
+     \vdots \\
+     x_n
+  \end{bmatrix}
+  + 
+  \begin{bmatrix} 
+    y_1 \\
+    y_2 \\
+    \vdots \\
+    y_n
+  \end{bmatrix}
+   = 
+   \begin{bmatrix} 
+    x_1 + y_1 \\
+    x_2 + y_2 \\
+    \vdots \\
+    x_n + y_n
+  \end{bmatrix}
+\end{align}
+Scalar multiplication of a scalar $a \in \mathbb{R}$ with a vector $\textbf{x} \in \mathbb{R}^n$
+\begin{align}
+  a \textbf{x} = 
+  \begin{bmatrix}
+     a x_1 \\
+     a x_2 \\
+     \vdots \\
+     a x_n 
+  \end{bmatrix}
+\end{align}
+The dot product of two vectors $\textbf{x}, \textbf{y}, \in \mathbb{R}^n$ is defined as
+\begin{align}
+  \textbf{x}^\top \textbf{y} = 
+  \begin{bmatrix}
+     x_1 & x_2 & \dots & x_n
+  \end{bmatrix}
+  \begin{bmatrix}
+    y_1 \\
+     y_2 \\ 
+     \vdots \\
+     y_n
+ \end{bmatrix}
+\end{align}
+With equivalent notation $\textbf{x}^\top \textbf{y} = \langle \textbf{x}, \textbf{y} \rangle$ \\
+\begin{gather}
+  \| \textbf{x} - \textbf{y} \|_2^2 = \| \textbf{x} \|_2^2 + \| \textbf{y} \|_2^2 - 2 \| \textbf{x} \|_2 \| \textbf{y} \|_2 \cos \theta \\
+  \| \textbf{x} - \textbf{y} \|_2^2 = (\textbf{x} - \textbf{y})^\top (\textbf{x} - \textbf{y})
+\end{gather}
+
+The Cauchy-Schwarts Inequality is derived by the following
+\begin{gather}
+  \cos \theta = \frac{x^\top y}{\| x \| \| y \|} \\ 
+  \frac{x^\top y}{\| x \| \| y \|} \leq 1 \\
+  x^\top y \leq \| x \| \| y \|
+\end{gather}
+
+The triangle inequality is defined as
+\begin{equation}
+  \| \textbf{x} + \textbf{y} \| \leq \| \textbf{x} \| + \| \textbf{y} \|
+\end{equation}
+
+A matrix $A \in \mathbb{R}^{m \times n}$ is defined as 
+\begin{align}
+  A = 
+  \begin{bmatrix}
+     a_{11} & \dots & a_{1n} \\
+    \vdots & \dots & \vdots \\
+    a_{m1} & \dots & a_{mn}
+  \end{bmatrix}
+\end{align}
+The transpose of a matrix $A^\top$ flips each value for the row and column  as such 
+\begin{align}
+  A^\top = 
+  \begin{bmatrix}
+     a_{11} & \dots & a_{1m} \\
+    \vdots & \dots & \vdots \\
+    a_{n1} & \dots & a_{nm}
+  \end{bmatrix}
+\end{align}
+Matrix addition is element-wise and can be shown as such between two matrices $A,B \in \mathbb{R}^{m \times n}$
+\begin{align}
+  A + B = 
+  \begin{bmatrix}
+    a_{11} + b_{11} & \dots & a_{1n} + b_{1n} \\
+    \vdots & \dots & \vdots \\
+    a_{m1} + b_{m1} & \dots & a_{mn} + b_{mn}
+  \end{bmatrix}
+\end{align}
+Scalar multiplication of a matrix $A$ with a scalar $\alpha$ is defined as 
+\begin{align}
+  \alpha A = 
+  \begin{bmatrix}
+     \alpha a_{11} & \dots & \alpha a_{1n} \\
+    \vdots & \dots & \vdots \\
+    \alpha a_{m1} & \dots & \alpha a_{mn}
+  \end{bmatrix}
+\end{align}
+Matrix multiplication between two matrices $A \in \mathbb{R}^{m \times n}, B \in \mathbb{R}^{n \times p}$ is defined as 
+\begin{align}
+  AB = 
+  \begin{bmatrix}
+    a_{11} & \dots & a_{1n} \\
+   \vdots & \dots & \vdots \\
+   a_{m1} & \dots & a_{mn}
+ \end{bmatrix}
+ \begin{bmatrix}
+  b_{11} & \dots & b_{1p} \\
+ \vdots & \dots & \vdots \\
+ b_{n1} & \dots & b_{np}
+\end{bmatrix}
+\end{align}
+With the following properties
+\begin{itemize}
+  \item $AB \neq BA$
+  \item $(ABC)^\top = C^\top B^\top A^\top $
+\end{itemize}
+The inverse of a matrix has the following properties
+\begin{itemize}
+  \item $AA^{-1} = I$
+  \item $(AB)^{-1} - B^{-1} A^{-1}$
+  \item $(B^\top)^{-1} = (B^{-1})^\top$
+  \item $(A^{-1})^{-1} = A$
+\end{itemize}
+Orthonormal matrices have the properties
+\begin{itemize}
+  \item $O^\top O = I$
+  \item $O^\top = O^{-1}$
+\end{itemize}
+Some following matrix partitions are useful
+\begin{align}
+  \begin{bmatrix}
+     A_1 \\
+     B_1
+  \end{bmatrix}
+  +
+  \begin{bmatrix}
+    A_2 \\
+    B_2
+ \end{bmatrix}
+ =
+ \begin{bmatrix}
+  A_1 + A_1\\
+  B_1 + B_2
+\end{bmatrix}
+\end{align}
+\begin{align}
+  \begin{bmatrix}
+     A \\
+     B
+  \end{bmatrix}^\top
+  = 
+  \begin{bmatrix}
+    A^\top & B^\top
+ \end{bmatrix}
+\end{align}
+\begin{align}
+  A
+  \begin{bmatrix}
+    B_1 \\
+    B_2
+  \end{bmatrix}^\top
+  = 
+  \begin{bmatrix}
+    A B_1 & A B_2
+ \end{bmatrix}
+\end{align}
+
+The determinant of a matrix $A \in \mathbb{R}^{n \times n}$ is calculated by subtracting the product of the diagonals of a matrix recursively. The minor of a matrix is the section of a matrix that is achieved when removing a section. Simply, the determinant of a matrix can also be defined as the product of the eigenvalues.
+\begin{equation}
+  \det A = \prod \lambda
+\end{equation}
+
+\subsubsection{Spaces}
+A vector space is defined as a set of all vectors with some properties. We define a vector space $\mathbb{V}$
+\begin{gather}
+    u + v \in \mathbb{V} \\
+    u + (v +w) = (u+v) + w \\
+    u + v = v+ u 
+\end{gather}
+A linearly dependent system of vectors $v_i \in \mathbb{R}^n$ satifies the following for a set of scalars $c_i$
+\begin{equation}
+    c_1 v_1 + \dots + c_m v_m = 0
+\end{equation}
+The span of a set of vectors $v_i$ is the set of all vectors that can be created with a linear combination of those vectors.
+\begin{equation}
+    \{ x | c_1 v_1 + \dots + c_m  v_m = x  \}
+\end{equation}
+The basis of a space is the minimum number of vectors needed to span a vector space.

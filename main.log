@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.5.1)  14 JAN 2025 14:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.5.1)  16 JAN 2025 13:40
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1266,7 +1266,7 @@ Package csquotes Info: ... none found.
 LaTeX Font Info:    Trying to load font information for T1+lmr on input line 16.
  (C:\Users\hanse\AppData\Local\Programs\MiKTeX\tex/latex/lm\t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) (main.aux (chapters/chapter1.aux))
+) (main.aux (chapters/chapter1.aux) (chapters/chapter2.aux))
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
@@ -1453,36 +1453,48 @@ Overfull \hbox (0.49188pt too wide) in paragraph at lines 99--100
 []\T1/lmr/m/n/10.95 A \T1/lmr/bx/n/10.95 lo-cal min-i-mum \T1/lmr/m/n/10.95 with re-spect to a dis-tance $\OML/lmm/m/it/10.95 "$ \T1/lmr/m/n/10.95 is de-fined as a point $\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 x[]; y[]\OT1/lmr/m/n/10.95 )$ \T1/lmr/m/n/10.95 that sat-is-fies $\OML/lmm/m/it/10.95 F\OT1/lmr/m/n/10.95 (\OML/lmm/m/it/10.95 x[]; y[]\OT1/lmr/m/n/10.95 ) \OMS/lmsy/m/n/10.95 ^^T
  []
 
-<chapters/01142025_feasible_region.png, id=88, 462.528pt x 346.896pt>
+<chapters/01142025_feasible_region.png, id=113, 462.528pt x 346.896pt>
 File: chapters/01142025_feasible_region.png Graphic file (type png)
 <use chapters/01142025_feasible_region.png>
 Package pdftex.def Info: chapters/01142025_feasible_region.png  used on input line 102.
 (pdftex.def)             Requested size: 234.8775pt x 176.15768pt.
 ) [4] [5 <./chapters/01142025_feasible_region.png>]
+\openout2 = `chapters/chapter2.aux'.
+
+ (chapters/chapter2.tex
+Underfull \hbox (badness 10000) in paragraph at lines 77--79
+
+ []
+
+[6
+
+
+
+] [7]) [8]
 No complaints by nag.
-(main.aux (chapters/chapter1.aux))
+(main.aux (chapters/chapter1.aux) (chapters/chapter2.aux))
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2020/03/25>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 818719A756961FA047F5E76EE61E36D6;1256.
+(rerunfilecheck)             Checksum: 4B569CC9A944504C2A87E258BCBF7942;2067.
 Package logreq Info: Writing requests to 'main.run.xml'.
 \openout1 = `main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 45571 strings out of 474423
- 959677 string characters out of 5741719
- 1941496 words of memory out of 5000000
- 67143 multiletter control sequences out of 15000+600000
- 608106 words of font info for 75 fonts, out of 8000000 for 9000
+ 45642 strings out of 474423
+ 961404 string characters out of 5741719
+ 1956496 words of memory out of 5000000
+ 67172 multiletter control sequences out of 15000+600000
+ 614092 words of font info for 77 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 99i,10n,107p,1209b,961s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi8.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr17.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr8.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmri10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy8.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (5 pages, 372496 bytes).
+ 99i,16n,107p,1209b,1054s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi8.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr17.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr8.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmri10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy10.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy8.pfb><C:/Users/hanse/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on main.pdf (8 pages, 405090 bytes).
 PDF statistics:
- 177 PDF objects out of 1000 (max. 8388607)
- 41 named destinations out of 1000 (max. 500000)
- 74 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 253 PDF objects out of 1000 (max. 8388607)
+ 74 named destinations out of 1000 (max. 500000)
+ 114 words of extra memory for PDF output out of 10000 (max. 10000000)
 
