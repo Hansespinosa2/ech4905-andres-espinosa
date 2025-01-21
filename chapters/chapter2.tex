@@ -220,3 +220,237 @@ The span of a set of vectors $v_i$ is the set of all vectors that can be created
     \{ x | c_1 v_1 + \dots + c_m  v_m = x  \}
 \end{equation}
 The basis of a space is the minimum number of vectors needed to span a vector space.
+
+\subsection{Tuesday 01/21/2025}
+\subsubsection{Matrix eigenvalues}
+We define $\lambda$ as the eigenvalues of a matrix. We investigate what it means for matrices with different eigenvalues.
+\begin{itemize}
+  \item $\lambda_i \geq 0 \to $ Matrix $A$ is positive semi-definite
+  \item $\lambda_i > 0 \to $ Matrix $A$ is positive definite
+  \item $\lambda_i \leq 0 \to $ Matrix $A$ is negative semi-definite
+  \item $\lambda_i < 0 \to $ Matrix $A$ is negative definite
+  \item $\lambda_i < 0, \lambda_i > 0 \to $ Matrix $A$ is  indefinite
+\end{itemize}
+
+\subsubsection{Convex Sets}
+A convex set is defined as a set where the line through all points is contained in the same set.
+\\ \\
+\textbf{Half Spaces}: 
+\\
+Half spaces are the space under a line, defined with the parameters $c \in \mathbb{R}^n z \in \mathbb{R}$,  
+\begin{equation}
+  \{ x | c^\top x \leq z, x \in \mathbb{R}^n \}
+\end{equation}
+A half space is open if the inequality is strict.
+
+The intersection of a finite number of closed half spaces is known as a polytope. If a polytope is bounded on all sides, it is also known as a polyhedron.
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \filldraw[fill=blue!20, draw=black] (0,0,0) -- (2,0,0) -- (2,2,0) -- (0,2,0) -- cycle;
+    \filldraw[fill=blue!20, draw=black] (0,0,0) -- (2,0,0) -- (2,0,2) -- (0,0,2) -- cycle;
+    \filldraw[fill=blue!20, draw=black] (0,0,0) -- (0,2,0) -- (0,2,2) -- (0,0,2) -- cycle;
+    \filldraw[fill=blue!20, draw=black] (2,0,0) -- (2,2,0) -- (2,2,2) -- (2,0,2) -- cycle;
+    \filldraw[fill=blue!20, draw=black] (0,2,0) -- (2,2,0) -- (2,2,2) -- (0,2,2) -- cycle;
+    \filldraw[fill=blue!20, draw=black] (0,0,2) -- (2,0,2) -- (2,2,2) -- (0,2,2) -- cycle;
+  \end{tikzpicture}
+  \caption{A polyhedron}
+  \label{fig:polyhedron}
+\end{figure}
+\\ \\ 
+\textbf{Extreme Points}: 
+\\
+Consider a convex set $C \subseteq \mathbb{R}^n$. Let $z \in \mathbb{R}^n$, $z$ is an extreme point of $C$ if $z \in C$ and there are no $x,y \in C$ such that $z = (1-\lambda)x + \lambda y$. In other words, the point $z$ is not on a line defined by two points. The figure \ref{fig:2d_polyhedron} shows a polyhedron. It is impossible to represent the red points as a positive combination of two other points in this square. Therefore, they are extreme points.
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \filldraw[fill=blue!20, draw=black] (0,0) -- (2,0) -- (2,2) -- (0,2) -- cycle;
+    \foreach \x in {0,2} {
+      \foreach \y in {0,2} {
+        \filldraw[fill=red, draw=black] (\x,\y) circle (2pt);
+      }
+    }
+  \end{tikzpicture}
+  \caption{A 2D polyhedron with emphasized vertices}
+  \label{fig:2d_polyhedron}
+\end{figure}
+\\ \\
+\textbf{Convex combinations}: 
+\\
+Let $\textbf{x}_1, \textbf{x}_2, \dots, \textbf{x}_m$ be a set of $m$ vectors in $\mathbb{R}^n$. A convex combination of these vectors is a point of the form
+\begin{gather}
+  \lambda_1 \textbf{x}_1 + \dots + \lambda_m \textbf{x}_m
+\end{gather}
+where $\textbf{1}^\top \lambda = 1, \lambda \succeq 0$
+\\ \\
+\textbf{A Simplex}: 
+\\
+A simplex is the simplest possible polytope in a given dimension. Figure \ref{fig:simplexes} shows the simplexes in 0 to 3 dimensions.
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    % 0D simplex
+    \filldraw[fill=red, draw=black] (0,0) circle (2pt);
+    \node at (0,-0.5) {0D Simplex};
+
+    % 1D simplex
+    \draw[thick] (2,0) -- (4,0);
+    \filldraw[fill=red, draw=black] (2,0) circle (2pt);
+    \filldraw[fill=red, draw=black] (4,0) circle (2pt);
+    \node at (3,-0.5) {1D Simplex};
+
+    % 2D simplex
+    \draw[thick] (6,0) -- (7,1.73) -- (8,0) -- cycle;
+    \filldraw[fill=red, draw=black] (6,0) circle (2pt);
+    \filldraw[fill=red, draw=black] (7,1.73) circle (2pt);
+    \filldraw[fill=red, draw=black] (8,0) circle (2pt);
+    \node at (7,-0.5) {2D Simplex};
+
+    % 3D simplex
+    \draw[thick] (10,0) -- (11,1.73) -- (12,0) -- cycle;
+    \draw[thick] (10,0) -- (11,0.58) -- (12,0);
+    \draw[thick] (11,1.73) -- (11,0.58);
+    \filldraw[fill=red, draw=black] (10,0) circle (2pt);
+    \filldraw[fill=red, draw=black] (11,1.73) circle (2pt);
+    \filldraw[fill=red, draw=black] (12,0) circle (2pt);
+    \filldraw[fill=red, draw=black] (11,0.58) circle (2pt);
+    \node at (11,-0.5) {3D Simplex};
+  \end{tikzpicture}
+  \caption{Simplexes in 0D to 3D}
+  \label{fig:simplexes}
+\end{figure}
+\\ \\
+\textbf{Convex Hull}
+\\ 
+The convex hull of a set $S$ is defined as the smallest convex set that contains $S$. It is also defined as the intersection of all convex sets which contain $S$. Figure \ref{fig:nonconvex_convex_hull} shows the convex hull of a nonconvex set.
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    % Nonconvex set
+    \filldraw[fill=blue!20, draw=black] (0,0) -- (1,2) -- (2,1) -- (3,3) -- (4,0) -- cycle;
+    \node at (2,-0.5) {Nonconvex Set};
+
+    % Convex hull
+    \draw[dashed, thick] (0,0) -- (1,2) -- (3,3) -- (4,0) -- cycle;
+    \node at (2,3.5) {Convex Hull};
+  \end{tikzpicture}
+  \caption{A 2D nonconvex set and its convex hull}
+  \label{fig:nonconvex_convex_hull}
+\end{figure}
+\\ \\ 
+\textbf{Farkas Theorem}: 
+\\
+The Farkas Theorem is a theorem that allows for a certificate of feasibility (or infeasibility) of an optimization problem. With the variables $A \in \mathbb{R}^{m \times n}, b \in \mathbb{R}^n$, exactly one of the following two propositions is true.
+\begin{itemize}
+  \item $Ax = b, x \succeq 0$ for some $x \in \mathbb{R}^n$. In other words, $b$ is in the cone spanned by convex combinations of the columns of $A$.
+  \item $A^\top y \succeq 0, b^\top y \preceq 0$, for some $y \in \mathbb{R}^m$. In other words, the angle between $y$ and $b$ is greater than 90 and the angle between $y$ and every column of $A$ is less than 90. 
+\end{itemize}
+\subsubsection{Convex Functions}
+\textbf{Derivatives}: 
+\\
+Gradient refresher
+\begin{align}
+  \nabla f(x) = 
+  \begin{bmatrix}
+    \frac{d f}{d x_1} \\
+    \frac{d f}{d x_2} \\ 
+    \vdots \\
+    \frac{d f}{d x_n}  
+  \end{bmatrix}
+\end{align}
+A directional derivative is the transpose of the gradient times a direction $\nabla f(x)^\top d$. Consider a function $f : \mathbb{R}^n \to \mathbb{R}$ that is differentiable. A direction is a descent direction if $d^\top \nabla f(x) < 0$. The jacobian of a function is a generalized derivative for a function $f : \mathbb{R}^n \to \mathbb{R}^m$. It is defined as
+\begin{align}
+  J(x) = 
+  \begin{bmatrix}
+     \nabla f_1 (x)^\top \\
+     \nabla f_2 (x)^\top \\
+     \vdots \\
+     \nabla f_m (x)^\top
+  \end{bmatrix}
+\end{align}
+The hessian of a function is the second derivative of a function. The Hessian is symmetric as long as the mixed derivatives are equal to each other. 
+\begin{align}
+  H(f(x)) = 
+  \begin{bmatrix}
+     \frac{d^2 f}{d x_1^2} & \dots & \frac{d ^2 f}{d x_1 d x_n}   \\
+     \vdots & \vdots & \vdots \\
+     \frac{d^2 f}{d x_n d x_1} & \dots & \frac{d ^2 f}{d x_n^2}
+  \end{bmatrix}
+\end{align}
+\\ \\
+\textbf{Convex Functions}: 
+\\
+Let $C$ be a convex subset of $\mathbb{R}^n$, and f(x) be a real-valued function defined on $C$. The function $f$ is convex if Jensens inequality below holds. A function is strictly convex if the below property holds with strict inequality.
+\begin{equation}
+  f((1-\lambda)x_1 + \lambda x_2) \leq (1-\lambda) f(x_1) + \lambda f(x_2)
+\end{equation}
+In words, a function is convex if the line between any two points lies above every point of the function between those two points. Figure \ref{fig:convex_function} shows a convex function and how the line between any two points lies above the graph.
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    % Convex function
+    \draw[thick, domain=0:4, smooth, variable=\x] plot ({\x}, {0.5*\x*\x - 2*\x + 3});
+
+    % Points on the function
+    \filldraw[fill=red, draw=black] (1,1.5) circle (2pt) node[above] {$f(x_1)$};
+    \filldraw[fill=red, draw=black] (3,1.5) circle (2pt) node[above] {$f(x_2)$};
+
+    % Line between points
+    \draw[dashed, thick] (1,1.5) -- (3,1.5);
+    \node at (2,0.5) {$(1-\lambda)f(x_1) + \lambda f(x_2)$};
+  \end{tikzpicture}
+  \caption{A convex function and the line between two points}
+  \label{fig:convex_function}
+\end{figure}
+Another way to define convex functions is with respect to the Hessian of the function $H(f(x))$. A function is convex if the Hessian of the function is positive semi definite $H(f(x)) \succeq 0$. Convexity can also be defined in sections of a function. For example, let $S$ be anon-empty open set in $\mathbb{R}^n$. If $f(x_0)$ is convex at the point $x_0$, then $H$ is positive semi-definite at that point.
+\\ \\
+\textbf{Example Problem}: 
+\\
+Determine if the following equation is convex
+\begin{equation}
+  f(x_1, x_2, x_3) = x_1^2 + x_2^2 + x_3^2 + 2x_1 x_2
+\end{equation}
+\begin{align}
+  \nabla f(x) = 
+  \begin{bmatrix}
+     2 x_1 + 2x_2 \\
+     2x_2 + 2x_1 \\
+     2x_3
+  \end{bmatrix}
+\end{align}
+
+\begin{align}
+  \nabla^2 f(x) = 
+  \begin{bmatrix}
+     2 & 2 & 0 \\
+     2 & 2 & 0 \\
+     0 & 0 & 2
+  \end{bmatrix}
+\end{align}
+Calculating the eigenvalues
+\begin{align} \det
+  \begin{bmatrix}
+    2 - \lambda& 2 & 0 \\
+    2 & 2 - \lambda & 0 \\
+    0 & 0 & 2 - \lambda
+  \end{bmatrix} 
+\end{align}
+\begin{gather}
+  (2-\lambda)(2-\lambda)(2-\lambda) - 2(2)(2-\lambda) + 0= 0 \\
+  (2-\lambda)^3 - 4(2-\lambda) = 0 \\
+  (2-\lambda)((2-\lambda)^2 - 4) = 0 \\
+  \lambda = [2, 0, 4]
+\end{gather}
+$\lambda = [0,2,4] \succeq 0$, therefore the hessian is positive semi-definite and the function is convex.
+\subsubsection{Properties of Convex Functions}
+\begin{itemize}
+  \item if $f_i$ are convex, $\sum_i f_i(x)$ is convex
+  \item if $f$ is convex, $\lambda f(x)$ is convex, where $\lambda is a scalar$
+  \item Let $f$ be convex, and $g$ be an increasing function. The convex function $g(f(x))$ is also convex.
+\end{itemize}
+
+\subsubsection{Quadratic Forms}
+The quadratic form of a vector $x \in \mathbb{R}^n$ with parameters $B in \mathbb{R}^{n \times n}, a \in \mathbb{R}^n, c \in \mathbb{R}$ is
+\begin{equation}
+  f(x) = \frac{1}{2} x^\top B x + a^\top x + c
+\end{equation}
