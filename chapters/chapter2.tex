@@ -343,8 +343,25 @@ The convex hull of a set $S$ is defined as the smallest convex set that contains
 The Farkas Theorem is a theorem that allows for a certificate of feasibility (or infeasibility) of an optimization problem. With the variables $A \in \mathbb{R}^{m \times n}, b \in \mathbb{R}^n$, exactly one of the following two propositions is true.
 \begin{itemize}
   \item $Ax = b, x \succeq 0$ for some $x \in \mathbb{R}^n$. In other words, $b$ is in the cone spanned by convex combinations of the columns of $A$.
-  \item $A^\top y \succeq 0, b^\top y \preceq 0$, for some $y \in \mathbb{R}^m$. In other words, the angle between $y$ and $b$ is greater than 90 and the angle between $y$ and every column of $A$ is less than 90. 
+  \item $A^\top y \succeq 0, b^\top y \leq 0$, for some $y \in \mathbb{R}^m$. In other words, the angle between $y$ and $b$ is greater than 90 and the angle between $y$ and every column of $A$ is less than 90. 
 \end{itemize}
+
+\begin{align}
+  Ax = b \to 
+  \begin{bmatrix}
+     a_{11} x_1 + a_{12} x_2 + \dots a_{1n} x_n \\
+     a_{21} x_1 + a_{22} x_2 + \dots a_{2n} x_n \\
+     \vdots \\
+     a_{m1} x_1 + a_{m2} x_2 + \dots a_{mn} x_n
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    b_1 \\
+    b_2 \\
+    \vdots \\
+    b_m
+  \end{bmatrix}
+\end{align}
 \subsubsection{Convex Functions}
 \textbf{Derivatives}: 
 \\
@@ -454,3 +471,137 @@ The quadratic form of a vector $x \in \mathbb{R}^n$ with parameters $B in \mathb
 \begin{equation}
   f(x) = \frac{1}{2} x^\top B x + a^\top x + c
 \end{equation}
+
+\subsection{Thursday 01/23/2025}
+\subsubsection{Eigenvalues and Eigenvectors}
+A non-singular matrix is a matrix $A$ that follows the property $\det A \neq 0 $.
+\\ \\
+\textbf{Eigenvalues}: 
+\\ 
+In order to calculate the eigenvalues of a matrix $A$, we solve the equation $\det (A - \lambda I) = 0$. For example, we take the matrix
+\begin{align}
+  A = 
+  \begin{bmatrix}
+     13 & -4 \\
+     -4 & 7
+  \end{bmatrix}
+\end{align}
+We subtract $\lambda$ from the diagonals to get 
+\begin{align}
+  A = 
+  \begin{bmatrix}
+     13 - \lambda & -4 \\
+     -4 & 7 - \lambda
+  \end{bmatrix}
+  \\
+  = (13-  \lambda)(7 - \lambda) - 16 = 0 \\
+  \lambda_1 = 15, \lambda_2 = 5
+\end{align}
+Not all eigenvalues are always real. 
+The number of eigenvalues is the same as the dimension of the matrix but is not always real.
+\\ \\
+\textbf{Eigenvectors}
+\\
+To find the eigenvectors $\nu$ of the matrix, we solve $(A - \lambda I )\nu = 0$.
+\begin{align}
+  A - \lambda I = 
+(  \begin{bmatrix}
+     13 & -4 \\
+     -4 & 7
+  \end{bmatrix}
+  - 15
+  \begin{bmatrix}
+    1 & 0 \\
+    0 & 1
+  \end{bmatrix})
+  \begin{bmatrix}
+    v_1 \\
+    v_2
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    0 \\ 
+    0
+  \end{bmatrix}
+  \\ 
+  =
+  \begin{bmatrix}
+    -2 & -4 \\
+    0 & 0
+  \end{bmatrix}
+  \begin{bmatrix}
+    v_1 \\
+    v_2
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    0 \\ 
+    0
+  \end{bmatrix} \\
+  -2 v_1 - 4v_2 = 0 \\
+  v_1 + 2v_2 = 0 \\
+  v_1 = - 2 v_2 \\
+  \text{Infinite solutions, as long as the vector looks like }
+  \begin{bmatrix}
+    -2 a \\
+    a
+  \end{bmatrix}
+\end{align}
+Now we use the other eigenvalue $\lambda = 5$
+\begin{align}
+  A - \lambda I = 
+(  \begin{bmatrix}
+     13 & -4 \\
+     -4 & 7
+  \end{bmatrix}
+  - 5
+  \begin{bmatrix}
+    1 & 0 \\
+    0 & 1
+  \end{bmatrix})
+  \begin{bmatrix}
+    w_1 \\
+    w_2
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    0 \\ 
+    0
+  \end{bmatrix}
+  \\ 
+  =
+  \begin{bmatrix}
+    8 & -4 \\
+    -4 & 2
+  \end{bmatrix}
+  \begin{bmatrix}
+    w_1 \\
+    w_2
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    0 \\ 
+    0
+  \end{bmatrix} \\
+  \text{Infinite solutions, as long as the vector looks like }
+  \begin{bmatrix}
+    a/2 \\
+    a
+  \end{bmatrix}
+\end{align}
+\subsubsection{Convexity in Functions}
+A bilinear function is a function in the form 
+\begin{equation}
+  f(x_1, x_2) = x_1 x_2
+\end{equation}
+The hessian of this function looks like
+\begin{align}
+  H = 
+  \begin{bmatrix}
+     0 & 1 \\
+     1 & 0
+  \end{bmatrix}
+\end{align}
+The eigenvalues of this matrix are $(-\lambda)^2 - 1 = 0, \lambda = \pm 1$.
+This matrix is indefinite and therefore non-convex.
+This function creates a saddle and is non-convex in both variables but is convex in either variable at a fixed falue of the other.

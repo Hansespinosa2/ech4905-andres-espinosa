@@ -15,4 +15,7 @@
 \contentsline {subsubsection}{\numberline {2.2.2}Convex Sets}{9}{subsubsection.2.2.2}%
 \contentsline {subsubsection}{\numberline {2.2.3}Convex Functions}{11}{subsubsection.2.2.3}%
 \contentsline {subsubsection}{\numberline {2.2.4}Properties of Convex Functions}{12}{subsubsection.2.2.4}%
-\contentsline {subsubsection}{\numberline {2.2.5}Quadratic Forms}{12}{subsubsection.2.2.5}%
+\contentsline {subsubsection}{\numberline {2.2.5}Quadratic Forms}{13}{subsubsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.3}Thursday 01/23/2025}{13}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Eigenvalues and Eigenvectors}{13}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Convexity in Functions}{14}{subsubsection.2.3.2}%
