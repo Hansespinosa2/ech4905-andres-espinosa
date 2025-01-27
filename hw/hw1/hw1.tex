@@ -27,6 +27,8 @@ Consider the following matrix and perform the following calculations showing all
 \end{align*}
 \subsection{Part a}
 Determinant of A
+\\
+\textbf{Solution: }
 \begin{gather*}
     \det A = 
     2 (-1(1) - 0) - 2(1(1) + 0) + 3((1)(2) - (-1)(-1)) \\
@@ -36,6 +38,8 @@ Determinant of A
 
 \subsection{Part b}
 Eigenvalues and eigenvectors of A
+\\
+\textbf{Solution: }
 \begin{gather*}
     (2- \lambda) ((-1 - \lambda)(1 - \lambda) - 0) - 2(1(1- \lambda) + 0) + 3((1)(2) - (-1-\lambda)(-1)) = 0 \\
     -(2-\lambda)(1+\lambda)(1-\lambda) -2(1-\lambda) + 6 -3(1+\lambda) = 0 \\
@@ -49,7 +53,10 @@ Eigenvalues and eigenvectors of A
 % Still need to do eigenvectors
 
 \section{Problem 2}
-% NEED TO DO THIS
+Check if the set of all polynomials with real coefficients form a vector space.
+\\
+\textbf{Solution: }
+%INSERT SOLUTION HERE
 
 \section{Problem 3}
 Consider the following function and perform the following calculations
@@ -59,6 +66,8 @@ Consider the following function and perform the following calculations
 
 \subsection{Part a}
 Gradient of the function
+\\
+\textbf{Solution: }
 \begin{align*}
     \nabla f(x_1, x_2) = 
   \begin{bmatrix}
@@ -69,6 +78,8 @@ Gradient of the function
 
 \subsection{Part b}
 Hessian of the function
+\\
+\textbf{Solution: }
 \begin{align*}
     \nabla^2 f(x_1, x_2) = 
   \begin{bmatrix}
@@ -79,6 +90,8 @@ Hessian of the function
 
 \subsection{Part c}
 Write the second order Taylor expansions around a point $(x_1^*, x_2^*)$
+\\
+\textbf{Solution: }
 % Still need to do this
 
 \section{Problem 4}
@@ -86,6 +99,8 @@ Check if the following function is convex
 \begin{equation*}
   f(x_1, x_2) = (1 - x_1)^2 + 100(x_2 - x_1^2)^2
 \end{equation*}
+\\
+\textbf{Solution: }
 In order to check if $f$ is convex, we calculate its hessian and evaluate if it is positive semi-definite.
 \begin{align*}
   \nabla f(x_1, x_2) = 
@@ -116,6 +131,8 @@ Check if the following function is convex
 \begin{equation*}
   g(x_1, x_2) = 5 x_1^2 - 4x_1 x_2
 \end{equation*}
+\\
+\textbf{Solution: }
 Like the previous problem, we calculate the hessian of this function and evaluate when it is positive semi-definite.
 \begin{align*}
   \nabla g(x_1, x_2) = 
@@ -151,6 +168,12 @@ Like the previous problem, we calculate the hessian of this function and evaluat
 Since we have one eigenvalue greater than 0 and one less than 0, the hessian is indefinite and $g$ is not convex.
 
 \section{Problem 6}
+Consider a set of linear equalities $Ax = b$ as well as a set of convex nonlinear inequalities $g(x) \leq 0$. 
+Consider the feasible region constrained by these linear and nonlinear inequalities.
+Assuming that this region is non-empty, show that this feasible region is convex.
+\\
+\textbf{Solution: }
+% INSERT SOLUTION HERE
 
 \section{Problem 7}
 Consider the following optimization problem
@@ -163,9 +186,15 @@ Consider the following optimization problem
 \end{align}
 
 \subsection{Part a}
+What type of problem is this (MILP, MINLP,...)? Justify.
+\\
+\textbf{Solution: }
 This problem is an LP. The constraints are all linear and the variables are continuous variables in $\mathbb{R}$.
 
 \subsection{Part b}
+Draw the feasible region of the problem
+\\
+\textbf{Solution: }
 
 \begin{tikzpicture}
     \fill[red!20] (1,0) -- (10,0) -- (5,5) -- (7,3) -- cycle;
@@ -177,7 +206,9 @@ This problem is an LP. The constraints are all linear and the variables are cont
 \end{tikzpicture}
 
 \subsection{Part c}
-
+Is the region convex or non-convex? Justify.
+\\
+\textbf{Solution: }
 The problem is convex. 
 The objective function is convex as it is linear. 
 The feasible region is also convex because it is the intersection of half-spaces.
@@ -193,11 +224,17 @@ The feasible region is a polyhedron.
 \end{align}
 
 \subsection{Part a}
+What type of problem is this (MILP, MINLP, ...)? Justify.
+\\
+\textbf{Solution: }
 This problem is a MILP. 
 The constraints and objective function are all linear and the variables are binary integer variables.
 Therefore it is not a standard LP, but instead an MILP.
 
 \subsection{Part b}
+Draw the feasible region of the problem.
+\\
+\textbf{Solution: }
 
 \begin{tikzpicture}
     % Shaded feasible region - keep as is to show the feasible region
@@ -253,6 +290,9 @@ Therefore it is not a standard LP, but instead an MILP.
 \end{tikzpicture}
 
 \subsection{Part c}
+Is the region convex or non-convex? Justify.
+\\
+\textbf{Solution: }
 
 The problem is non-convex because there are integer variables. 
 The disjoint that integer variables introduce naturally make the problem non-convex.
