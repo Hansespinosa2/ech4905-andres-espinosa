@@ -123,7 +123,34 @@ In order to check if $f$ is convex, we calculate its hessian and evaluate if it 
     -400x_1 & 200
   \end{bmatrix}
 \end{align*}
-% CONTINUE THIS PROBLEM TO LOOK AT THE EIGENVALUES and when they are >= 0
+\begin{align*}
+  (H- \lambda I) =
+  \begin{bmatrix}
+    2 - 400x_2 + 1200 x_1^2 - \lambda & -400 x_1 \\
+    -400x_1 & 200 - \lambda
+  \end{bmatrix}
+  \\
+  0 = (2 - 400x_2 + 1200 x_1^2 - \lambda)(200 - \lambda) - (-400 x_1) (-400 x_1) \\
+  0 \leq 400 - 80,000 x_2 + 240,000 x_1^2 - 200 \lambda - 2 \lambda + 400 \lambda x_2 - 1200 x_1^2 \lambda + \lambda^2 - 160,000 x_1 ^2
+\end{align*}
+The function $f$ is convex when the above equation holds.
+% Is this sufficient?
+Another way to evaluate if the function $f$ is convex is by using rules that preserve convexity.
+We can split $f$ into two functions $f = f_1 + f_2$.
+\begin{equation*}
+  f_1(x_1, x_2) = (1-x_1)^2, \quad f_2(x_1, x_2) = 100(x_2 - x_1^2)^2
+\end{equation*}  
+The non-negative weighted sum of two convex functions is convex so we break the problem down to verifying convexity of $f_1$ and $f_2$.
+$f_1$ is clearly convex since it is a quadratic function in one variable.
+To verify convexity of $f_2$, we can use composition rules.
+\begin{equation*}
+  f_2(x_1, x_2) = 100(\tilde{f}_2(x_1, x_2))^2, \quad \tilde{f}_2(x_1, x_2) = x_2 - x_1^2
+\end{equation*}
+
+
+The function $f_2$ is convex, non-increasing on $\tilde{f}_2(x_1, x_2) \leq 0$, and non-decreasing on $\tilde{f}_2(x_1, x_2) \geq 0$.
+The function $\tilde{f}_2$ is concave, therefore the overall function $f$ is convex on the domain $\textbf{dom} f = x_2 - x_1^2 \leq 0$.
+
 
 
 \section{Problem 5}
