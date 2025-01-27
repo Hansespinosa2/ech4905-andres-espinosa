@@ -49,6 +49,7 @@ Eigenvalues and eigenvectors of A
 % Still need to do eigenvectors
 
 \section{Problem 2}
+% NEED TO DO THIS
 
 \section{Problem 3}
 Consider the following function and perform the following calculations
@@ -78,11 +79,76 @@ Hessian of the function
 
 \subsection{Part c}
 Write the second order Taylor expansions around a point $(x_1^*, x_2^*)$
-%Still need to do this
+% Still need to do this
 
 \section{Problem 4}
+Check if the following function is convex
+\begin{equation*}
+  f(x_1, x_2) = (1 - x_1)^2 + 100(x_2 - x_1^2)^2
+\end{equation*}
+In order to check if $f$ is convex, we calculate its hessian and evaluate if it is positive semi-definite.
+\begin{align*}
+  \nabla f(x_1, x_2) = 
+  \begin{bmatrix}
+    -2(1-x_1) - (2x_1) 200(x_2 - x_1^2) \\
+    200(x_2 - x_1^2)
+  \end{bmatrix}
+  \\
+  = 
+  \begin{bmatrix}
+    2x_1-2 - 400x_2 x_1 + 400x_1^3 \\
+    200x_2 - 200x_1^2
+  \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+  \nabla^2 f (x_1, x_2) =
+  \begin{bmatrix}
+    2 - 400x_2 + 1200 x_1^2 & -400 x_1 \\
+    -400x_1 & 200
+  \end{bmatrix}
+\end{align*}
+% CONTINUE THIS PROBLEM TO LOOK AT THE EIGENVALUES and when they are >= 0
+
 
 \section{Problem 5}
+Check if the following function is convex
+\begin{equation*}
+  g(x_1, x_2) = 5 x_1^2 - 4x_1 x_2
+\end{equation*}
+Like the previous problem, we calculate the hessian of this function and evaluate when it is positive semi-definite.
+\begin{align*}
+  \nabla g(x_1, x_2) = 
+  \begin{bmatrix}
+    10 x_1 - 4 x_2 \\
+    -4 x_1
+  \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+  \nabla^2 g(x_1, x_2) = 
+  \begin{bmatrix}
+    10  & -4 \\
+    -4 & 0
+  \end{bmatrix}
+\end{align*}
+
+\begin{align*}
+  (A - \lambda I) = 
+  \begin{bmatrix}
+    10 - \lambda  & -4 \\
+    -4 & - \lambda
+  \end{bmatrix}
+  \\
+  0 = (10- \lambda)(-\lambda) - (-4)(-4) \\
+  0 = \lambda^2 - 10 \lambda - 16  \\
+  16 + 25 = \lambda^2 - 10 \lambda + 25 \\
+  (\lambda - 5)^2 = 41 \\
+  \lambda - 5 = \pm \sqrt{41} \\
+  \lambda = 5 \pm \sqrt{41} \\
+  \lambda >= 0, \lambda <=0.
+\end{align*}
+Since we have one eigenvalue greater than 0 and one less than 0, the hessian is indefinite and $g$ is not convex.
 
 \section{Problem 6}
 
