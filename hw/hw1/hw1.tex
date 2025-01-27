@@ -92,7 +92,11 @@ Hessian of the function
 Write the second order Taylor expansions around a point $(x_1^*, x_2^*)$
 \\
 \textbf{Solution: }
-% Still need to do this
+Defining a vector $\textbf{x}^* = (x_1^*, x_2^*)$The second order taylor expansion has the form
+\begin{equation*}
+  f(\textbf{x}) = f(\textbf{x}^*) + \nabla f(\textbf{x}^*)^\top (\textbf{x} - \textbf{x}^*) + \frac{1}{2} (\textbf{x} - \textbf{x}^*)^\top \nabla^2 f(\textbf{x}^*)(\textbf{x} - \textbf{x}^*)
+\end{equation*}
+We can evaluate the $f, \nabla f, \nabla^2 f$ at $\textbf{x}^*$ and replace the symbols above with those values.
 
 \section{Problem 4}
 Check if the following function is convex
@@ -134,7 +138,6 @@ In order to check if $f$ is convex, we calculate its hessian and evaluate if it 
   0 \leq 400 - 80,000 x_2 + 240,000 x_1^2 - 200 \lambda - 2 \lambda + 400 \lambda x_2 - 1200 x_1^2 \lambda + \lambda^2 - 160,000 x_1 ^2
 \end{align*}
 The function $f$ is convex when the above equation holds.
-% Is this sufficient?
 Another way to evaluate if the function $f$ is convex is by using rules that preserve convexity.
 We can split $f$ into two functions $f = f_1 + f_2$.
 \begin{equation*}
@@ -150,7 +153,6 @@ To verify convexity of $f_2$, we can use composition rules.
 
 The function $f_2$ is convex, non-increasing on $\tilde{f}_2(x_1, x_2) \leq 0$, and non-decreasing on $\tilde{f}_2(x_1, x_2) \geq 0$.
 The function $\tilde{f}_2$ is concave, therefore the overall function $f$ is convex on the domain $\textbf{dom} f = x_2 - x_1^2 \leq 0$.
-
 
 
 \section{Problem 5}
