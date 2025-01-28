@@ -1,2 +1,117 @@
-\section{Chapter 3 - IDK}
+\section{Chapter 3 - Linear Programming}
+\usetikzlibrary{arrows,automata}
 \subsection{Tuesday 01/28/2025}
+\subsubsection{Linear Tricks}
+\textbf{Constraint Relaxation: }
+If we have the following optimization problem
+\begin{align}
+  \text{minimize} & \quad c^\top x \\
+  \text{subject to} & \quad \sum_j a_j x_j \leq  b
+\end{align},
+we can relax the constraint by adding a variable $u$ that will allow us to bend the constraint a bit at a cost.
+\begin{align}
+  \text{minimize} & \quad c^\top x + cost(u) \\
+  \text{subject to} & \quad \sum_j a_j x_j - u \leq b
+\end{align}
+
+\textbf{Handling Absolute Values: }
+Absolute values can be handled by introducing additional variables and constraints.
+One way is to split the variable into a positive and negative component.
+\begin{align}
+  \text{minimize} & \quad c^\top |x| \\
+  \text{subject to} & \quad Ax \leq b
+\end{align}
+Here, we replace $|x|$ with $x^+ - x^-$
+\begin{align}
+    \text{minimize} & \quad c^\top (x^+ - x^-) \\
+    \text{subject to} & \quad Ax \leq b \\
+    & \quad x = x^+ - x^- \\
+    & \quad x, x^+, x^- \geq 0
+\end{align}
+
+\subsubsection{Example Models}
+\textbf{Metabolic Flux Balance: } 
+A metabolic flux balance problem is a problem where we have a cell that inputs some nutrient and outputs a metabolic yield, the growth of the cell.
+We have a $source$ that is an input into a cell $A$ at a rate $v_1$.
+$A$ inputs into $B$ at a rate $v_2$.
+In parallel, $A$ inputs into $C$ at a rate $v_3$.
+B + C input into $2D$ at a rate $v_4$, etc, the rest of the reaction network model is shown below.
+\begin{itemize}
+    \item $source \to A \quad (v_1)$
+    \item  $A \to B \quad (v_2)$
+    \item $A \to C \quad (v_3)$
+    \item $B + E \to 2D \quad (v_4)$
+    \item $source \to E \quad (v_5)$
+    \item $B \to C + F \quad (v_6)$
+    \item $C \to D \quad (v_7)$
+    \item $D \to biomass \quad (v_8)$
+    \item $F \to biomass \quad (v_9)$
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[auto, node distance=2cm,>=latex']
+    \node [name=source1] {source1};
+    \node [right of=source1] (A) {A};
+    \node [above right of=A] (B) {B};
+    \node [below right of=A] (C) {C};
+    \node [below right of=B] (D) {D};
+    \node [below of=source1] (E) {E};
+    \node [right of=C] (F) {F};
+    \node [right of=D] (biomass1) {biomass};
+    \node [right of=F] (biomass2) {biomass};
+
+    \draw [->] (source1) -- node {$v_1$} (A);
+    \draw [->] (A) -- node {$v_2$} (B);
+    \draw [->] (A) -- node {$v_3$} (C);
+    \draw [->] (B) -- node {$v_4$} (D);
+    \draw [->] (C) -- node {$v_4$} (D);
+    \draw [->] (B) -- node {$v_7$} (C);
+    \draw [->] (source1) -- node {$v_5$} (E);
+    \draw [->] (B) -- node {$v_6$} (F);
+    \draw [->] (C) -- node {$v_7$} (D);
+    \draw [->] (E) -- node {$v_4$} (D);
+    \draw [->] (D) -- node {$v_8$} (biomass1);
+    \draw [->] (F) -- node {$v_9$} (biomass2);
+\end{tikzpicture}
+\end{center}
+
+In this problem, we have an objective we could have multiple goals, one is to maximize the weighted biomass output $w_8 v_8 + w_9 v_9$.
+We have constraints that must obey the laws of chemistry and physics. One of them is \textit{mass balance} constraints.
+This constraint ensures that the rate of consumption of each edge entering a node is equal to the sum of the rate of production leaving the node.
+Flow conservation constraints:
+\begin{align}
+  \text{maximize} & \quad w_8 v_8 + w_9 v_9 \\
+  \text{subject to} & \quad v_1 = v_2 + v_3 \quad (A)\\
+  & \quad v_2 = v_4 + v_6 \quad (B)\\
+  & \quad v_3 + v_6 = v_7 \quad (C)\\
+  & \quad 2v_4 + v_7 = v_8 \quad (D)\\
+  & \quad v_5 = v_4 \quad (E)\\
+  & \quad v_6 = v_9 \quad (F)
+\end{align} 
+This problem will be unbounded if we do not constraint the entering sources, so we also introduce \textit{source} constraints.
+
+\textbf{Oil blending}
+Consider the problem where we have the following oils with different prices and hardness ratings for each
+\begin{itemize}
+    \item veg 1 - \$110 - 8.8
+    \item veg 2 - \$120 - 6.1
+    \item oil 1 - \$130 - 2
+    \item oil 2 - \$110 - 4.
+    \item oil 3 - \$115 - 5
+\end{itemize}
+We sell each quantity for \$150.
+We have 200 tons of vegetable we can make oil with and 250 tons of non-vegetables we can make oil with.
+We want a hardness level between 3 and 6.
+To solve this, we can take the vector $\textbf{x} \in \mathbb{R}^5$ as the amount of each liquid $i$ we use. 
+We define $\textbf{x}_v$ and $\textbf{x}_n$ subscripts as the subsets of $\textbf{x}$ that are vegetable and non-vegetable.
+We similarly define $\textbf{c}$ as the cost vector and $\textbf{h}$ as the hardness vector.
+The selling price is $p=150$.
+This problem can be formulated as
+
+\begin{align}
+  \text{maximize} & \quad 150 (\textbf{1}^\top \textbf{x}) - \textbf{c}^\top \textbf{x} \\
+  \text{subject to} & \quad \textbf{1}^\top \textbf{x}_v \leq 200\\
+  & \quad \textbf{1}^\top \textbf{x}_n \leq 250 \\
+  & \quad 3 (\textbf{1}^\top \textbf{x}) \leq \textbf{h}^\top \textbf{x} \leq 6 (\textbf{1}^\top \textbf{x}) \\
+  & \quad \textbf{x} \succeq 0
+\end{align}
