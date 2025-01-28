@@ -86,18 +86,46 @@ v_1 = a
 \end{bmatrix}
 \end{align*}
 
+Using python, the other eigenvectors were found the same way and evaluated to be 
+\begin{align*}
+  v_2 = a
+  \begin{bmatrix}
+    6 + 2 \sqrt{10} \\
+    -1 \\
+    1
+  \end{bmatrix}
+  \\ 
+  v_3 = a
+  \begin{bmatrix}
+    6 - 2 \sqrt{10} \\
+    -1 \\
+    1
+  \end{bmatrix}
+\end{align*}
+
 
 \section{Problem 2}
 Check if the set of all polynomials with real coefficients form a vector space.
 \\
 \textbf{Solution: }
-%INSERT SOLUTION HERE
 The set of all polynomials with real coefficients looks like $ \mathbb{P} = \{ p(x) | a \in \mathbb{R}^n, x \in \mathbb{R} \}$ where
 \begin{equation*}
   p(x) = a_n x^n + a_{n-1} x^{n-1}  + \dots a_1 x + a_0
 \end{equation*}
 This set is a vector space since each of the properties of a vector space hold.
-% WRITE THE PROPERTIES OF A VECTOR SPACE
+\begin{itemize}
+  \item $p_1 + (p_2 + p_3) = (p_1 + p_2) + p_3$
+  \item $p_1 + p_2 = p_2 + p_1$
+  \item $p + 0 = p \forall p \in \mathbb{P}$
+  \item $p - p = 0 \forall p \in \mathbb{P}$
+  \item $\alpha p \in \mathbb{P}$
+  \item $(\alpha + \beta) p =  \alpha p + \beta p$
+  \item $\beta (p_1 + p_2) = \beta p_1 + \beta p_2$
+  \item $(\alpha \beta) p = \alpha (\beta) p$
+  \item $1 p = p$
+\end{itemize}
+These statements are true for all $p$ in the form above.
+Therefore, the set of all polynomials forms a vector space.
 
 \section{Problem 3}
 Consider the following function and perform the following calculations
