@@ -271,7 +271,15 @@ Consider the feasible region constrained by these linear and nonlinear inequalit
 Assuming that this region is non-empty, show that this feasible region is convex.
 \\
 \textbf{Solution: }
-% INSERT SOLUTION HERE
+This feasible region defined by the set $\mathbb{C} = \{ x | Ax = b, g(x) \leq 0 \}$, where $g$ is a set of convex non-linear inequalities is convex.
+
+Proving this uses the fact that the intersection of convex sets is convex.
+If the functions $g(x)$ are convex, their sublevel sets $g(x) \leq \alpha$, for any $\alpha$ are convex sets.
+Ax = b is an affine function, therefore it is both concave and convex. 
+By extension, both the sublevel sets and superlevel sets $Ax \leq b, Ax \geq b$ are convex sets.
+\textit{An important note of this is that the superlevel set of a concave function is a convex set.}
+Since both of these sets are convex, the intersection of them, $Ax = b$ is also convex.
+
 
 \section{Problem 7}
 Consider the following optimization problem
