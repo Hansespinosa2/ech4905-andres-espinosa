@@ -163,6 +163,7 @@ The matrix $\textbf{X} \in \mathbb{R}^{5 \times 5}$ is our decision variable whe
 The first and last column must be equal to a vector of 500s, since we must start and end with 500 of each raw oil.
 We also introduce buying and selling variables $\textbf{B} \in \mathbb{R}^{5 \times 5}, \textbf{S} \in \mathbb{R}^{5 \times 5}$ where each row is the amount of an oil we buy and sell before the end of each period.
 The first column is $\textbf{0}$ since we can not buy or sell in the 0th period. 
+The vector $\textbf{h} \in \mathbb{R}^5$ are the hardness ratings per raw oil.
 \\
 The buying cost component of the objective function is equal to $\textbf{trace}(\Lambda \textbf{X})$.
 The inventory holding cost component of the objective function is equal to $5 (\textbf{1}^\top \textbf{X} \textbf{1} - 500 \times 5)$, the $-500 \times 5$ term is to address the fact that we pay no inventory cost for the 0th period.
@@ -211,3 +212,34 @@ The objective function is therefore
   \text{maximize} & \quad 150(\textbf{1}^\top \textbf{S} \textbf{1}) - \textbf{trace}(\Lambda \textbf{X}) - 5 (\textbf{1}^\top \textbf{X} \textbf{1} - 500 \times 5)
 \end{align}
 
+The storage constraints can be expressed as $\textbf{X}_{o,t} \leq 1,000 \quad \forall o \in O, t \in T$. 
+Where $O$ is the set of raw oils and $T$ is the set of periods.
+
+The capacity constraints can be modeled as $b_{1t} + b_{2t} \leq 200 \quad \forall t \in T$ and $b_{3t} + b_{4t} + b_{5t} \leq 250 \quad \forall t \in T$.
+
+The hardness constraints can be modeled as $\textbf{S}^\top \textbf{h} \preceq 6 (\textbf{S}^\top \textbf{1}), \textbf{S}^\top \textbf{h} \succeq 3 (\textbf{S}^\top \textbf{1}) $
+
+We also must model our logical inventory constraints that dictate the amount of product we end a period with is equal to the amount we bought during that period, minus the amount we sold, plus the amount we previously had.
+$\textbf{X} = \textbf{B} - \textbf{S} + \textbf{X}_{prev}$. Where $\textbf{X}_{prev}$ is a shift of $\textbf{X}$ 
+\begin{align}
+  \textbf{X}_{prev} = 
+  \begin{bmatrix}
+    500 & 500 & x_{11} & x_{12} & x_{13} \\
+    500 & 500 & x_{21} & x_{22} & x_{23} \\
+    500 & 500 & x_{31} & x_{32} & x_{33} \\
+    500 & 500 & x_{41} & x_{42} & x_{43} \\
+    500 & 500 & x_{51} & x_{52} & x_{53} \\
+  \end{bmatrix}
+\end{align}
+
+The full optimization problem, with a rather large abuse of different notations and indices can be written as 
+
+\begin{align}
+  \text{minimize} & \quad 150(\textbf{1}^\top \textbf{S} \textbf{1}) - \textbf{trace}(\Lambda \textbf{X}) - 5(\textbf{1}^\top \textbf{X} \textbf{1} - 500 \times 5) \\
+  \text{subject to} & \quad \textbf{X}_{o, t} \leq 1000 \quad \forall o \in O, t \in T \\
+  & \quad \textbf{B}_{1t} + \textbf{B}_{2t} \leq 200 \quad \forall t \in T \\
+  & \quad \textbf{B}_{3t} + \textbf{B}_{4t} + \textbf{B}_{5t} \leq 250 \quad \forall t \in T \\
+  & \quad \textbf{S}^\top \textbf{h} \preceq 6 (\textbf{S}^\top \textbf{1}), \quad \textbf{S}^\top \textbf{h} \succeq 3 (\textbf{S}^\top \textbf{1}) \\
+  & \quad \textbf{X} = \textbf{B} - \textbf{S} + \textbf{X}_{prev} \\
+  & \quad \textbf{X}_{o,t}, \textbf{B}_{o,t}, \textbf{S}_{o,t} \geq 0 \quad \forall o \in O, t \in T
+\end{align}
