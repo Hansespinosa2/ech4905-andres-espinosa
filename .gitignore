@@ -31,7 +31,6 @@
 # Other LaTeX-related files
 *.dvi
 *.ps
-*.pdf
 *.nav
 *.snm
 *.vrb
