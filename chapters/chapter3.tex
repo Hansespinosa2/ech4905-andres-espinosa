@@ -243,3 +243,179 @@ The full optimization problem, with a rather large abuse of different notations 
   & \quad \textbf{X} = \textbf{B} - \textbf{S} + \textbf{X}_{prev} \\
   & \quad \textbf{X}_{o,t}, \textbf{B}_{o,t}, \textbf{S}_{o,t} \geq 0 \quad \forall o \in O, t \in T
 \end{align}
+
+\subsection{Tuesday 02/04/2025}
+
+\subsubsection{Standard Form}
+Standard form LPs follow the form 
+\begin{align}
+  \text{minimize} & \quad c^\top x \\
+  \text{subject to} & \quad Ax = b \\
+  & \quad x \geq 0
+\end{align}
+we can turn any LP into the above form with some tricks.
+An example problem, we want to turn the following optimization problem into standard form
+\begin{align}
+  \text{maximize} & \quad 3 x_1 + 2 x_2 - x_3 + x_4 \\
+  \text{subject to} & \quad x_1 + 2 x_2 + x_3 - x_4 \leq 5 \\
+  & \quad -2 x_1 - 2x_4 - x_3 - x_4 \geq 1 \\
+  & \quad x_1 \geq 0, x_2 \leq 0 
+\end{align}
+
+\begin{align}
+  \text{minimize} & \quad -(3 x_1 + 2 (-x_2) - x_3 + x_4)  \\
+  \text{subject to} & \quad x_1 + 2 (-x_2) + x_3 - x_4 - s_1 = 5 \\
+  & \quad 2 x_1 - 2x_4 - x_3 - x_4 + s_2 = 1 \\
+  & \quad x_1, x_2, s_1, s_2 \geq 0
+\end{align}
+In order to bound variables $x_3, x_4$, we can have them equal $x_3 = x_3^+ - x_3^-$.
+
+\subsubsection{Active Constraints}
+Consider the following optimization problem 
+\begin{align}
+  \text{minimize} & \quad x^2 \\
+  \text{subject to} & \quad x \leq 4 \\
+  & \quad x \geq -10
+\end{align}
+
+\begin{center}
+\begin{tikzpicture}
+  \begin{axis}[
+    axis lines = middle,
+    xlabel = $x$,
+    ylabel = {$f(x) = x^2$},
+    domain=-11:5,
+    samples=100,
+    ymin=0, ymax=110,
+    xmin=-11, xmax=5,
+    restrict y to domain=0:110,
+    restrict x to domain=-10:4,
+    ]
+    \addplot [blue, thick] {x^2};
+    \addplot [red, thick, dashed] coordinates {(-10,0) (-10,100)};
+    \addplot [red, thick, dashed] coordinates {(4,0) (4,16)};
+    \node at (axis cs:4,20) [anchor=west] {$x \leq 4$};
+    \node at (axis cs:-10,105) [anchor=east] {$x \geq -10$};
+  \end{axis}
+\end{tikzpicture}
+\label{img:quadratic_constrained}
+\end{center}
+Both of the constraints in the above problem have no effect on the optimal solution.
+If they were removed, the answer to the problem would still be the same.
+These are inactive constraints.
+However, if we consider the next optimization problem
+\begin{align}
+  \text{minimize} & \quad x^2 \\
+  \text{subject to} & \quad x \leq 4 \\
+  & \quad x \geq 1
+\end{align}
+
+\begin{center}
+\begin{tikzpicture}
+  \begin{axis}[
+    axis lines = middle,
+    xlabel = $x$,
+    ylabel = {$f(x) = x^2$},
+    domain=0:5,
+    samples=100,
+    ymin=0, ymax=20,
+    xmin=0, xmax=5,
+    restrict y to domain=0:20,
+    restrict x to domain=1:4,
+    ]
+    \addplot [blue, thick] {x^2};
+    \addplot [red, thick, dashed] coordinates {(1,0) (1,1)};
+    \addplot [red, thick, dashed] coordinates {(4,0) (4,16)};
+    \node at (axis cs:4,17) [anchor=west] {$x \leq 4$};
+    \node at (axis cs:1,2) [anchor=east] {$x \geq 1$};
+  \end{axis}
+\end{tikzpicture}
+\end{center}
+The optimal solution is at $x=1$.
+To formally define an active or inactive constraint, we can use the following:
+\\
+\textbf{Definition: } Consider $g : \mathbb{R}^m \to \mathbb{R}^p$ and $h : \mathbb{R}^n \to \mathbb{R}^m$.
+For $i \in \{ 1, \dots, p \}$inequality constraints,
+\begin{equation}
+  g_i(x) \leq 0
+\end{equation}
+is said to be active in $x^*$ if 
+\begin{equation}
+  g_i(x^*) = 0
+\end{equation}
+and inactive if 
+\begin{equation}
+  g_i(x^*) < 0
+\end{equation}
+The set of indices of active constraints at $x^*$ is deonated as $\mathbb{A}(x^*)$
+
+\subsubsection{Feasible Direction}
+Using the same optimization problem as above in \ref{img:quadratic_constrained}, we can illustrate the concept of a feasible direction.
+Starting at $x=-10$, the only feasible direction is to proceed in the positive $x$ direction.
+
+For a general optimization problem and a feasible point $x \in \mathbb{R}^n$.
+A direction $d$ is said to be feasible in $x$ if there is $\eta > 0$ such that $x + \alpha d$ is feasible for any $0 \leq \alpha \leq \eta$.
+Our degree of freedom for movement is one less than the dimension of the total problem. 
+
+\textbf{Theorem: } Let $\mathbb{C}$ be a feasible convex set, and consider $x,y \in \mathbb{C}, y \neq x$.
+The direction $d= y-x$ is a feasible direction in $\mathbb{C}$ and $x +\alpha d$ is feasible for any $0 \leq \alpha \leq 1$.
+
+A conclusion that can be drawn from the theorem above is that if we pick an interior point in $\mathbb{C}$ (not on the boundary of $\mathbb{C}$), any direction is feasible.
+
+\textbf{Theorem: } Consider the optimization problem
+\begin{align}
+  \text{minimize} & \quad f(x) \\
+  \text{subject to} & \quad Ax = b \\
+  & \quad x \geq 0
+\end{align}
+and let $x^+$ be a feasible point. 
+A direction $d$ is feasible iff $Ad = 0$ and $ d_i \geq 0$ when $x_i^+ = 0$.
+\subsubsection{LP Region}
+The feasible region for a linear programming problem is a polyhedron.
+In canonical form, it can expressed as $\{ x \in \mathbb{R}^n | Ax \leq 0 \}$ and in standard form $ \{ x \in \mathbb{R}^n | Ax = b, x \geq 0 \}$.
+
+\textbf{Vertex: } Let $P$ be a polyhedron. 
+A vector $x \in P$ is a vertex of $P$ if it is impossible to find two vectors $y, z \in P, y\neq x, z \neq x$ such that $x$ is a convex combination of the two points.
+A convex combination with $0 \leq \lambda \leq 1$ such that
+\begin{equation}
+  x = \lambda y + (1-\lambda) z
+\end{equation}
+With this definition of a vertex, we can see that an optimal solution must be at a corner point.
+
+\textbf{Theorem: } Let $P = \{ x \in \mathbb{R}^n | Ax = b, x \geq 0 \}$ be a polyhedron.
+$A \in \mathbb{R}^{m \times n}, b \in \mathbb{R}^m$. 
+Consider $m$ linearly independent columns of $A$ and the collection of those columns $B \in \mathbb{R}^{m \times m}$ and 
+the remaining $n-m$ columns be $N \in \mathbb{R}^{m \times (n-m)}$. 
+
+In order to move around the columns of $A$, we have a permutation matrix $P$.
+This permutation matrix has a $1$ in each column and each row.
+The permutation matrix will switch around the columns of matrix $A$.
+\begin{align}
+  AP = 
+  \begin{bmatrix}
+    B \\
+    N
+  \end{bmatrix}
+\end{align}
+
+\begin{align}
+  x = P
+  \begin{bmatrix}
+     B^{-1} b \\
+     0_{n-m}
+  \end{bmatrix}
+\end{align}
+If $B^{-1} b \geq 0$, then this is a vertex
+\subsubsection{Basic solution}
+Let $P = \{ x \in \mathbb{R}^n | Ax = b, x \geq 0 \}$ be a polyhedron in standard form.
+$A \in \mathbb{R}^{m \times n},$ 
+$n \geq m,$
+$x \in \mathbb{R}^n,$
+$ Ax = b$.
+This vector $x$ is called a basic solution if 
+\begin{itemize}
+  \item $B$ is non singular ($B$ is $m$ linearly independent cols of $A$)
+  \item $x_i = 0$ if $i \geq m$
+  \item x = $B^{-1} b \geq 0$
+\end{itemize}
+
