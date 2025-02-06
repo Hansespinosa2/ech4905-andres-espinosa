@@ -419,3 +419,181 @@ This vector $x$ is called a basic solution if
   \item x = $B^{-1} b \geq 0$
 \end{itemize}
 
+\subsection{Thursday 02/06/2025}
+\subsubsection{Basic Feasible Soltuions}
+We define the following optimization problem
+\begin{align}
+  \text{minimize} & \quad c^T x \\
+  \text{subject to} & \quad Ax = 0 \\
+  & \quad x \geq 0
+\end{align}
+We have a matrix 
+\begin{align}
+  A =
+  \begin{bmatrix}
+     1 & 1 & 1 & 0 \\
+     1 & -1 & 0 & 1 
+  \end{bmatrix}
+\end{align}
+We can get a basic solution by picking any two columns of the matrix and creating the basis with those two columns.
+We then solve for $x_B = B^{-1} b$ and set the other $x_N = 0$.
+A basic solution is the intersection of any two constraints.
+A basic feasible solution is the intersection of any two constraints that lie in the feasible region.
+By choosing $x_1, x_2$ in the basis from above, we get the following basic solution:
+\begin{align}
+  \textbf{x} = 
+  \begin{bmatrix}
+     \textbf{x}_B \\
+     \textbf{x}_N
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    1 \\
+    0 \\
+    0 \\
+    0
+  \end{bmatrix}
+\end{align}
+This solution above has three active constraints and one inactive constraint since $1 > 0$.
+This is a basic feasible solution since it obeys the constraints in the original problem.
+If we pick $x_2, x_3$ we get the following solution
+\begin{align}
+  \textbf{x} = 
+  \begin{bmatrix}
+     \textbf{x}_B \\
+     \textbf{x}_N
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    0 \\
+    -1 \\
+    2 \\
+    0
+  \end{bmatrix}
+\end{align}
+This is a basic solution but is not a basic feasible solution since one of the entries is negative.
+Effectively, by finding the basic solutions, we are solving the $Ax = 0$ system and then at the end we check for feasibility against $x \geq 0$.
+
+\subsubsection{LP Solution Analysis}
+If all basic variables are $>0$, then we have a unique solution to our problem. 
+This is called non-degenerate.
+If any basic variables are $=0$, then we have many values of $x$ that will yield the optimal $f^*$.
+This is called degenerate.
+
+The simplex algorithm works by traversing these basic solutions.
+It traverses along a basic direction.
+If $x$ is a basic solution, then a basic direction is a feasible direction along the edges of the polyhedron.
+
+Consider the solution
+\begin{align}
+  \textbf{x} = 
+  \begin{bmatrix}
+     \textbf{x}_B \\
+     \textbf{x}_N
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    B^{-1} b \\
+    0
+  \end{bmatrix}
+\end{align},
+we want to find a basic direction
+\begin{align}
+  \textbf{d} = 
+  \begin{bmatrix}
+     \textbf{d}_B \\
+     \textbf{d}_N
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    d_1 \\
+    d_2 \\
+    d_m \\
+    d_{m+1} \\
+    d_{m+2} \\
+    d_{n}
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    d_1 \\
+    d_2 \\
+    d_m \\
+    0 \\
+    1 \\
+    0
+  \end{bmatrix}
+\end{align}.
+In order to find a basic direction, you set all non-basic variables = 0 except for 1.
+We want a feasible direction $d$ where $Ad = 0$.
+We can partition $A$ into two matrixes $B,N$.
+\begin{align}
+  \begin{bmatrix}
+     B & N
+  \end{bmatrix}
+  \begin{bmatrix}
+    \textbf{d}_B \\
+    \textbf{d}_N
+  \end{bmatrix} 
+  = B \textbf{d}_B + B \textbf{d}_N
+  = 0
+\end{align}
+
+We can do some simplification on the middle section as such
+\begin{gather}
+  = B \textbf{d}_B + B \textbf{d}_N = B \textbf{d}_B + B \sum_{j=m+1}^N A_j d_j \\
+  = B \textbf{d}_B + A_p
+\end{gather}
+Where $A_p$ is the $p$-th column of $A$.
+
+\begin{align}
+  \begin{bmatrix}
+     a & b & c \\
+     d & e & f \\
+     g & h & i
+  \end{bmatrix}
+  \begin{bmatrix}
+    \alpha \\
+    \beta \\
+    \gamma
+  \end{bmatrix}
+  =
+  \begin{bmatrix}
+    \alpha a & \beta b & \gamma c \\
+    \alpha d & \beta e & \gamma f \\
+    \alpha g & \beta h & \gamma i
+ \end{bmatrix}
+ = \alpha
+ \begin{bmatrix}
+  a \\
+  d \\
+  g
+ \end{bmatrix}
+ + \beta
+ \begin{bmatrix}
+  b \\
+  e \\
+  h
+ \end{bmatrix}
+ + \gamma
+ \begin{bmatrix}
+  c \\
+  f \\
+  i
+ \end{bmatrix}
+\end{align}
+
+Therefore, 
+\begin{equation}
+  d_B = -B^{-1} A_p
+\end{equation}
+
+\begin{align}
+  \textbf{d}_p = P
+  \begin{bmatrix}
+    d_{B_p} \\
+    d_{N_p}
+  \end{bmatrix}
+\end{align}
+
+where $ d_{B_p} = -B^{-1} A_p$ and  $d_{N_p}$ is a basis vector where the $p$-th entry is 1 and the rest are 0.
+
