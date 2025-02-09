@@ -25,7 +25,7 @@ Write the following problem in standard form
 \\
 \textbf{Solution: }
 % TODO: SOLVE PROBLEM
-To solve this problem we want to turn the above problem into the standard form
+To solve this problem we want to turn the above problem into the canonical form
 \begin{align}
   \text{minimize} & \quad c^\top x \\
   \text{subject to} & \quad Ax \leq b \\
@@ -58,6 +58,20 @@ Bounding the variables to be $\geq 0$
   & \quad -(x_1^+ - x_1^-) + -3(x_2^+ - x_2^-) \leq -2 \\
   & \quad (x_1^+ - x_1^-) + 3(x_2^+ - x_2^-) \leq 2 \\
   & \quad x_1^+, x_1^-, x_2^+, x_2^- \geq 0
+\end{align}
+% I solved it this way by accident
+To solve this problem in standard form, we turn it into
+\begin{align}
+  \text{minimize} & \quad c^\top x \\
+  \text{subject to} & \quad Ax = b \\
+  & \quad x \geq 0
+\end{align}
+We can alter the canonical form easily by adding slack variables
+\begin{align}
+  \text{minimize} & \quad -3 (x_1^+ - x_1^-) - 2(x_2^+ - x_2^-) \\
+  \text{subject to} & \quad 2(x_1^+ - x_1^-) - (x_2^+ - x_2^-) + s_1 = -1 \\
+  & \quad (x_1^+ - x_1^-) + 3(x_2^+ - x_2^-) = 2 \\
+  & \quad x_1^+, x_1^-, x_2^+, x_2^-, s_1 \geq 0
 \end{align}
 
 \section{Problem 2}
@@ -98,6 +112,7 @@ Formulate an LP to find the optimal product distribution.
 \\
 \textbf{Solution: }
 % TODO: SOLVE PROBLEM
+
 
 \section{Problem 3}
 Solve problem 2 but consider that the demand of each product is a function of
