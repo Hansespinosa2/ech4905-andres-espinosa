@@ -192,6 +192,17 @@ hydrogen that would be required to balance the equations.
 
 \textbf{Solution: }
 % TODO: SOLVE PROBLEM
+This is a flow problem and can be modeled using the flow variables $r_i$.
+\begin{align*}
+  \text{maximize} & \quad r_{11} \\
+  \text{subject to} & \quad 1 = r_1 + r_2 + r_3 \\
+  & \quad r_1 = r_4 + r_5 + r_6 \\
+  & \quad r_3 = r_7 \\
+  & \quad r_6 + r_7 = r_8 \\
+  & \quad r_2 + r_5 + r_8 = r_{10} \\
+  & \quad r_4 = r_9 \\
+  & \quad r_9 + r_{10} = r_{11}
+\end{align*}
 
 
 \end{document}
