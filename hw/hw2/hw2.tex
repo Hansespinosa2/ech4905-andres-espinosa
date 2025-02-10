@@ -221,46 +221,39 @@ To solve for the optimal solution, \texttt{cvxpy} was used with the following pa
 
 \begin{shaded}
 \begin{verbatim}
-### Parameters
-n_P = 7  # number of products
-n_M = 4  # number of months
-n_K = 5  # number of machines
+import cvxpy as cp
+import numpy as np
 
-c = np.array([10, 6, 8, 4, 11, 9, 3])  # selling price of product i
+### Parameters
+n_P = 7 # number of products
+n_M = 4 # number of months
+n_K = 5 # number of machines
+
+
+c = np.array([10, 6, 8, 4, 11, 9, 3]) # selling price of product i
 A = np.array([
-  [0.5, 0.7, 0, 0, 0.3, 0.2, 0.5],
-  [0.1, 0.2, 0, 0.3, 0, 0.6, 0],
-  [0.2, 0, 0.8, 0, 0, 0, 0.6],
-  [0.05, 0.03, 0, 0.07, 0.1, 0, 0.08],
-  [0, 0, 0.01, 0, 0.05, 0, 0.05]
-])  # machine constraint matrix
+    [0.5, 0.7, 0, 0, 0.3, 0.2, 0.5],
+    [0.1, 0.2, 0, 0.3, 0, 0.6, 0],
+    [0.2, 0, 0.8, 0, 0, 0, 0.6],
+    [0.05, 0.03, 0, 0.07, 0.1, 0, 0.08],
+    [0, 0, 0.01, 0, 0.05, 0, 0.05]
+]) # machine constraint matrix
 
 D = np.array(
-  [500, 1000, 300, 300, 800, 200, 100] * n_M
+    [500, 1000, 300, 300, 800, 200, 100] * n_M
 ).reshape(n_P, n_M)
-D = np.c_[np.zeros(n_P), D]  # demand constraint matrix
+D = np.c_[np.zeros(n_P), D] # demand constraint matrix
 
-v = 100  # max amount of product i inventory in a month m (is constant)
-l = 0.5  # cost of holding a unit to the next month
-u = 384  # max amount of hours for a machine
-\end{verbatim}
-\end{shaded}
-and the following variables:
-\begin{shaded}
-\begin{verbatim}
+v = 100 # max amount of product i inventory in a month m (is constant)
+l = 0.5 # cost of holding a unit to the next month
+u = 384 # max amount of hours for a machine
+
 ### Variables
-P = cp.Variable((n_P, n_M))
-P = cp.hstack([np.zeros((n_P, 1)), P[:,:]]) 
-S = cp.Variable((n_P, n_M))
-S = cp.hstack([np.zeros((n_P, 1)), S[:,:]]) 
-X = cp.Variable((n_P, n_M))
-X = cp.hstack([np.zeros((n_P, 1)), X[:,:]]) 
-X_prev = cp.hstack([np.zeros((n_P, 1)), X[:, 1:]])
-\end{verbatim}
-\end{shaded}
-the problem framed as:
-\begin{shaded}
-\begin{verbatim}
+P = cp.Variable((n_P, n_M+1),name="P")
+S = cp.Variable((n_P, n_M+1),name="S")
+X = cp.Variable((n_P, n_M+1),name="X")
+X_prev = cp.hstack([np.zeros((n_P, 2)), X[:, 1:-1]])
+
 ### Objective Function
 obj = cp.Maximize(cp.sum(c.T @ S) - cp.sum(l* X))
 
@@ -273,14 +266,18 @@ constraints = [
     X >= 0,
     P >= 0,
     S >= 0,
-    X_prev >= 0
+    X_prev >= 0,
+    X[:,0] == 0,
+    X[:,-1] == 50,
+    P[:,0] == 0,
+    S[:,0] == 0
 ]
 
 ### Problem
 prob = cp.Problem(obj, constraints)
 
 prob.solve()
->>> 59440.714291133234
+>>> 58885.52385535276
 \end{verbatim}
 \end{shaded}
 
@@ -288,41 +285,41 @@ The results of the variables were queried and resulted in:
 \begin{align*}
   \textbf{S} = 
   \begin{bmatrix}
-  500 & 388 & 141.43 & 300 \\
-  34.29 & 0 & 0 & 162.86 \\
-  355 & 300 & 300 & 405 \\
-  200 & 100 & 500 & 471.43 \\
-  300 & 300 & 800 & 200 \\
-  100 & 500 & 366.43 & 300 \\
-  0 & 0 & 0 & 0 \\
+  0 & 448 & 448 & 141.43 & 300 \\
+  0 & 0 & 0 & 0 & 5.71 \\
+  0 & 368 & 300 & 300 & 405 \\
+  0 & 200 & 100 & 500 & 476.19 \\
+  0 & 300 & 300 & 800 & 200 \\
+  0 & 100 & 500 & 466.43 & 300 \\
+  0 & 0 & 0 & 0 & 0 \\
   \end{bmatrix}
-  \end{align*}
-  
-  \begin{align*}
+\end{align*}
+
+\begin{align*}
   \textbf{X} = 
   \begin{bmatrix}
-  0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & 0 \\
+  0 & 0 & 0 & 0 & 50 \\
+  0 & 0 & 0 & 0 & 50 \\
+  0 & 0 & 0 & 100 & 50 \\
+  0 & 69.33 & 100 & 100 & 50 \\
+  0 & 100 & 0 & 0 & 50 \\
+  0 & 100 & 100 & 0 & 50 \\
+  0 & 0 & 0 & 0 & 50 \\
   \end{bmatrix}
-  \end{align*}
-  
-  \begin{align*}
+\end{align*}
+
+\begin{align*}
   \textbf{P} = 
   \begin{bmatrix}
-  500 & 388 & 141.43 & 300 \\
-  34.29 & 0 & 0 & 162.86 \\
-  355 & 300 & 300 & 405 \\
-  200 & 100 & 500 & 471.43 \\
-  300 & 300 & 800 & 200 \\
-  100 & 500 & 366.43 & 300 \\
-  0 & 0 & 0 & 0 \\
+  0 & 448 & 448 & 141.43 & 350 \\
+  0 & 0 & 0 & 0 & 55.71 \\
+  0 & 368 & 300 & 400 & 355 \\
+  0 & 269.33 & 130.67 & 500 & 426.19 \\
+  0 & 400 & 200 & 800 & 250 \\
+  0 & 200 & 500 & 366.43 & 350 \\
+  0 & 0 & 0 & 0 & 50 \\
   \end{bmatrix}
-  \end{align*}
+\end{align*}
 
 
 
