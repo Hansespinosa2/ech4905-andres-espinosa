@@ -111,7 +111,6 @@ We can assume that the factory works 24 days, and that each day each machine wor
 Formulate an LP to find the optimal product distribution.
 \\
 \textbf{Solution: }
-% TODO: SOLVE PROBLEM
 Our objective function is pretty simple and can be expressed as $10 p_1 + 6 p_2 + 8 p_3 + 4 p_4 + 11 p_5 + 9 p_6 + 3 p_7$.
 To handle the constraints, we have three types: demand, machine, and non-negativity constraints.
 Since the factory works 24 days and each machine works for 16 hours, each machine is constrained to work a maximum of $24 \times 16 = 384$ hours.
@@ -135,7 +134,7 @@ The optimization problem can be expressed as
 \end{align*}
 This can be equivalently expressed with matrix notation as 
 \begin{align*}
-  \text{minimize} & \quad \textbf{c}^\top \textbf{p} \\
+  \text{maximize} & \quad \textbf{c}^\top \textbf{p} \\
   \text{subject to} & \quad \textbf{A} \textbf{p} \preceq 384 \times \textbf{1} \\
   & \quad \textbf{p} \preceq \textbf{d} \\
   & \quad \textbf{p} \succeq 0
@@ -178,6 +177,47 @@ When and what should the factory produce to maximize profit?
 \\
 \textbf{Solution: }
 % TODO: SOLVE PROBLEM
+In order to solve this problem with the introduction of periods, we can abstract the number of months as $M$ and products $P$.
+We define three decision variables $\textbf{P}, \textbf{S}, \textbf{X}, \textbf{X}_{prev} \in \mathbb{R}^{P \times (M+1)}$.
+\begin{itemize}
+  \item $\textbf{P} \in \mathbb{R}^{P \times (M+1)}$ has entries $p_{i m}$ where each entry is the amount of product $i$ produced during period $m$. 
+        This matrix is padded with zeros in the first column since we do not produce anything in period 0.
+  \item $\textbf{S} \in \mathbb{R}^{P \times (M+1)}$ has entries $s_{i m}$ where each entry is the amount of product $i$ sold during period $m$.
+        This matrix is padded with zeros in the first column since we do not produce anything in period 0.
+  \item $\textbf{X} \in \mathbb{R}^{P \times (M+1)}$ has entries $x_{i m}$ where each entry is the amount of product $i$ left at the end of period $m$.
+        The first column is a zero vector since we end period 0 with no inventory.
+        The last column is a $P$ length vector of 50s since we must end with $50$ units of each product.
+  \item $\textbf{X}_{prev} \in \mathbb{R}^{P \times (M+1)}$ is a shift of $\textbf{X}$ and represents the amount of product $i$ left at the beginning of period $m$.
+        This isn't really a decision variable, as each entry is shared with $\textbf{X}$.
+        The first two columns are zero vectors since we do not start period 0 or 1 with any inventory.
+\end{itemize}
+The parameters to this problem would be
+\begin{itemize}
+  \item $\textbf{c} \in \mathbb{R}^P$ is the contribution to profit of each product $i$.
+  \item $\textbf{A} \in \mathbb{R}^{K \times P}$ is the constraint matrix for the machines.
+        This problem has five machines so $K=5$
+  \item $\textbf{D} \in \mathbb{R}^{P \times (M+1)}$ has entries $d_{i m}$ with the amount of demand of product $i$ in period $m$.
+        The first column is a zero vector since there is no demand for period 0.
+  \item $v \in \mathbb{R}$ is the maximum amount of product $i$ at the end of each month.
+        In this problem, it is equivalent to $ 100$
+  \item $l \in \mathbb{R}$ is the cost of storing a unit of product $i$ in month $m$.
+        In this problem, it is 0.5
+  \item $u \in \mathbb{R}$ is the maximum amount of hours each machine can work in a month.
+        It is equal to 384 in this problem.
+\end{itemize}
+The optimization problem can then be expressed as
+\begin{align*}
+  \text{maximize} & \quad \textbf{c}^\top \textbf{S} \textbf{1} - l(\textbf{1}^\top \textbf{X} \textbf{1}) \\
+  \text{subject to} & \quad \textbf{A} \textbf{P} \preceq u \times \textbf{1} \quad \textbf{1} = \textbf{1}^{K \times (M+1)}\\
+  & \quad \textbf{S} \preceq \textbf{D} \\
+  & \quad \textbf{X} \preceq v \times \textbf{1} \quad \textbf{1} = \textbf{1}^{P \times (M+1)}\\
+  & \quad \textbf{X} = \textbf{P} - \textbf{S} + \textbf{X}_{prev} \\
+  & \quad \textbf{X}, \textbf{P}, \textbf{S}, \textbf{X}_{prev} \succeq 0
+\end{align*}
+In the above problem, the inequalities $\preceq, \succeq$ are defined as element-wise inequality for both vectors and matrices.
+
+
+
 
 \section{Problem 4}
 Formulate a LP model for the following reaction network (image \ref{fig:problem_4_rn}), assuming that you want
@@ -191,7 +231,6 @@ hydrogen that would be required to balance the equations.
 \end{figure}
 
 \textbf{Solution: }
-% TODO: SOLVE PROBLEM
 This is a flow problem and can be modeled using the flow variables $r_i$.
 \begin{align*}
   \text{maximize} & \quad r_{11} \\
@@ -203,6 +242,34 @@ This is a flow problem and can be modeled using the flow variables $r_i$.
   & \quad r_4 = r_9 \\
   & \quad r_9 + r_{10} = r_{11}
 \end{align*}
+This can be expressed in matrix notation as
+
+\begin{align*}
+  \text{maximize} & \quad \textbf{c}^\top \textbf{r} \\
+  \text{subject to} & \quad \textbf{N} \textbf{r} = \textbf{b} \\
+  & \quad \textbf{r} \succeq 0
+\end{align*}
+with the following parameters
+\begin{align*}
+  \textbf{c} = 
+    \begin{bmatrix}
+      0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1
+    \end{bmatrix}
+    \textbf{N} = 
+    \text{flow conservation matrix }
+    \textbf{b} = 
+    \begin{bmatrix}
+      1 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0
+    \end{bmatrix}
+\end{align*}
+and the decision variables
+\begin{align*}
+  \textbf{r} = 
+  \begin{bmatrix}
+     r_1 \\ r_2 \\ r_3 \\ r_4 \\ r_5 \\ r_6 \\ r_7 \\ r_8 \\ r_9 \\ r_{10} \\ r_{11}
+  \end{bmatrix}
+\end{align*} 
+
 
 
 \end{document}
