@@ -1,0 +1,133 @@
+\section{Chapter 4 - LP Solutions}
+\subsection{Tuesday 02/11/2025}
+\subsubsection{Simplex Algorithm}
+For an algorithm that solves an LP, we can define its input as an LP in the form
+\begin{align}
+  \text{minimize} & \quad c^\top x \\
+  \text{subject to} & \quad Ax = b \\
+  & \quad x \succeq 0
+\end{align}
+where $c \in \mathbb{R}^n, b \in \mathbb{R}^m, A \in \mathbb{R}^{m \times n}$.
+The optimal solution lies at one of the vertices of the problem which we can represent as $J_1^0, \dots, J_m^0$.
+The steps of the algoirthm include
+\begin{enumerate}
+    \item $B = (A_{j1}, \dots, A_{jm})$
+    \item Calculate the reduced cost in all basic directions as 
+          $\bar{c}_j = c_j - c_B^\top B^{-1} A_j, \quad \forall j \notin J^k$
+    \item If $\bar{c}_j \geq 0 \quad \forall j \notin J^k$ then this is the optimal solution.
+          Otherwise, we have a collection of reduced costs for every non-basic variable we have.
+          We then pick the calculate them one by one and pick the first one that is less than zero.
+          We do this so we don't have to calculate each reduced cost to identify a descent direction.
+    \item Calculate the basic variables $x_B = B^{-1} b$.
+    \item Calculate the basic components of the basic direction $d_b = B^{-1} A_p$.
+    \item Move along $x_B + \alpha d_B$ where $\alpha_i = -\frac{x_{B i}}{d_{b i}}$ if $d_{b i} < 0$
+          We will choose the total step $\alpha$ as the $\alpha_i$ that results in the smallest value.
+\end{enumerate}
+For an example for part 3, consider a reduced cost vector:
+\[
+\bar{c} = \begin{bmatrix}
+2 \\
+-2 \\
+-4 \\
+\vdots \\
+-10000
+\end{bmatrix}
+\]
+In this case, we would pick the first value less than zero, which is $-2$.
+
+\subsubsection{Simplex Example}
+We can take an example problem
+\begin{align}
+  \text{minimize} & \quad -x_1 - 2x_2 \\
+  \text{subject to} & \quad x_1 + x_2 \leq 1 \\
+  & \quad x_1 - x_2 \leq 1 \\
+  & \quad x_1, x_2 \geq 0
+\end{align}
+
+which can be turned into standard form 
+\begin{align}
+  \text{minimize} & \quad c^\top x \\
+  \text{subject to} & \quad Ax = b \\
+  & \quad  x \succeq 0
+\end{align}
+with parameters 
+\begin{align}
+    A = 
+  \begin{bmatrix}
+     1 & 1 & 1 & 0 \\
+     1 & -1 & 0 & 1
+  \end{bmatrix}
+  \quad
+  b = 
+  \begin{bmatrix}
+    1 \\ 1
+  \end{bmatrix}
+  \quad
+  c = 
+  \begin{bmatrix}
+    1 \\ -2 \\ 0 \\ 0
+  \end{bmatrix}
+\end{align}
+
+\begin{align}
+    J^0 = \{ 3,4 \}
+    \quad 
+    B = 
+    \begin{bmatrix}
+        1 & 0 \\ 0 & 2
+    \end{bmatrix}
+    \quad
+    x_B = 
+    \begin{bmatrix}
+        x_3 \\ x_4
+    \end{bmatrix} 
+    = B^{-1} b = 
+    \begin{bmatrix}
+        1 \\ 1
+    \end{bmatrix}
+\end{align}
+
+We solve for the reduced costs and get
+\begin{align}
+    \bar{c}_1 = c_1 - C_B^\top B^{-1} A_1 =
+    -1 -
+  \begin{bmatrix}
+     0 & 0
+  \end{bmatrix}
+  \begin{bmatrix}
+    1 & 0 \\ 0 & 2
+  \end{bmatrix}
+  \begin{bmatrix}
+    1 \\ 1
+  \end{bmatrix}
+  = -1
+\end{align}
+
+\begin{align}
+    \bar{c}_2 = c_2 - C_B^\top B^{-1} A_2 =
+    -2 -
+  \begin{bmatrix}
+     0 & 0
+  \end{bmatrix}
+  \begin{bmatrix}
+    1 & 0 \\ 0 & 2
+  \end{bmatrix}
+  \begin{bmatrix}
+    1 \\ -1
+  \end{bmatrix}
+  = -2
+\end{align}
+
+\begin{align}
+    d_{Np} = -B^{-1} A_1 = 
+    \begin{bmatrix}
+        -1 \\ -1
+    \end{bmatrix}
+\end{align}
+
+\begin{align}
+    d_p = 
+    \begin{bmatrix}
+        1 \\ 0 \\ -1 \\ -1
+    \end{bmatrix}
+\end{align}
