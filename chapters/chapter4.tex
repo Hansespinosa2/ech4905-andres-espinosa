@@ -131,3 +131,66 @@ We solve for the reduced costs and get
         1 \\ 0 \\ -1 \\ -1
     \end{bmatrix}
 \end{align}
+
+\subsection{Thursday 02/13/2025}
+
+\subsubsection{Geometric Interpretation of Steps}
+If we are at a vertex $x$, and we know a descent direction $d$, we want to figure out how far we should go along the direction to get a new $x_0 = x + \alpha d $.
+The direction may traverse multiple basic solutions, so we pick the lowest $\alpha_i = \frac{x}{d_i}$ so we ensure we do not violate the constraints.
+
+
+\subsubsection{Simplex Table}
+The simplex algorithm has some paramters calculated or held at each iteration
+\begin{itemize}
+  \item Reduced cost: $\bar{c} = c^\top - c_B^\top B^{-1} A$
+  \item Current iterate: $x_B = B^{-1} b$
+  \item Basic direction: $d_B = -B^{-1} A_p$
+  \item Objective function value: $-c^\top x$
+\end{itemize}
+
+Each of these must be stored.
+If we break it apart into a matrix we can store it with a matrix called the simplex table which is $\mathbb{R}^{(m+1)\times (n+1)}$
+
+The simplex table is a convenient way to keep track of all the necessary information during the iterations of the simplex algorithm. It includes the coefficients of the constraints, the objective function, and the current solution.
+
+For our example, the initial simplex table is:
+
+\[
+\begin{array}{c|cccc|c}
+ & x_1 & x_2 & s_1 & s_2 & \text{RHS} \\
+\hline
+s_1 & 1 & 1 & 1 & 0 & 1 \\
+s_2 & 1 & -1 & 0 & 1 & 1 \\
+\hline
+\text{Obj} & -1 & -2 & 0 & 0 & 0 \\
+\end{array}
+\]
+
+Here, $s_1$ and $s_2$ are the slack variables added to convert the inequalities into equalities. The "RHS" column represents the right-hand side of the constraints.
+
+The simplex algorithm has two parts, phase 1 is finding a basic feasible solution using the simplex algorithm and phase 2 is solving given the basic feasible solution.
+\subsubsection{Updating the Simplex table}
+In order to update a simplex table that has a feasible solution, we can use the example below
+
+For a simplex table with 3 constraints and 6 variables, we can set it up as follows:
+
+\[ 
+\begin{array}{c|ccccccc}
+ & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & \text{RHS} \\
+\hline
+x_1 & 0 & 1.5 & 1 & 1 & -0.5 & 0 & 10 \\
+x_4 & 1 & 0.5 & 1 & 0 & 0.5 & 0 &  10 \\
+x_6 & 0 & 1 & -1 & 0 & -1 & 1 & 0 \\
+\hline
+\text{Obj} & 0 & -7 & -2 & 0 & 5 & 0 & 100 \\
+\end{array}
+\]
+
+Here, we pick $x_2$ as the entering variable since it is the first index with a negative value.
+We calculate $\alpha$ for each basic variable to calculate which is the one leaving the simplex table.
+\begin{itemize}
+  \item $\alpha_1 = \frac{20}{25}$
+  \item $\alpha_2 = \frac{20}{25}$
+  \item $\alpha_1 = \frac{1}{1}$
+\end{itemize}
+We pivot the table on row $x_6$, and column $x_2$.
