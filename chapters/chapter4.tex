@@ -194,3 +194,117 @@ We calculate $\alpha$ for each basic variable to calculate which is the one leav
   \item $\alpha_1 = \frac{1}{1}$
 \end{itemize}
 We pivot the table on row $x_6$, and column $x_2$.
+
+\subsection{Tuesday 02/18/2025}
+\subsubsection{Simplex Phase 1}
+The simplex method is computationally tractable partly due to the fact that the only inverse that needs to be computed is that of $B^{-1}$.
+This matrix, the basis matrix with auxiliary variables ends up being equal to the identity matrix, $B = I$.
+Therefore, the only identity necessary is $I^{-1} = I$.
+
+We have the following optimization problem
+\begin{align}
+  \text{minimize} & \quad 2 x_1 + 3 x_2 + 3 x_3 + x_4 - 2 x_5 \\
+  \text{subject to} & \quad x_1 + 3x_2 + 4 x_4 + x_5 = 2 \\
+  & \quad x_1 + 3x_2 - 3x_4 + x_5 = 2 \\
+  & \quad - x_1 - 4 x_2 + 3x_3 = 2 \\
+  & \quad \textbf{x} \succeq 0 
+\end{align}
+
+which we turn into the auxiliary problem
+\begin{align}
+  \text{minimize} & \quad x_6 + x_7 + x_8 \\
+  \text{subject to} & \quad x_1 + 3x_2 + 4 x_4 + x_5 + x_6 = 2 \\
+  & \quad x_1 + 3x_2 - 3x_4 + x_5 + x_7 = 2 \\
+  & \quad - x_1 - 4 x_2 + 3x_3 + x_8 = 1 \\
+  & \quad \textbf{x} \succeq 0
+\end{align}
+
+The initial simplex table with the auxiliary variables in the basis is:
+
+\[ 
+\begin{array}{c|cccccccc|c}
+ & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & x_8 & \text{RHS} \\
+\hline
+x_6 & 1 & 3 & 0 & 4 & 1 & 1 & 0 & 0 & 2 \\
+x_7 & 1 & 3 & 0 & -3 & 1 & 0 & 1 & 0 & 2 \\
+x_8 & -1 & -4 & 3 & 0 & 0 & 0 & 0 & 1 & 1 \\
+\hline
+\text{Obj} & -1 & -1 & -3 & -1 & -2 & 0 & 0 & 0 & 0 \\
+\end{array}
+\]
+
+To pivot on $x_3$ and $x_8$, we first need to identify the pivot element, which is the element in the intersection of the row and column of the entering and leaving variables. In this case, the pivot element is $3$.
+
+We then perform row operations to make the pivot element $1$ and all other elements in the pivot column $0$.
+
+The updated simplex table is:
+
+\[ 
+\begin{array}{c|cccccccc|c}
+ & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & x_7 & x_8 & \text{RHS} \\ 
+\hline
+x_6 & 1 + \frac{1}{3} & 3 + \frac{4}{3} & 0 & 4 & 1 & 1 & 0 & -\frac{1}{3} & 2 - \frac{2}{3} \\ 
+x_7 & 1 + \frac{1}{3} & 3 + \frac{4}{3} & 0 & -3 & 1 & 0 & 1 & -\frac{1}{3} & 2 - \frac{2}{3} \\ 
+x_3 & -\frac{1}{3} & -\frac{4}{3} & 1 & 0 & 0 & 0 & 0 & \frac{1}{3} & \frac{1}{3} \\ 
+\hline
+\text{Obj} & -1 + \frac{1}{3} & -1 + \frac{4}{3} & 0 & -1 & -2 & 0 & 0 & \frac{1}{3} & \frac{1}{3} \\ 
+\end{array}
+\]
+
+Here, we have updated the table by performing the necessary row operations to ensure that the pivot element is $1$ and all other elements in the pivot column are $0$.
+
+\subsubsection{Simplex Phase 2}
+After finding a basic feasible solution in Phase 1, we proceed to Phase 2 to optimize the original objective function. We start with the feasible solution obtained from Phase 1 and use the simplex method to find the optimal solution.
+
+Consider the following optimization problem:
+\begin{align}
+  \text{minimize} & \quad 2 x_1 + 3 x_2 + 3 x_3 + x_4 - 2 x_5 \\
+  \text{subject to} & \quad x_1 + 3x_2 + 4 x_4 + x_5 = 2 \\
+  & \quad x_1 + 3x_2 - 3x_4 + x_5 = 2 \\
+  & \quad - x_1 - 4 x_2 + 3x_3 = 2 \\
+  & \quad \textbf{x} \succeq 0 
+\end{align}
+
+The initial simplex table for Phase 2 is:
+
+\[ 
+\begin{array}{c|cccccc|c}
+ & x_1 & x_2 & x_3 & x_4 & x_5 & \text{RHS} \\
+\hline
+x_6 & 1 & 3 & 0 & 4 & 1 & 2 \\
+x_7 & 1 & 3 & 0 & -3 & 1 & 2 \\
+x_8 & -1 & -4 & 3 & 0 & 0 & 1 \\
+\hline
+\text{Obj} & -2 & -3 & -3 & -1 & 2 & 0 \\
+\end{array}
+\]
+
+We identify the entering variable as $x_1$ (most negative coefficient in the objective row) and calculate the ratios to determine the leaving variable:
+
+\[
+\begin{array}{c|c}
+\text{Variable} & \alpha \\
+\hline
+x_6 & \frac{2}{1} = 2 \\
+x_7 & \frac{2}{1} = 2 \\
+x_8 & \frac{1}{-1} = \text{Not feasible} \\
+\end{array}
+\]
+
+Since both $x_6$ and $x_7$ have the same ratio, we can choose either. Let's choose $x_6$ as the leaving variable. We pivot on the element in row $x_6$ and column $x_1$.
+
+The updated simplex table is:
+
+\[ 
+\begin{array}{c|cccccc|c}
+ & x_1 & x_2 & x_3 & x_4 & x_5 & \text{RHS} \\
+\hline
+x_1 & 1 & 3 & 0 & 4 & 1 & 2 \\
+x_7 & 0 & -6 & 0 & -7 & 0 & 0 \\
+x_8 & 0 & -1 & 3 & 4 & 1 & 3 \\
+\hline
+\text{Obj} & 0 & 3 & -3 & 7 & 3 & 4 \\
+\end{array}
+\]
+
+We continue this process until all the coefficients in the objective row are non-negative, indicating that we have found the optimal solution.
