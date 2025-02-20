@@ -1,0 +1,42 @@
+\section{Chapter 5 - Formulation of NLPs}
+\subsection{Thursday 02/20/2025}
+\subsubsection{Chapter Introduction}
+Generally, there are two types of nonlinear problems in relation to their constraints:
+\begin{itemize}
+    \item Unconstrained
+    \item Constrained
+\end{itemize}
+This will introduce the chapter and the general material discussed. 
+For NLPs, there are also convex and non-convex problems.
+Convex problems are generally much easier to solve than non-convex problems.
+There are tricks that can be employed to help solve and reduce the complexity of the algorithms.
+A final portion of this chapter will go into specific NLPs in chemical engineering applications.
+
+\subsubsection{NLPs}
+The general form of an NLP is 
+\begin{align}
+  \text{minimize} & \quad f(x) \\
+  \text{subject to} & \quad g(x) \leq 0 \\
+  & \quad h(x) = 0
+\end{align}
+where any of the functions $f, g, h$ are non-linear and $\textbf{x} \in \mathbb{R}^n$.
+The problem above is convex if both $f, g$ are convex and $h$ is an affine function that can be represented as $h(x)=Ax-b$.
+
+In chemical engineering, there are a few sources of non-linearity:
+\begin{itemize}
+    \item $c = \alpha (size)^\beta $: Formula for cost of capital. This is a long term cost and generally marginally decreases with size, therefore $0 \leq \beta \leq 1$.
+    \item $xy$: Splitter, which is a bilinear and non-convex term that takes an input and outputs the same amount by an amount of paths.
+    \item $everything$: Thermodynamics, kinetics, transport, and other many chemical relations are not linear.
+\end{itemize}
+
+\subsubsection{Tricks}
+Some tricks can be employed that alleviate constraints of chemistry or physics and give generally accurate convex approximations.
+\begin{itemize}
+    \item Bounds: $l \leq x \leq u$. These constrain the design variables to be in a well constrained area. A smaller design space is easier to explore.
+    \item Linear: Try to approximate or represent things as linearly whenever possible. For example, a ratio constraint $\frac{x_i}{x_T} \leq \alpha \rightarrow x_i \leq \alpha x_T$.
+    \item Elimination: Eliminating variables where possible. For example, a constraint $y = x_1 + x_2$ with those three variables can have the rest of the problem's $y$ replaced with $x_1 + x_2$.
+\end{itemize}
+The complexity of chemical engineering problems and formulating them as LPs can be seen in multiple paradigms.
+\begin{itemize}
+    \item Level of aggregation: Chemical engineering problems have many different unit operations that will compress, react, separate, etc different chemicals. These unit operations can be aggregated into different "zones"to assist with having linear constraints in between these zones. Effectively, simplifying the unit operations to reduce the amount of design variables.
+\end{itemize}
