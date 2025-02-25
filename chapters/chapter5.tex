@@ -40,3 +40,15 @@ The complexity of chemical engineering problems and formulating them as LPs can 
 \begin{itemize}
     \item Level of aggregation: Chemical engineering problems have many different unit operations that will compress, react, separate, etc different chemicals. These unit operations can be aggregated into different "zones"to assist with having linear constraints in between these zones. Effectively, simplifying the unit operations to reduce the amount of design variables.
 \end{itemize}
+
+\subsection{Tuesday 02/25/2025}
+For a mixer, the only balance equations necessary are the input must equal the output.
+\begin{center}
+\begin{tikzpicture}
+    \node[circle, draw, minimum size=1cm] (mixer) at (0,0) {Mixer};
+    \draw[->] (-2,0) -- (mixer.west);
+    \draw[->] (0,-2) -- (mixer.south);
+    \draw[->] (mixer.east) -- (2,0);
+\end{tikzpicture}
+\end{center}
+The chemical components that enter must equal the chemical components that exit this mixer.
