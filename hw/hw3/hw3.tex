@@ -42,6 +42,104 @@ Identify the basic solutions, and among them, those that are feasible
 For each point corresponding to a feasible basic solution identify the basic directions
 \\
 \textbf{Solution: }
+\section{Problem 2}
+Solve the following optimization problem using the two-stage simplex method
+\[
+\begin{aligned}
+\text{min } & -9x_1 - 4x_2 \\
+\text{s.t. } & 5x_1 + 2x_2 \leq 31 \\
+& -3x_1 + 2x_2 \leq 5 \\
+& -2x_1 - 3x_2 \leq -1 \\
+& x_1 \geq 0 \\
+& x_2 \geq 0
+\end{aligned}
+\]
+
+\subsection{Part a}
+Use the two-stage simplex tableau
+\\
+\textbf{Solution: }
+
+\subsection{Part b}
+Use GAMS to solve the optimization problem
+\\
+\textbf{Solution: }
+
+\section{Problem 3}
+An oil refinery purchases two crude oils (crude 1 and crude 2). These crude oils are put through four processes: distillation, reforming, cracking, and blending, to produce petrols and fuels that are sold.
+
+\textbf{Distillation:} distillation separates each crude oil into fractions known as light naphtha, medium naphtha, heavy naphtha, light oil, heavy oil, and residuum according to their boiling points.
+
+Light, medium, and heavy naphthas have octane numbers of 90, 80, and 70, respectively. The fractions into which one barrel of each type of crude splits are given in the following table:
+
+\begin{tabular}{lcccccc}
+    & Light naphtha & Medium naphtha & Heavy naphtha & Light oil & Heavy oil & Residuum \\
+    \hline
+    Crude 1 & 0.1 & 0.2 & 0.2 & 0.12 & 0.2 & 0.13 \\
+    Crude 2 & 0.15 & 0.25 & 0.18 & 0.08 & 0.19 & 0.12 \\
+\end{tabular}
+
+Note that there is a small wastage in the distillation operation (i.e., fractions do not add to 1).
+
+\textbf{Reforming:} the naphthas can be used immediately for blending into different grades of petrol or can go through a process known as reforming. Reforming produces a product known as reformed gasoline with an octane number of 115. The yields of reformed gasoline from each barrel of the different naphthas are given as follows:
+
+\begin{itemize}
+    \item 1 barrel of light naphtha yields 0.6 barrels of reformed gasoline
+    \item 1 barrel of medium naphtha yields 0.52 barrels of reformed gasoline
+    \item 1 barrel of heavy naphtha yields 0.45 barrels of reformed gasoline
+\end{itemize}
+
+\textbf{Cracking:} the oils (light and heavy) can either be used directly for blending into jet fuel or fuel oil or be put through a process known as catalytic cracking. The catalytic cracker produces cracked oil and cracked gasoline. Cracked gasoline has an octane number of 105.
+
+\begin{itemize}
+    \item 1 barrel of light oil yields 0.68 barrels of cracked oil and 0.28 barrels of cracked gasoline
+    \item 1 barrel of heavy oil yields 0.75 barrels of cracked oil and 0.2 barrels of cracked gasoline
+\end{itemize}
+
+Cracked oil is used for blending fuel oil and jet fuel; cracked gasoline is used for blending petrol.
+
+Residuum can be used for either producing lube oil or blending into jet fuel and fuel oil:
+\begin{itemize}
+    \item 1 barrel of residuum yields 0.5 barrels of lube oil.
+\end{itemize}
+
+\textbf{Blending:}
+\begin{itemize}
+    \item Petrols: there are two types of petrol, regular and premium, obtained by blending the naphtha, reformed gasoline, and cracked gasoline. The only stipulations concerning them are that regular must have an octane number of at least 84 and that premium must have an octane number of at least 94. It is assumed that octane numbers blend linearly by volume.
+    \item Jet fuel: the stipulation concerning jet fuel is that its vapor pressure must not exceed 1 kg/cm\textsuperscript{2}. The vapor pressures for light, heavy, cracked oils, and residuum are 1.0, 0.6, 1.5, and 0.05 kg/cm\textsuperscript{2}. It may again be assumed that vapor pressures blend linearly by volume.
+    \item Fuel oil: To produce fuel oil, we blend light oil, cracked oil, heavy oil, and residuum in a ratio of 10:4:3:1.
+\end{itemize}
+
+There are some availability and capacity limitations on the quantities and processes used as follows:
+\begin{itemize}
+    \item The daily availability of crude 1 is 20000 barrels
+    \item The daily availability of crude 2 is 30000 barrels
+    \item At most 45000 barrels of crude can be distilled per day
+    \item At most 10000 barrels of naphtha can be reformed per day
+    \item At most 8000 barrels of oil can be cracked per day
+    \item The daily production of lube oil must be between 500 and 1000 barrels
+    \item Premium motor fuel production must be at least 40\% of regular motor fuel production
+\end{itemize}
+
+The profit contributions from the sale of the final products are (in dollars per barrel) as follows:
+\begin{itemize}
+    \item Premium petrol: 700
+    \item Regular petrol: 600
+    \item Jet fuel: 400
+    \item Fuel oil: 350
+    \item Lube oil: 150
+\end{itemize}
+
+How should the operations of the refinery be planned in order to maximize the total profit?
+\subsection{Part a}
+Develop a model based on the provided information
+\\
+\textbf{Solution: }
+
+\subsection{Part b}
+Find the optimal value in GAMS
+\\
+\textbf{Solution: }
 
 
 \end{document}

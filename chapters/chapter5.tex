@@ -52,3 +52,26 @@ For a mixer, the only balance equations necessary are the input must equal the o
 \end{tikzpicture}
 \end{center}
 The chemical components that enter must equal the chemical components that exit this mixer.
+
+\subsection{Thursday 02/27/2025}
+Below is an example of a chemical layout with certain unit operations that perform operations on their inputs.
+\begin{center}
+\begin{tikzpicture}
+    \node[rectangle, draw, minimum width=2cm, minimum height=3cm] (distiller) at (0,0) {Distiller};
+    \draw[->] (-2,1) -- (distiller.west) node[midway, above] {Crude Oil 1};
+    \draw[->] (-2,-1) -- (distiller.west) node[midway, below] {Crude Oil 2};
+    \draw[->] (distiller.east) -- (2,2) node[midway, above] {Blend 1};
+    \draw[->] (distiller.east) -- (2,1) node[midway, above] {Blend 2};
+    \draw[->] (distiller.east) -- (2,0) node[midway, above] {Blend 3};
+    \draw[->] (distiller.east) -- (2,-1) node[midway, above] {Blend 4};
+    \draw[->] (distiller.east) -- (2,-2) node[midway, above] {Blend 5};
+    \draw[->] (distiller.east) -- (2,-3) node[midway, above] {Blend 6};
+    
+    \node[rectangle, draw, minimum width=2cm, minimum height=1.5cm] (refiner) at (5,1) {Refiner};
+    \draw[->] (2,2) -- (refiner.west) node[midway, above] {Blend 1};
+    \draw[->] (2,1) -- (refiner.west) node[midway, above] {Blend 2};
+    \draw[->] (2,0) -- (refiner.west) node[midway, above] {Blend 3};
+    \draw[->] (refiner.east) -- (7,1) node[midway, above] {Refined Blend};
+\end{tikzpicture}
+\end{center}
+The outputs of this system are petrol 1, petrol 2, jet fuel, fuel oil, and lube.
