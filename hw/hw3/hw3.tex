@@ -264,7 +264,7 @@ For each point corresponding to a feasible basic solution identify the basic dir
 Since there are 6 basic feasible solution points, and 3 non-basic variables for each, there will be 18 total basic directions.
 To be less confusing, I will index them with $d_i^j$, where $i$ is the non-basic variable index and $j$ is the index of the basic feasible solution that it corresponds to.
 \begin{enumerate}
-    \item $j = 2$
+    \item $j = 2 = [1,3]$
     \begin{align*} 
         d_2^2 = \textbf{P}
       \begin{bmatrix}
@@ -362,7 +362,7 @@ To be less confusing, I will index them with $d_i^j$, where $i$ is the non-basic
         0 \\ 0 \\ -1 \\ 0 \\ 1 
       \end{bmatrix}
     \end{align*}
-    \item $j=4$
+    \item $j=4 = [1,5]$
     \begin{align*} 
         d_2^4 = \textbf{P}
       \begin{bmatrix}
@@ -458,6 +458,398 @@ To be less confusing, I will index them with $d_i^j$, where $i$ is the non-basic
       =
       \begin{bmatrix}
         -1 \\ 0 \\ 0 \\ 1 \\ 1 
+      \end{bmatrix}
+    \end{align*}
+    \item $j=5 = [2,3]$
+    \begin{align*}
+        d_1^5 = \textbf{P}
+      \begin{bmatrix}
+         d_{B1} \\ d_{N1}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 1
+        \end{bmatrix} \\
+        1 \\ 0 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ -1 \\ 1 \\ 0 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        1 \\ -1 \\ -1 \\ 0 \\ 0
+      \end{bmatrix}
+      \\
+      d_4^5 = \textbf{P}
+      \begin{bmatrix}
+         d_{B4} \\ d_{N4}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 0
+        \end{bmatrix} \\
+        0 \\ 1 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ 0 \\ 0 \\ 1 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ -1 \\ 0 \\ 1 \\ 0
+      \end{bmatrix}
+      \\
+      d_5^5 = \textbf{P}
+      \begin{bmatrix}
+         d_{B5} \\ d_{N5}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            0 \\ 1
+        \end{bmatrix} \\
+        0 \\ 0 \\ 1
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        0 \\ -1 \\ 0 \\ 0 \\ 1
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ 0 \\ -1 \\ 0 \\ 1
+      \end{bmatrix}
+    \end{align*}
+    \item $j=7 = [2,5]$
+    \begin{align*}
+        d_1^7 = \textbf{P}
+      \begin{bmatrix}
+         d_{B1} \\ d_{N1}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 1
+        \end{bmatrix} \\
+        1 \\ 0 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1 \\
+        0 & 1 & 0 & 0 & 0
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ -1 \\ 1 \\ 0 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        1 \\ -1 \\ 0 \\ 0 \\ -1
+      \end{bmatrix}
+      \\
+      d_3^7 = \textbf{P}
+      \begin{bmatrix}
+         d_{B3} \\ d_{N3}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            0 \\ 1
+        \end{bmatrix} \\
+        0 \\ 1 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1 \\
+        0 & 1 & 0 & 0 & 0
+      \end{bmatrix}
+      \begin{bmatrix}
+        0 \\ -1 \\ 0 \\ 1 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ 0 \\ 1 \\ 0 \\ -1
+      \end{bmatrix}
+      \\
+      d_4^7 = \textbf{P}
+      \begin{bmatrix}
+         d_{B4} \\ d_{N4}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 0
+        \end{bmatrix} \\
+        0 \\ 0 \\ 1
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1 \\
+        0 & 1 & 0 & 0 & 0
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ 0 \\ 0 \\ 0 \\ 1
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ 0 \\ 0 \\ 1 \\ -1
+      \end{bmatrix}
+    \end{align*}
+    \item $j=8 = [3,4]$
+    \begin{align*}
+        d_1^8 = \textbf{P}
+      \begin{bmatrix}
+         d_{B1} \\ d_{N1}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         0 & 1 \\ 1 & 0   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 1
+        \end{bmatrix} \\
+        1 \\ 0 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ -1 \\ 1 \\ 0 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        1 \\ 0 \\ -1 \\ -1 \\ 0
+      \end{bmatrix}
+      \\
+      d_2^8 = \textbf{P}
+      \begin{bmatrix}
+         d_{B2} \\ d_{N2}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         0 & 1 \\ 1 & 0   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 0
+        \end{bmatrix} \\
+        0 \\ 1 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        0 \\ -1 \\ 0 \\ 1 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ 1 \\ 0 \\ -1 \\ 0
+      \end{bmatrix}
+      \\
+      d_5^8 = \textbf{P}
+      \begin{bmatrix}
+         d_{B5} \\ d_{N5}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         0 & 1 \\ 1 & 0   
+        \end{bmatrix}
+        \begin{bmatrix}
+            0 \\ 1
+        \end{bmatrix} \\
+        0 \\ 0 \\ 1
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ 0 \\ 0 \\ 0 \\ 1
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ 0 \\ -1 \\ 0 \\ 1
+      \end{bmatrix}
+    \end{align*}
+    \item $j=10 = [4,5]$
+    \begin{align*}
+        d_1^{10} = \textbf{P}
+      \begin{bmatrix}
+         d_{B1} \\ d_{N1}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 1
+        \end{bmatrix} \\
+        1 \\ 0 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ -1 \\ 1 \\ 0 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        1 \\ 0 \\ 0 \\ -1 \\ -1
+      \end{bmatrix}
+      \\
+      d_2^{10} = \textbf{P}
+      \begin{bmatrix}
+         d_{B2} \\ d_{N2}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 0
+        \end{bmatrix} \\
+        0 \\ 1 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ 0 \\ 0 \\ 1 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ 1 \\ 0 \\ -1 \\ 0
+      \end{bmatrix}
+      \\
+      d_3^{10} = \textbf{P}
+      \begin{bmatrix}
+         d_{B3} \\ d_{N3}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ 0 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            0 \\ 1
+        \end{bmatrix} \\
+        0 \\ 0 \\ 1
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1 \\
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0
+      \end{bmatrix}
+      \begin{bmatrix}
+        0 \\ -1 \\ 0 \\ 0 \\ 1
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ 0 \\ 1 \\ 0 \\ -1
       \end{bmatrix}
     \end{align*}
 \end{enumerate}
