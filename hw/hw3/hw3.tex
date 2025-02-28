@@ -32,11 +32,228 @@ x_3 &\geq 0
 Express the constraints in standard form
 \\
 \textbf{Solution: }
+To move this feasible set to standard form, we add slack variables to turn the inequalities into 
+\[
+\begin{aligned}
+x_1 + x_2 + s_1 & = 3 \\
+x_1 + x_3 + s_2 & = 7 \\
+x_1, x_2, x_3, s_1, s_2 & \geq 0
+\end{aligned}
+\]
+which can be expressed in matrix form as 
+\[
+\begin{aligned}
+A \textbf{x}& = b \\
+\textbf{x} &\succeq 0
+\end{aligned}
+\]
+where
+\begin{align*}
+    A =
+  \begin{bmatrix}
+     1 & 1 & 0 & 1 & 0 \\
+     1 & 0 & 1 & 0 & 1
+  \end{bmatrix}
+  \quad
+  b = 
+  \begin{bmatrix}
+    3 \\ 7
+  \end{bmatrix}
+  \quad
+  \textbf{x} = 
+  \begin{bmatrix}
+    x_1 \\ x_2 \\ x_3 \\ s_1 \\ s_2
+  \end{bmatrix}
+\end{align*}
 
 \subsection{Part b}
 Identify the basic solutions, and among them, those that are feasible
 \\
 \textbf{Solution: }
+To identify the basic solutions, we can group the columns into the following sets of two, select those columns as the basis of a matrix $B$, and solve for \textbf{x}:
+\begin{enumerate}
+    \item $J_{1} = 1,2$
+    \begin{align*}
+      B = 
+      \begin{bmatrix}
+        1 & 1 \\ 1 & 0
+      \end{bmatrix}
+      \quad
+      B^{-1} =
+      \begin{bmatrix}
+        0 & 1 \\ 1 & -1
+      \end{bmatrix}
+      \quad 
+      \textbf{x}_{B} = B^{-1} b = 
+      \begin{bmatrix}
+        7 \\ -4
+      \end{bmatrix}
+      \quad
+      \textbf{x} =
+      \begin{bmatrix}
+        7 \\ -4 \\ 0 \\ 0 \\ 0
+      \end{bmatrix}
+    \end{align*}
+    \item $J_{2} = 1,3$
+    \begin{align*}
+        B = 
+        \begin{bmatrix}
+          1 & 0 \\ 1 & 1
+        \end{bmatrix}
+        \quad
+        B^{-1} =
+        \begin{bmatrix}
+          1 & 0 \\ -1 & 1
+        \end{bmatrix}
+        \quad 
+        \textbf{x}_{B} = B^{-1} b = 
+        \begin{bmatrix}
+          3 \\ 10
+        \end{bmatrix}
+        \quad
+        \textbf{x} =
+        \begin{bmatrix}
+          3 \\ 0 \\ 10 \\ 0 \\ 0
+        \end{bmatrix}
+      \end{align*}
+    \item $J_{3} = 1,4$
+    \begin{align*}
+        B = 
+        \begin{bmatrix}
+          1 & 1 \\ 1 & 0
+        \end{bmatrix}
+        \quad
+        B^{-1} =
+        \begin{bmatrix}
+          0 & 1 \\ 1 & -1
+        \end{bmatrix}
+        \quad 
+        \textbf{x}_{B} = B^{-1} b = 
+        \begin{bmatrix}
+          7 \\ -4
+        \end{bmatrix}
+        \quad
+        \textbf{x} =
+        \begin{bmatrix}
+          7 \\ 0 \\ 0 \\ -4 \\ 0
+        \end{bmatrix}
+      \end{align*}
+    \item $J_{4} = 1,5$
+    \begin{align*}
+        B = 
+        \begin{bmatrix}
+          1 & 0 \\ 1 & 1
+        \end{bmatrix}
+        \quad
+        B^{-1} =
+        \begin{bmatrix}
+          1 & 0 \\ -1 & 1
+        \end{bmatrix}
+        \quad 
+        \textbf{x}_{B} = B^{-1} b = 
+        \begin{bmatrix}
+          3 \\ 10
+        \end{bmatrix}
+        \quad
+        \textbf{x} =
+        \begin{bmatrix}
+          3 \\ 0 \\ 0 \\ 0 \\ 10
+        \end{bmatrix}
+      \end{align*}
+    \item $J_{5} = 2,3$
+    \begin{align*}
+        B = 
+        \begin{bmatrix}
+          1 & 0 \\ 0 & 1
+        \end{bmatrix}
+        \quad
+        B^{-1} =
+        \begin{bmatrix}
+          1 & 0 \\ 0 & 1
+        \end{bmatrix}
+        \quad 
+        \textbf{x}_{B} = B^{-1} b = 
+        \begin{bmatrix}
+          3 \\ 7
+        \end{bmatrix}
+        \quad
+        \textbf{x} =
+        \begin{bmatrix}
+          0 \\ 3 \\ 7 \\ 0 \\ 0
+        \end{bmatrix}
+      \end{align*}
+    \item $J_{6} = 2,4$
+    These columns are linearly dependent and therefore do not form a basis and are not a basic solution.
+    \item $J_{7} = 2,5$
+    \begin{align*}
+        B = 
+        \begin{bmatrix}
+          1 & 0 \\ 0 & 1
+        \end{bmatrix}
+        \quad
+        B^{-1} =
+        \begin{bmatrix}
+          1 & 0 \\ 0 & 1
+        \end{bmatrix}
+        \quad 
+        \textbf{x}_{B} = B^{-1} b = 
+        \begin{bmatrix}
+          3 \\ 7
+        \end{bmatrix}
+        \quad
+        \textbf{x} =
+        \begin{bmatrix}
+          0 \\ 3 \\ 0 \\ 0 \\ 7
+        \end{bmatrix}
+      \end{align*}
+    \item $J_{8} = 3,4$
+    \begin{align*}
+        B = 
+        \begin{bmatrix}
+          0 & 1 \\ 1 & 0
+        \end{bmatrix}
+        \quad
+        B^{-1} =
+        \begin{bmatrix}
+          0 & 1 \\ 1 & 0
+        \end{bmatrix}
+        \quad 
+        \textbf{x}_{B} = B^{-1} b = 
+        \begin{bmatrix}
+          7 \\ 3
+        \end{bmatrix}
+        \quad
+        \textbf{x} =
+        \begin{bmatrix}
+          0 \\ 0 \\ 7 \\ 3 \\ 0
+        \end{bmatrix}
+      \end{align*}
+    \item $J_{9} = 3,5$
+    This is not a basic solution since the columns are linearly dependent
+    \item $J_{10} = 4,5$
+    \begin{align*}
+        B = 
+        \begin{bmatrix}
+          1 & 0 \\ 0 & 1
+        \end{bmatrix}
+        \quad
+        B^{-1} =
+        \begin{bmatrix}
+          1 & 0 \\ 0 & 1
+        \end{bmatrix}
+        \quad 
+        \textbf{x}_{B} = B^{-1} b = 
+        \begin{bmatrix}
+          3 \\ 7
+        \end{bmatrix}
+        \quad
+        \textbf{x} =
+        \begin{bmatrix}
+          0 \\ 0 \\ 0 \\ 3 \\ 7
+        \end{bmatrix}
+      \end{align*}
+\end{enumerate}
+
 
 \subsection{Part c}
 For each point corresponding to a feasible basic solution identify the basic directions
