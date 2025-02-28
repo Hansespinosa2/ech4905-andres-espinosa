@@ -253,12 +253,117 @@ To identify the basic solutions, we can group the columns into the following set
         \end{bmatrix}
       \end{align*}
 \end{enumerate}
+The basic solutions are $J_i, \forall i \in [1,2,3,4,5,7,8,10]$.
+The basic \textit{feasible} solutions are $J_i, \forall i \in [2,4,5,7,8,10]$.
 
 
 \subsection{Part c}
 For each point corresponding to a feasible basic solution identify the basic directions
 \\
 \textbf{Solution: }
+Since there are 6 basic feasible solution points, and 3 non-basic variables for each, there will be 18 total basic directions.
+To be less confusing, I will index them with $d_i^j$, where $i$ is the non-basic variable index and $j$ is the index of the basic feasible solution that it corresponds to.
+\begin{enumerate}
+    \item $j = 2$
+    \begin{align*} 
+        d_2^2 = \textbf{P}
+      \begin{bmatrix}
+         d_{B2} \\ d_{N2}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ -1 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 0
+        \end{bmatrix} \\
+        1 \\ 0 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ 1 \\ 1 \\ 0 \\ 0 
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        -1 \\ 1 \\ 1 \\ 0 \\ 0 
+      \end{bmatrix}
+      \\
+      d_4^2 = \textbf{P}
+      \begin{bmatrix}
+         d_{B4} \\ d_{N4}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ -1 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 \\ 0
+        \end{bmatrix} \\
+        0 \\ 1 \\ 0
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        -1 \\ 1 \\ 0 \\ 1 \\ 0 
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        -1 \\ 0 \\ 1 \\ 1 \\ 0 
+      \end{bmatrix}
+      \\
+      d_5^2 = \textbf{P}
+      \begin{bmatrix}
+         d_{B5} \\ d_{N5}
+      \end{bmatrix}
+      =
+      \textbf{P}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+         1 & 0 \\ -1 & 1   
+        \end{bmatrix}
+        \begin{bmatrix}
+            0 \\ 1
+        \end{bmatrix} \\
+        0 \\ 0 \\ 1
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1
+      \end{bmatrix}
+      \begin{bmatrix}
+        0 \\ -1 \\ 0 \\ 0 \\ 1
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        0 \\ 0 \\ -1 \\ 0 \\ 1 
+      \end{bmatrix}
+    \end{align*}
+\end{enumerate}
+
 \section{Problem 2}
 Solve the following optimization problem using the two-stage simplex method
 \[
