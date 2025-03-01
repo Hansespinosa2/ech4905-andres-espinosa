@@ -1065,17 +1065,20 @@ The objective function can be formulated as
 The input and output yield constraints can be formulated as
 \begin{align*}
   \text{Availability Constraints} & \quad x_{1}^1 \leq 20000 \\ 
-  & \quad x_{2}^2 \leq 30000
+  & \quad x_{2}^2 \leq 30000 \\
   & \quad x_{1}^1 + x_{2}^2 \leq 45000
 \end{align*}
 
 \begin{align*}
-  \text{Distilling Constraints} & \quad x_{j}^3 = y_{1,j}^3 x_{1}^1 + y_{2,j}^3 x_{2}^2, \quad \forall j \in [3,4,5,6,7,8]
+  \text{Distilling Constraints} & \quad x_{j}^3 = y_{1,j}^3 x_{1}^1 + y_{2,j}^3 x_{2}^2, \quad \forall j \in [3,4,5,6,7,8] \\
+  & \quad \sum_{j \in [3,4,5]} x_{j}^4 \leq 10000
 \end{align*}
 
 \begin{align*}
   \text{Reforming Constraints} & \quad x_{j}^4 = y_{3,j}^4 x_{3}^3 + y_{4,j}^4 x_{4}^4 +  y_{5,j}^4 x_{5}^4, \quad \forall j \in [9]
 \end{align*}
+
+
 
 
 
