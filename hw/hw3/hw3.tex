@@ -888,6 +888,111 @@ Use the two-stage simplex tableau
   \end{bmatrix}
 \end{align*}
 
+\begin{center}
+  \[
+  \begin{array}{c|ccccc|c}
+    & x_1 & x_2 & s_1 & s_2 & s_3 & \text{RHS} \\
+    \hline
+    s_1 & 5 & 2 & 1 & 0 & 0 & 31 \\
+    s_2 & -3 & 2 & 0 & 1 & 0 & 5 \\
+    s_3 & -2 & -3 & 0 & 0 & 1 & -1 \\
+    \hline
+    \text{obj} & -9 & -4 & 0 & 0 & 0 & 0 \\
+  \end{array}
+  \]
+  We can identify $x_1$ as the entering variable.
+  To find the exiting variable we must first calculate the descent direction associated with $x_1$.
+  \begin{align*}
+    d_p =\textbf{P}
+    \begin{bmatrix}
+       d_{Bp} \\ d_{Np}
+    \end{bmatrix}
+    = 
+    \begin{bmatrix}
+      0 & 0 & 0 & 1 & 0 \\
+      0 & 0 & 0 & 0 & 1 \\
+      1 & 0 & 0 & 0 & 0 \\
+      0 & 1 & 0 & 0 & 0 \\
+      0 & 0 & 1 & 0 & 0
+    \end{bmatrix}
+    \begin{bmatrix}
+      -
+      \begin{bmatrix}
+        5 \\ -3 \\ -2
+      \end{bmatrix} \\
+      1 \\ 0
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+      1 \\ 0 \\ -5 \\ 3 \\ 2
+    \end{bmatrix}
+  \end{align*}
+  \[
+    \alpha_3 = -\frac{31}{-5}, \alpha_4 = \infty, \alpha_5 = \infty
+  \]
+  $s_1$ is the exiting variable.
+  \begin{center}
+    \[
+    \begin{array}{c|ccccc|c}
+      & x_1 & x_2 & s_1 & s_2 & s_3 & \text{RHS} \\
+      \hline
+      x_1 & 1 & 0.4 & 0.2 & 0 & 0 & 6.2 \\
+      s_2 & 0 & 3.2 & 0.6 & 1 & 0 & 23.6 \\
+      s_3 & 0 & -2.6 & 0.4 & 0 & 1 & 5.8 \\
+      \hline
+      \text{obj} & 0 & -0.4 & 1.8 & 0 & 0 & 55.8 \\
+    \end{array}
+    \]
+    We can identify $x_2$ as the entering variable.
+    To find the exiting variable we must first calculate the descent direction associated with $x_2$.
+    \begin{align*}
+      d_p =\textbf{P}
+      \begin{bmatrix}
+         d_{Bp} \\ d_{Np}
+      \end{bmatrix}
+      = 
+      \begin{bmatrix}
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1 & 0 \\
+        0 & 0 & 0 & 0 & 1 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0
+      \end{bmatrix}
+      \begin{bmatrix}
+        -
+        \begin{bmatrix}
+          0.4 \\ 3.2 \\ -2.6
+        \end{bmatrix} \\
+        1 \\ 0
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+        -0.4 \\ 1 \\ 0 \\ -3.2 \\ 2.6
+      \end{bmatrix}
+    \end{align*}
+    \[
+      \alpha_1 = -\frac{6.2}{-0.4} , \alpha_4 = -\frac{23.6}{-3.2}, \alpha_5 = \infty
+    \]
+    $s_2$ is the exiting variable.
+    \begin{center}
+      \[
+      \begin{array}{c|ccccc|c}
+        & x_1 & x_2 & s_1 & s_2 & s_3 & \text{RHS} \\
+        \hline
+        x_1 & 1 & 0.4 & 0.2 & 0 & 0 & 6.2 \\
+        x_2 & 0 & 1 & 0.1875 & 0.3125 & 0 & 7.375 \\
+        s_3 & 0 & 0 & 0.8875 & 0.8125 & 1 & 18.375 \\
+        \hline
+        \text{obj} & 0 & 0 & 1.925 & 1.25 & 0 & 58.75 \\
+      \end{array}
+      \]
+      The optimal solution is $x_1 = 3.25$, $x_2 = 7.375$, and the optimal value is $-58.75$.
+    \end{center}
+  \end{center}
+\end{center}
+
+
+
 \subsection{Part b}
 Use GAMS to solve the optimization problem
 \\
