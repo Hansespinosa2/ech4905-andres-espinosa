@@ -871,12 +871,34 @@ Solve the following optimization problem using the two-stage simplex method
 Use the two-stage simplex tableau
 \\
 \textbf{Solution: }
-
+\begin{align*}
+  \textbf{A} =
+  \begin{bmatrix}
+     5 & 2 & 1 & 0 & 0 \\
+     -3 & 2 & 0 & 1 & 0 \\
+     -2 & -3 & 0 & 0 & 1 
+  \end{bmatrix},
+  \textbf{b} = 
+  \begin{bmatrix}
+    31 \\ 5 \\ -1
+  \end{bmatrix},
+  \textbf{c} = 
+  \begin{bmatrix}
+    -9 \\ -4 \\ 0 \\ 0 \\ 0
+  \end{bmatrix}
+\end{align*}
 
 \subsection{Part b}
 Use GAMS to solve the optimization problem
 \\
 \textbf{Solution: }
+\begin{verbatim}
+              LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR x1                  .             3.2500        +INF             .          
+---- VAR x2                  .             7.3750        +INF             .          
+---- VAR obj               -INF          -58.7500        +INF             .          
+\end{verbatim}
 
 \section{Problem 3}
 An oil refinery purchases two crude oils (crude 1 and crude 2). These crude oils are put through four processes: distillation, reforming, cracking, and blending, to produce petrols and fuels that are sold.
