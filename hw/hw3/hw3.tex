@@ -1042,18 +1042,42 @@ Develop a model based on the provided information
 
 For this problem above, we can define the following parameters and variables:
 \begin{align*}
+& \text{Sets: } \\
+& C: \text{Set of crude oil inputs } o \in [1,2] \\
+& D: \text{Set of distillations } o \in [3] \\
+& R: \text{Set of refineries } o \in [4] \\
+& A: \text{Set of cracking stations } o \in [5] \\
+& B: \text{Set of blenders } o \in [6,7,8,9,10,11] \\
+& I: \text{Set of inputs and outputs $c_1,c_2,n_l, n_m, n_h, o_l, o_h, r, g_r, o_c, g_c, P_p, P_r, J_f, O_f, O_l$ } i \in [1,\dots,16] \\
 & \text{Parameters:} \\
-& c_1, c_2: \text{Daily availability of crude 1 and crude 2} \\
-& d: \text{Maximum daily distillation capacity} \\
-& r: \text{Maximum daily reforming capacity} \\
-& k: \text{Maximum daily cracking capacity} \\
-& l_{\min}, l_{\max}: \text{Minimum and maximum daily production of lube oil} \\
-& p_{\min}: \text{Minimum percentage of premium motor fuel production} \\
+& y_{i,j}^O: \text{Yield of output $j$ produced by input $i$ and processed by op $O$.} \\
+& o_{j}: \text{Octane rating output $j$.} \\
+& a_i: \text{Daily availability of input $i$} \\
 & \text{Profit contributions:} \\
-& p_p, p_r, j_f, o_f, o_l: \text{Profit per barrel for premium petrol, regular petrol, jet fuel, fuel oil, and lube oil} \\
+& c_{j}: \text{Profit per barrel of output $j$.} \\
 & \text{Variables:} \\
-& x_{i,j}^O : \text{Quantity of input $i$ to process by op $O$ and send to output $j$. (Barrels)} \\
+& x_{j}^O : \text{Quantity of output $j$ produced by op $O$. (Barrels)} \\
 \end{align*}
+The objective function can be formulated as 
+\begin{align*}
+  \text{maximize} & \quad  \sum_{j}^I c_{j} \sum_{i}^I \sum_{o}^O x_{i,j}^o
+\end{align*}
+The input and output yield constraints can be formulated as
+\begin{align*}
+  \text{Availability Constraints} & \quad x_{1}^1 \leq 20000 \\ 
+  & \quad x_{2}^2 \leq 30000
+  & \quad x_{1}^1 + x_{2}^2 \leq 45000
+\end{align*}
+
+\begin{align*}
+  \text{Distilling Constraints} & \quad x_{j}^3 = y_{1,j}^3 x_{1}^1 + y_{2,j}^3 x_{2}^2, \quad \forall j \in [3,4,5,6,7,8]
+\end{align*}
+
+\begin{align*}
+  \text{Reforming Constraints} & \quad x_{j}^4 = y_{3,j}^4 x_{3}^3 + y_{4,j}^4 x_{4}^4 +  y_{5,j}^4 x_{5}^4, \quad \forall j \in [9]
+\end{align*}
+
+
 
 \subsection{Part b}
 Find the optimal value in GAMS
