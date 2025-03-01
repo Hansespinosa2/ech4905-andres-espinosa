@@ -1037,10 +1037,23 @@ Develop a model based on the provided information
       % Draw the arrows from refined gasoline to premium petrol and regular petrol
       \draw[->, thick] (8,4) -- (10.25,5.5);
       \draw[->, thick] (8,4) -- (10.25,4);
-
-
   \end{tikzpicture}
 \end{center}
+
+For this problem above, we can define the following parameters and variables:
+\begin{align*}
+& \text{Parameters:} \\
+& c_1, c_2: \text{Daily availability of crude 1 and crude 2} \\
+& d: \text{Maximum daily distillation capacity} \\
+& r: \text{Maximum daily reforming capacity} \\
+& k: \text{Maximum daily cracking capacity} \\
+& l_{\min}, l_{\max}: \text{Minimum and maximum daily production of lube oil} \\
+& p_{\min}: \text{Minimum percentage of premium motor fuel production} \\
+& \text{Profit contributions:} \\
+& p_p, p_r, j_f, o_f, o_l: \text{Profit per barrel for premium petrol, regular petrol, jet fuel, fuel oil, and lube oil} \\
+& \text{Variables:} \\
+& x_{i,j}^O : \text{Quantity of input $i$ to process by op $O$ and send to output $j$. (Barrels)} \\
+\end{align*}
 
 \subsection{Part b}
 Find the optimal value in GAMS
