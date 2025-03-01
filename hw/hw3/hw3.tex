@@ -947,6 +947,100 @@ How should the operations of the refinery be planned in order to maximize the to
 Develop a model based on the provided information
 \\
 \textbf{Solution: }
+\begin{center}
+  \begin{tikzpicture}
+    % Draw the distiller rectangle
+      \draw[thick] (0,0) rectangle (1,5);
+      \node at (0.5,2.5) {Dis};
+
+      % Draw the crude oil approaching the distiller
+      \draw[->, thick] (-2,1) -- (0,1);
+      \node[circle, draw, thin, minimum size=2em] at (-2.5,1) {$c_1$};
+      \draw[->, thick] (-2,4) -- (0,4);
+      \node[circle, draw, thin, minimum size=2em] at (-2.5,4) {$c_2$};
+
+      % Draw the arrows leaving the distiller
+      \draw[->, thick] (1,5) -- (3,5);
+      \node[circle, draw, thin, minimum size=2em] at (3.5,5) {$n_l$};
+      \draw[->, thick] (1,4) -- (3,4);
+      \node[circle, draw, thin, minimum size=2em] at (3.5,4) {$n_m$};
+      \draw[->, thick] (1,3) -- (3,3);
+      \node[circle, draw, thin, minimum size=2em] at (3.5,3) {$n_h$};
+      \draw[->, thick] (1,2) -- (3,2);
+      \node[circle, draw, thin, minimum size=2em] at (3.5,2) {$o_l$};
+      \draw[->, thick] (1,1) -- (3,1);
+      \node[circle, draw, thin, minimum size=2em] at (3.5,1) {$o_h$};
+      \draw[->, thick] (1,0) -- (3,0);
+      \node[circle, draw, thin, minimum size=2em] at (3.5,0) {$r$};
+
+      % Draw the arrows entering the refiner
+      \draw[->, thick] (4,5) -- (5,4.1);
+      \draw[->, thick] (4,4) -- (5,4);
+      \draw[->, thick] (4,3) -- (5,3.9);
+      \node[rectangle, draw, thin, minimum size=2em] at (5.5,4) {Ref};
+
+      \draw[->, thick] (6,4) -- (7,4);
+      \node[circle, draw, thin, minimum size=2em] at (7.5,4) {$g_r$};
+
+      % Draw the rectangle between ol and oh
+      \node[rectangle, draw, thin, minimum size=2em] at (5.5,1.5) {Cra};
+
+      % Draw the arrows pointing to the rectangle
+      \draw[->, thick] (4,2) -- (5,1.6);
+      \draw[->, thick] (4,1) -- (5,1.4);
+
+      % Add titles to the diamonds
+      \node[diamond, draw, thin, minimum size=1em] at (11, 5.5) {$P_p$};
+      \node[diamond, draw, thin, minimum size=1em] at (11, 4) {$P_r$};
+      \node[diamond, draw, thin, minimum size=1em] at (11, 2.5) {$J_f$};
+      \node[diamond, draw, thin, minimum size=1em] at (11, 1) {$O_f$};
+      \node[diamond, draw, thin, minimum size=1em] at (11, -0.5) {$O_l$};
+
+      % Draw the arrows from cracked oil to fuel oil and jet fuel
+      \draw[->, thick] (6,1.25) -- (7,1);
+      \draw[->, thick] (6,1.75) -- (7,2);
+
+      \node[circle, draw, thin, minimum size=2em] at (7.5,2) {$o_c$};
+      \node[circle, draw, thin, minimum size=2em] at (7.5,1) {$g_c$};
+
+      % Draw the arrows from naphtha, reformed gasoline, and cracked gasoline to petrols
+      \draw[->, thick, dotted] (4,5) -- (10.25,5.75);
+      \draw[->, thick, dotted] (4,4) -- (10.25,5.5);
+      \draw[->, thick, dotted] (4,3) -- (10.25,5.25);
+      \draw[->, thick, dotted] (4,5) -- (10.25,4.25);
+      \draw[->, thick, dotted] (4,4) -- (10.25,4);
+      \draw[->, thick, dotted] (4,3) -- (10.25,3.75);
+
+      % Draw the arrows from oils and residuum to jet fuel
+      \draw[->, thick, dotted] (4,2) -- (10.25,2.75);
+      \draw[->, thick, dotted] (4,1) -- (10.25,2.5);
+      \draw[->, thick, dotted] (7.5,2) -- (10.25,2.625);
+      \draw[->, thick, dotted] (4,0) -- (10.25,2.25);
+
+      % Draw the arrows from oils and residuum to fuel oil
+      \draw[->, thick, dotted] (4,2) -- (10.25,1.25);
+      \draw[->, thick, dotted] (7.5,2) -- (10.25,1.125);
+      \draw[->, thick, dotted] (4,1) -- (10.25,1);
+      \draw[->, thick, dotted] (4,0) -- (10.25,0.75);
+
+      % Draw the arrow from residuum to lube oil
+      \draw[->, thick, dotted] (4,0) -- (10.25,-0.5);
+
+      % Draw the arrows from cracked gasoline and oil to jet fuel
+      \draw[->, thick] (8,1) -- (10.25,2.25);
+      \draw[->, thick] (8,2) -- (10.25,2.5);
+
+      % Draw the arrows from cracked gasoline and oil to fuel oil
+      \draw[->, thick] (8,1) -- (10.25,1);
+      \draw[->, thick] (8,2) -- (10.25,1.25);
+
+      % Draw the arrows from refined gasoline to premium petrol and regular petrol
+      \draw[->, thick] (8,4) -- (10.25,5.5);
+      \draw[->, thick] (8,4) -- (10.25,4);
+
+
+  \end{tikzpicture}
+\end{center}
 
 \subsection{Part b}
 Find the optimal value in GAMS
