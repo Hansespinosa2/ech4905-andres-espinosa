@@ -996,8 +996,44 @@ Use the two-stage simplex tableau
 \subsection{Part b}
 Use GAMS to solve the optimization problem
 \\
-\textbf{Solution: }
+\textbf{Solution: } The following code was ran in GAMs and outputted the below optimal values.
 \begin{verbatim}
+  Variables
+  x1, x2,  
+  obj;      
+
+Positive Variables x1, x2;
+
+Equations
+  objdef,   
+  c1, c2, c3,
+  c4, c5;
+
+objdef .. 
+  obj =e= -9*x1 - 4*x2;  
+
+c1 .. 
+  5*x1 + 2*x2 =l= 31;  
+
+c2 .. 
+  -3*x1 + 2*x2 =l= 5;  
+
+c3 .. 
+  -2*x1 - 3*x2 =l= -1;  
+
+c4 .. 
+  x1 =g= 0;  
+
+c5 .. 
+  x2 =g= 0;  
+
+Model LPModel /all/; 
+
+Solve LPModel using lp minimizing obj;  
+
+Display x1.l, x2.l, obj.l;  
+
+
               LOWER          LEVEL          UPPER         MARGINAL
 
 ---- VAR x1                  .             3.2500        +INF             .          
@@ -1225,7 +1261,78 @@ The input and output yield constraints can be formulated as
 \subsection{Part b}
 Find the optimal value in GAMS
 \\
-\textbf{Solution: }
+\textbf{Solution: } I was not able to get funcitonal code.
+I think my formulation logic is definitely off.
+\begin{verbatim}
+Sets
+  C "Crude oil "            /1*2/    
+  D "Distillations"         /3/      
+  R "Refineries"            /4/      
+  A "Cracking stations"     /5/      
+  B "Blenders"              /6*11/   
+  I "Inputs and outputs"    /1*16/   
+  O "Outputs"               /12*16/  ;
 
+Parameters
+  y(I,J,D)   "Yield of output j produced by input i and processed by op o"
+  q(I)       "Octane of output j"
+  a(I)       "Daily availability of input i"
+  v(I)       "Vapor pressure of output j"
+  c(I)       "Profit per barrel of output j";
+
+Table y(I,J,D)
+        LightN MediumN HeavyN LightO HeavyO Residuum
+  Crude1      0.1    0.2     0.2    0.12   0.2     0.13
+  Crude2      0.15   0.25    0.18   0.08   0.19    0.12;
+
+Scalar
+  maxDistill "Max barrels of crude distilled per day"   /45000/  
+  maxReform  "max quantity of naphtha reformed per day" /10000/  
+  maxCrack   "Max barrels of oil cracked per day"       /8000/   
+  minLube    "min daily production of lube oil"         /500/    
+  maxLube    "Max daily production of lube oil
+  premiumRatio "Premium to Regular ratio"               /0.40/ 
+
+  Variables
+  x(I,J,D)   "Quantity of output j produced by input i and processed by op o"
+  z          "objective function var";
+
+Equations
+  obj         
+  cap1        
+  cap2       
+  yield      
+  octane     
+  pressure    
+  blending;
+
+obj ..
+  z =e= sum(O, c(O) * sum(D, x(I,O,D)));
+
+cap1 ..
+  x('1','1','1') =l= 20000;
+  x('2','2','2') =l= 30000;
+
+cap2 ..
+  x('1','1','1') + x('2','2','2') =l= maxDistill;
+  sum(I, x(I,'9','4')) =l= maxReform;
+  sum(I, x(I,'10','5')) =l= maxCrack;
+
+yield(I,D) ..
+  x(I,I,D) =e= sum(I, y(I,I,D) * x(I,I,D));
+
+octane ..
+  sum(O, x(I,O,D)) =g= q(I) * sum(I, x(I,I,D));
+
+pressure ..
+  sum(D, x('15','15',D)) =l= sum(D, x(I,I,D));
+
+blending ..
+  x('12','12','4') =g= premiumRatio * x('13','13','4');
+
+Model refinery /all/;
+
+Solve refinery using lp maximizing z;
+\end{verbatim}
 
 \end{document}
