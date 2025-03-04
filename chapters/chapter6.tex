@@ -1,0 +1,137 @@
+\section{Chapter 6 - Optimality Conditions}
+\subsection{Tuesday 03/04/2025}
+Considering an optimization problem with only equality constraints as such
+
+\begin{align}
+  \text{minimize} & \quad f(x) \\
+  \text{subject to} & \quad h(x) =0
+\end{align}
+We have a lagragian function 
+\begin{equation}
+    L(x, \nu) = f(x) + \nu h(x)
+\end{equation}
+where
+\begin{equation}
+    \nabla_x L = \nabla f + \nu \nabla h = 0
+\end{equation}
+The geometric interpretation of the equation above is that the gradient of the objective function is directly opposite of the gradient of the equality constraint.
+
+If we have multiple equality constraints, the problem will look like
+
+\begin{align}
+  \text{minimize} & \quad f(x) \\
+  \text{subject to} & \quad h_k(x) = 0, \quad \forall k \in [1,\dots,K]
+\end{align}
+
+The lagrangian then looks like 
+\begin{equation}
+    L(x,\nu) = f(x) + \nu^T h(x)
+\end{equation}
+The solution to the lagrangian can be found by solving the following system of equations.
+\begin{gather}
+    \frac{d L}{d \textbf{x}} = \textbf{0} \\
+    \frac{d L}{d \nu} = \nabla h(\textbf{x}) 
+\end{gather}
+
+This can be extended to equality and inequality constrained problems in the KKT conditions.
+For the KKT conditions to apply, they must pass constraint qualifications.
+Generally, the KKT conditions apply to any NLP written in the form
+
+\begin{align}
+  \text{minimize} & \quad f(x) \\
+  \text{subject to} & \quad g_i (x) \leq 0, \quad \forall i \in [1,\dots, J] \\
+  & \quad h_k(x) = 0, \quad \forall k \in [1,\dots,K] 
+\end{align}
+As we introduce inequalities to the problem, there are some that are inactive and some that are active.
+So, we construct a similar lagragian that handles and ignores inactive constraints.
+
+\begin{equation}
+    L (x, \lambda, \nu) = f(x) + \lambda^\top g(x) + \nu^\top h(x)
+\end{equation}
+We take the following gradients
+\begin{gather}
+    \nabla_x L(x, \lambda, \nu) = 0 = \nabla f(x) + \lambda^\top \nabla g(x) + \nu^\top \nabla h(x) \\
+    \nabla_\lambda L(x, \lambda, \nu) = g(x) \leq 0 \\
+    \nabla_\nu L(x, \lambda, \nu) = h(x) = 0 \\ 
+    \lambda_i g_i(x) = 0 \\
+    \lambda \geq 0 
+\end{gather}
+
+In order for these KKT conditions to be applied, a problem must pass some constraint qualification criteria.
+For example, the gradients are linearly independent is a qualification criteria for the constraints.
+
+Consider the following optimization problem
+
+\begin{align}
+  \text{minimize} & \quad x_1^2 - x_2 \\
+  \text{subject to} & \quad x_1 - 1 \geq 0 \\
+  & \quad x_1 + x_2^2 \leq 26 \\
+  & \quad x_1 + x_2 = 6
+\end{align}
+To derive the KKT conditions, we flip the first inequality to be less than and bring the constants to the other side.
+\begin{align}
+    \text{minimize} & \quad x_1^2 - x_2 \\
+    \text{subject to} & \quad -x_1 + 1 \leq 0 \\
+    & \quad x_1 + x_2^2 -26 \leq 0 \\
+    & \quad x_1 + x_2 -6 = 0
+\end{align}
+The lagrangian for this problem is 
+
+\begin{equation}
+    L(x, \lambda, \nu) = x_1^2 - x_2 + \lambda_1 (-x_1 + 1) + \lambda_2 (x_1 + x_2^2 - 26) + \nu(x_1 + x_2 - 6)
+\end{equation}
+
+The gradients that we need for the KKT conditions are 
+
+\begin{align}
+    \nabla_x f(x) = 
+  \begin{bmatrix}
+     2x_1 \\ -1
+  \end{bmatrix},
+  \quad
+  \nabla_x g_1(x) = 
+  \begin{bmatrix}
+    -1 \\ 0
+  \end{bmatrix},
+  \quad
+  \nabla_x g_2(x) = 
+  \begin{bmatrix}
+    1 \\ 2x_2
+  \end{bmatrix},
+  \quad
+  \nabla_x h(x) = 
+  \begin{bmatrix}
+    1 \\ 1
+  \end{bmatrix}
+\end{align}
+
+The KKT conditions are then
+\begin{align}
+  \begin{bmatrix}
+     2x_1 \\ -1
+  \end{bmatrix} 
+  +
+  \lambda_1
+  \begin{bmatrix}
+    -1 \\ 0
+  \end{bmatrix}
+  +
+  \lambda_2
+  \begin{bmatrix}
+    1 \\ 2x_2
+  \end{bmatrix}
+  +
+  \nu
+  \begin{bmatrix}
+    1 \\ 1
+  \end{bmatrix}
+  = 0 
+  \\
+  x_1 + x_2 - 6 = 0
+  \\
+  -x_1 + 2 \leq 0, x_1 + x_2^2 - 26 \leq 0
+  \\
+  \lambda_1 (-x_1 + 2) = 0, \lambda_2 (x_1 + x_2 -6) = 0 
+  \\
+  \lambda_1, \lambda_2 \geq 0
+\end{align}
