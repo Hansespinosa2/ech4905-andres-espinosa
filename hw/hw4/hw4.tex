@@ -10,7 +10,7 @@
 \usepackage{../../include/akazachk}
 
 
-\title{ECH4905 ChemE Optimization HW 3}
+\title{ECH4905 ChemE Optimization HW 4}
 \author{Andres Espinosa}
 
 \begin{document}
@@ -173,13 +173,154 @@ And $F_R$ is the recycle molar flow rate.
 \subsection{Part a}
 Formulate a model of this process.
 
+
+
+
 \textbf{Solution: }
-%TODO: Formulate the model
+We define the following variables
+\begin{itemize}
+  \item $F_{A0}$: The input flow of A from the left of the reactor.
+  \item $F_{AF}$: The output flow of A from the bottom of the flash 
+  \item $F_{AR}$: The input flow of A from the recycle stream of the splitter.
+  \item $F_{AP}$: The output flow of A that is purged to the right of the splitter.
+  \item $F_{AI}$: The intermediate flow of A from the reactor to the flash.
+  \item $F_{BI}$: The intermediate flow of B from the reactor to the flash.
+  \item $F_{BTop}$: The output flow of B from the top of the flash.
+  \item $\lambda$: The split fraction of the splitter.
+  \item $T$: Temperature
+  \item $V$: Pressure (set to the input flow)
+\end{itemize}
+
+We then have the following optimization problem
+
+\begin{align*}
+  \text{maximize} & \quad 0.5 F_{BTop} - 0.1F_{AR}(500-T) - 10^{-5} V & \text{Objective}\\
+  \text{subject to} & \quad F_{A0} + F_{AR} = F_{AI} + F_{BI} & \text{Reactor MB}\\
+  & \quad F_{AI} + F_{BI} = F_{BTop} + F_{AF} & \text{Flash MB} \\
+  & \quad F_{AI} = F_{BI} & \text{Reactor Conversion}\\
+  & \quad F_{BTop} = F_{BI} & \text{Separate flow B}\\
+  & \quad F_{AI} = F_{AF} & \text{Separate flow A} \\
+  & \quad F_{AF} = F_{AR} + F_{AP} & \text{Splitter MB} \\
+  & \quad F_{AR} = \lambda F_{AF} & \text{Recycle Split} \\
+  & \quad F_{AP} = (1-\lambda) F_{AF} & \text{Purge Split} \\
+  & \quad \textbf{F} \succeq 0 & \text{Non-Negativity} \\
+  & \quad 0 \leq \lambda \leq 1 & \text{Split Proportion} \\
+  & \quad 273 \leq T \leq 500 & \text{Temperature Constraints} \\
+  & \quad V = F_{A0} & \text{Pressure Constraint} \\
+  & \quad 0.01(F_{AP} + F_{AR}) \leq F_{AP} \leq 0.99(F_{AP} + F_{AR}) & \text{Purge Fraction}
+\end{align*}
+Note that since the split is only two ways, only one variable is used and that avoids an otherwise additional constraint of $\textbf{1}^\top \lambda = 1$
 
 \subsection{Part b}
 Set up the model in GAMS and try 3 different NLP solvers, compare the results.
 
 \textbf{Solution: }
-%TODO: Set up the model in GAMS and compare results
+The following code was used to solve the problem. 
+The three solvers used, \texttt{baron, gurobi, conopt} resulted in the same answers.
+Currently, an arbitrary input bound of 1000 is used so that the solver doesnt push the value of the input flow to infinity.
+I didn't see anything in the problem that naturally constrained the input flow, so I picked a value of 1000.
+
+\begin{verbatim}
+Variables
+    profit profit equation;
+
+Positive Variables
+    FA0 reactor input of A
+    FAF flash output of A
+    FAR splitter recycle output of A
+    FAP splitter purge output of A
+    FAI reactor output of A
+    FBI reactor output of B
+    FBTop flash output of B
+    V pressure
+    T temperature
+    lambda split fraction;
+    
+    
+Equations
+    profit_e
+    reactor_mb
+    flash_mb
+    reactor_cons
+    sep_B
+    sep_A
+    split_mb
+    recycle_split
+    purge_split
+    split_prop_l
+    temp_l
+    temp_g
+    pressure
+    purge_frac_l
+    purge_frac_g
+    arbitrary_input_bound;
+profit_e.. profit =e= 0.5 * FBTop - 0.1* FAR * (500-T) - 0.00001 * V;
+
+reactor_mb.. FA0 + FAR =e= FAI + FBI;
+flash_mb.. FAI + FBI =e= FBTop + FAF;
+reactor_cons.. FAI =e= FBI;
+sep_B.. FBTop =e= FBI;
+sep_A.. FAI =e= FAF;
+split_mb.. FAF =e= FAR + FAP;
+recycle_split.. FAR =e= lambda * FAF; 
+purge_split.. FAP =e= (1-lambda) * FAF;
+split_prop_l.. lambda =l= 1;
+temp_l.. T =l= 500;
+temp_g.. T =g= 273;
+pressure.. V =e= FA0;
+purge_frac_l.. 0.01* (FAP + FAR) =l= FAP;
+purge_frac_g.. FAP =l= 0.99*(FAP + FAR);
+arbitrary_input_bound.. FA0 =l= 1000; 
+
+Model flowsheet /all/ ;
+
+*option nlp=gurobi;
+*option nlp=conopt;
+option nlp=baron;
+
+Solve flowsheet using nlp maximizing profit;
+
+Solution      = 495.039504950495  best solution found during preprocessing
+Best possible = 495.039504950495
+Absolute gap  = 5.6843418860808E-14  optca = 1E-9
+Relative gap  = 1.14826025584549E-16  optcr = 0.0001
+
+
+                           LOWER          LEVEL          UPPER
+
+---- EQU profit_e            .       9.095765E-15          .          
+---- EQU reactor_mb          .       -2.27374E-13          .          
+---- EQU flash_mb            .              .              .          
+---- EQU reactor_c~          .              .              .          
+---- EQU sep_B               .              .              .          
+---- EQU sep_A               .              .              .          
+---- EQU split_mb            .       4.618528E-14          .          
+---- EQU recycle_s~          .       1.197122E-10          .          
+---- EQU purge_spl~          .       -1.19703E-10          .          
+---- EQU split_pro~        -INF            0.9900         1.0000      
+---- EQU temp_l            -INF          500.0000       500.0000      
+---- EQU temp_g           273.0000       500.0000        +INF         
+---- EQU pressure            .              .              .          
+---- EQU purge_fra~        -INF      -1.23110E-14          .          
+---- EQU purge_fra~        -INF         -970.2970          .          
+---- EQU arbitrary~        -INF         1000.0000      1000.0000      
+
+                           LOWER          LEVEL          UPPER
+
+---- VAR profit            -INF          495.0395        +INF         
+---- VAR FA0                 .          1000.0000        +INF         
+---- VAR FAF                 .           990.0990        +INF         
+---- VAR FAR                 .           980.1980        +INF         
+---- VAR FAP                 .             9.9010        +INF         
+---- VAR FAI                 .           990.0990        +INF         
+---- VAR FBI                 .           990.0990        +INF         
+---- VAR FBTop               .           990.0990        +INF         
+---- VAR V                   .          1000.0000        +INF         
+---- VAR T                   .           500.0000        +INF         
+---- VAR lambda              .             0.9900        +INF         
+
+\end{verbatim}
+
+
 
 \end{document}
