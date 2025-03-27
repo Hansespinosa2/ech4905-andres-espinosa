@@ -1,0 +1,87 @@
+\section{Formulating Integer Programs}
+
+\subsection{Convex Hull}
+
+If we have a disjunction $\cup_{j \in D}[A_j x \leq b_j]$.
+This disjunction means that one of these conditions must hold.
+The convex hull of this problem is related to the problem but approximates it by the convex hull.
+\begin{align}
+  \text{subject to} & \quad x = \sum_{j \in D} \tilde{x}_j \\
+  & \quad A_j \tilde{x}_j  \leq b_j y_j, \forall j \in D \\
+  & \quad \sum_{j \in D} y_j = 1 \\
+  & \quad 0 \leq \tilde{x}_j \leq U y_j, \forall j \in D
+\end{align}
+
+The convex hull of the problem we did previously
+\begin{align}
+  \begin{bmatrix}
+     p \leq 10 \\
+     -p \leq -5
+  \end{bmatrix}
+  \oplus
+  \begin{bmatrix}
+    p \leq 30 \\
+    -p \leq -20
+  \end{bmatrix}
+\end{align}
+
+This is then turned into the following constraints
+
+\begin{align}
+  \text{subject to} & \quad P = p_1 + p_2 \\
+  & \quad p_1 \leq 10 y_1, -p_1 \leq -5 y_1 \\
+  & \quad p_2 \leq 30 y_2, -p_2 \leq -20 y_2 \\
+  & \quad y_1 + y_2 = 1 \\
+  & \quad p_1, p_2 \geq 0
+\end{align}
+
+Many MINLP problems can be reformulated into disjunctions.
+Generalized disjunctive programming problems are formulated like below:
+
+\begin{align}
+  \text{minimize} & \quad z = \sum_k c_k + f(x) \\
+  \text{subject to} & \quad 
+  \cup_{j \in k}
+  \begin{bmatrix}
+    y_{jk} \\ g_{jk}(x) \leq 0 \\ c_k = \gamma_{jk}
+  \end{bmatrix}
+  , \forall k \in K
+  \\
+  & \quad \cup y_{j,k} \\
+  & \quad \Omega(y) = true \\
+  & \quad 0 \leq x \leq U
+\end{align}
+
+\subsection{Examples}
+
+\subsubsection{Assignment Problem}
+Consider we have $n$ jobs, $m$ machines, a cost of placing job $i$ on machine $j$ $c_{i,j}$.
+One job per machine.
+
+We have a variable $y_{i,j}$ that represents if a job $i$ is ran on machine $j$.
+
+\begin{align}
+  \text{minimize} & \quad \sum_{i \in n} \sum_{j \in m} c_{i,j} y_{i,j} \\
+  \text{subject to} & \quad \sum_{i \in n}y_{i,j} = 1, \quad \forall j \in m \\
+  & \quad \sum_{j \in m} y_{i,j} = 1, \quad \forall i \in n
+\end{align}
+
+In matrix notation, we have $\textbf{Y} \in \mathbb{R}^{n \times m}$, $\textbf{C} \in \mathbb{R}^{n \times m}$
+
+\begin{align}
+  \text{minimize} & \quad \textbf{1}^\top(\textbf{Y} \odot \textbf{C}) \textbf{1} \\
+  \text{subject to} & \quad \textbf{Y} \textbf{1} \preceq \textbf{1} \\
+  & \quad \textbf{1}^\top \textbf{Y} \preceq \textbf{1} \\
+  & \quad \textbf{Y} \in \{ 0, 1 \}^{n \times m}
+\end{align}
+
+\subsubsection{Knapsack Problem}
+In the Knapsack problem, we have $n$ objects, $w_j$ weight per object $j$, $p_j$ price per object $j$, and a maximum weight $W$. 
+We want to maximize value.
+We have a variable $y \in \{ 0,1 \}^n$
+
+\begin{align}
+  \text{minimize} & \quad - \textbf{1}^\top (\textbf{p} \odot \textbf{y}) \\
+  \text{subject to} & \quad  \textbf{1}^\top(\textbf{y} \odot \textbf{w}) \leq W \\
+  & \quad \textbf{y} \in \{ 0,1 \}^n
+\end{align}
