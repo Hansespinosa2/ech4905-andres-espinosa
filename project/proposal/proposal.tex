@@ -1,0 +1,37 @@
+\RequirePackage[orthodox]{nag}
+\documentclass[11pt]{article}
+
+%% Define the include path
+\makeatletter
+\providecommand*{\input@path}{}
+\g@addto@macro\input@path{{include/}{../include/}}
+\makeatother
+
+\usepackage{../../include/akazachk}
+
+\title{Project Proposal}
+\author{Andres Espinosa}
+
+\begin{document}
+\maketitle
+
+\section{Project Description}
+\textbf{Python LP Solver:}
+This project will focus on building an LP solver in \texttt{python} from scratch. 
+The project will use \texttt{numpy} as the linear algebra package behind the solver, but everything else will be implemented from scratch.
+
+\section{Methodology}
+For me to complete this project, I think this is the best way to approach the problem.
+\begin{enumerate}
+    \item First, create a \texttt{simplex\_phase\_2} method which will take a feasible initial $x_0$ as well as $A,b$ and return the optimal solution to the problem $x^*$.
+          Some different variations on the entering variable algorithm are listed below.
+          I will also investigate how these algorithms perform on different problem sizes.
+        \begin{itemize}
+            \item Steepest descent - picking the value with the greatest negative value to enter the basis.
+            \item First negative - picking the variable with the first negative value as the entering variable.
+            \item Secretary's rule - I want to try using the Secretary's rule, where you do the first $\frac{1}{e}$ proportion of variables, and pick the one with first value greater than that.
+        \end{itemize}
+\end{enumerate}
+
+
+\end{document}
