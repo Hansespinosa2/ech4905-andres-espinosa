@@ -1,5 +1,5 @@
 class Variable:
-    def __init__(self):
+    def __init__(self,shape):
         pass
 
 class Problem:
@@ -21,6 +21,17 @@ class Problem:
             raise ValueError("The constraint definition must contain either 'subject to' or 'constraints' as a key.")
         
 
+
 class Expression:
-    def __init__(self):
-        pass
+    def __init__(self, expression):
+        if '==' in expression:
+            self.equality_type = 'e'
+            self.left_side, self.right_side = map(str.strip, expression.split('=='))
+        elif '<=' in expression:
+            self.equality_type = 'l'
+            self.left_side, self.right_side = map(str.strip, expression.split('<='))
+        elif '>=' in expression:
+            self.equality_type = 'g'
+            self.left_side, self.right_side = map(str.strip, expression.split('>='))
+        else:
+            raise ValueError("Expression must contain one of the following operators: '==', '<=', '>='")

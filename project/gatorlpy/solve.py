@@ -17,5 +17,7 @@ problem_def = {
     ]
 }
 
-problem = Problem(problem_def)
+expression = Expression(A @ x0 == b)
+
+# problem = Problem(problem_def)
 
