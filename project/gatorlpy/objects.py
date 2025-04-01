@@ -107,12 +107,15 @@ class Problem:
         else:
             raise ValueError("The constraint definition must contain either 'subject to' or 'constraints' as a key.")
 
-    def solve(self):
+    def solve(self)->tuple[np.ndarray,bool]:
         A = self.constraints[0].left.left
         x0 = self.constraints[0].left.right.array
         b = self.constraints[0].right.array
         c = self.objective.left
 
-        print(A,b,c,x0)
-        
+        x = self.simplex_phase_2(A, b, c, x0)
+        feasible = True
+
+        return (x, c.T @ x, feasible)
+
 
