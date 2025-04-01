@@ -23,15 +23,198 @@ The project will use \texttt{numpy} as the linear algebra package behind the sol
 \section{Methodology}
 For me to complete this project, I think this is the best way to approach the problem.
 \begin{enumerate}
-    \item First, create a \texttt{simplex\_phase\_2} method which will take a feasible initial $x_0$ as well as $A,b$ and return the optimal solution to the problem $x^*$.
+    \item First, create a \texttt{simplex\_phase\_2} method which will take a feasible initial $\textbf{x}_0$ as well as $\textbf{A},\textbf{b}, \textbf{c}$ and return the optimal solution to the problem $x^*$.
           Some different variations on the entering variable algorithm are listed below.
           I will also investigate how these algorithms perform on different problem sizes.
         \begin{itemize}
             \item Steepest descent - picking the value with the greatest negative value to enter the basis.
-            \item First negative - picking the variable with the first negative value as the entering variable.
+            \item Bland's Rule - picking the variable with the first negative value as the entering variable.
             \item Secretary's rule - I want to try using the Secretary's rule, where you do the first $\frac{1}{e}$ proportion of variables, and pick the one with first value greater than that.
+                  I expect this won't work super well but I read that it is supposed to be the most efficient way to find the optimal sequential choice.
         \end{itemize}
+    \item Second, create a \texttt{simplex\_phase\_1} method which will take in any of the parameters $\textbf{A},\textbf{b}, \textbf{c}$ and return a feasible start (or an output stating that the problem is infeasible).
+          I expect that this phase $1$ simplex method will create the arbitrary variables $\textbf{h}$ and then call the simplex phase 2 to solve it.
+          It will identify infeasibility as a solution to the auxilary problem that is not $\textbf{1}^\top \textbf{h} = 0$.
+    \item Third, and likely the most complex part of this project, I will implement a \texttt{python} module called \texttt{lp\_reductions.py} that will take any LP and turn it into standard form.
+          In order to accomplish this, I plan to do the following:
+          \begin{enumerate}
+            \item Implement a class of Variable and Expression.
+                  \texttt{Variables} will track the variables of a problem. It will probably have some methods like \texttt{intermediate, non-negative, etc} that will be helpful for the below things.
+                  \texttt{Expression} will track the equalities and objective function of a problem.
+                  Each variable will be assumed to be a vector $\mathbb{R}^n$ and each expression be an affine matrix inequality or equality.
+            \item Accept an arbitrary number of $\textbf{A}_i \textbf{x}_i = \textbf{b}_i, \textbf{x}_i \succeq 0$ equations.
+                  
+                Implement a \texttt{condense\_standard\_forms} function that will take the arbitrary number of affine matrix equalities and concatenate into one $\textbf{A} \textbf{x} = \textbf{b}, \textbf{x} \succeq 0$ problem.
+            \item Implement a function \texttt{lower\_ineq\_to\_eq}. 
+                  This function should take in the expression $\textbf{A} \textbf{x} \preceq \textbf{b}$ and add slack variables to turn it into $\textbf{A}_s \textbf{x}_s = \textbf{b}_s$
+            \item Implement a function \texttt{greater\_ineq\_to\_lower\_ineq}. 
+                  This function will turn $\textbf{A} \textbf{x} \succeq \textbf{b}$ into $-\textbf{A} \textbf{x} \preceq -\textbf{b}$
+            \item Implement a function \texttt{convert\_objective\_to\_standard\_form}.  This function will take a maximization problem $\max \textbf{c}^\top \textbf{x}$ and convert it into a minimization problem $\min -\textbf{c}^\top \textbf{x}$, which is the standard form for LP solvers.
+            \item Implement a function \texttt{combine\_multivar\_equality} that will combine any linear combinations of matrix vector multiplications.
+                  $\textbf{A}_0 \textbf{x}_0 + \textbf{A}_1 \textbf{x}_1 + \dots \textbf{A}_n \textbf{x}_n = \textbf{A}_{tot} \textbf{x}_{tot}$ where
+                  \begin{align*}
+                    \textbf{A}_{tot} = 
+                    \begin{bmatrix}
+                       \textbf{A}_0 & \textbf{A}_1 & \dots & \textbf{A}_n
+                    \end{bmatrix},
+                    \textbf{x}_{tot} = 
+                    \begin{bmatrix}
+                        \textbf{x}_0 \\ \textbf{x}_1 \\ \vdots \\ \textbf{x}_n
+                    \end{bmatrix}
+                  \end{align*}
+            \item Implement a function \texttt{bound\_all\_vars} which will accept a $\textbf{A} \textbf{x} = \textbf{b}$ and if it is not already bounded by non-negativity, it will split it into $x^+, x^-$ and make them non-negative.
+          \end{enumerate}
+        \item Finally, put this altogether by testing it with some available toy and real-world LP problems with accessible data.
+        \item If I have time, it would be nice to make it so that variables can appear on any side of the equation and still work. Otherwise I think it is still sufficient to have to enter variables on the left side of the equation.
 \end{enumerate}
 
+
+\section{Example Logic}
+To test how this logic will work, I will set up a problem below and show the outline of the future algorithm I will use to solve it.
+
+Consider a problem with variables $\textbf{w} \in \mathbb{R}^{20}, \textbf{y} \in \mathbb{R}^{10}, z \in \mathbb{R}$
+and the parameters $\textbf{A}_0 \in \mathbb{R}^{5 \times 20},\textbf{A}_1 \in \mathbb{R}^{5 \times 10}, \textbf{b}_0 \in \mathbb{R}^5, \textbf{b}_1 \in \mathbb{R}^5, \textbf{c}_0 \in \mathbb{R}^{20}, \textbf{c}_1 \in \mathbb{R}^{10}, c_2 \in \mathbb{R}$
+
+\begin{align}
+  \text{maximize} & \quad \textbf{c}_0^\top \textbf{w} - \textbf{c}_1^\top \textbf{y} + c_2 z \\
+  \text{subject to} & \quad \textbf{A}_0 \textbf{w} - \textbf{A}_1 \textbf{y} =  \textbf{b}_0 \\
+  & \quad \textbf{A}_0 \textbf{w} \preceq \textbf{b}_0 \\
+  & \quad \textbf{A}_1 \textbf{y} \succeq \textbf{b}_1 \\
+  & \quad z \leq 2 \\ 
+  & \quad \textbf{w} \succeq 0 
+\end{align}
+We can handle this line by line.
+
+Objective function: call \texttt{convert\_objective\_to\_standard\_form}
+\begin{align}
+    \text{maximize} & \quad \textbf{c}_0^\top \textbf{w} - \textbf{c}_1^\top \textbf{y} + c_2 z \quad \to \quad \text{minimize} \quad -\textbf{c}_0^\top \textbf{w} + \textbf{c}_1^\top \textbf{y} - c_2 z 
+\end{align}
+Equality 1: call \texttt{combine\_multivar\_equality}
+\begin{align}
+    \textbf{A}_0 \textbf{w} - \textbf{A}_1 \textbf{y} =  \textbf{b}_0 + c_2 z \quad \to \quad \quad \textbf{A}_{01} \textbf{x}_{wy}  =  \textbf{b}_0
+\end{align}
+where $\textbf{A}_{01}$ is a column concatenation of the parameters and $\textbf{x}_{wy}$ is a row contenation of the variables.
+
+Inequality 1: call \texttt{lower\_ineq\_to\_eq}
+\begin{align}
+    \textbf{A}_0 \textbf{w} \preceq \textbf{b}_0 \quad \to \quad \textbf{A}_0 \textbf{w} + \textbf{s}_0 = \textbf{b}_0, \quad \textbf{s}_0 \succeq 0
+\end{align}
+
+Inequality 2: call \texttt{greater\_ineq\_to\_lower\_ineq} and then \texttt{lower\_ineq\_to\_eq}
+\begin{align}
+    \textbf{A}_1 \textbf{y} \succeq \textbf{b}_1 \quad \to \quad -\textbf{A}_1 \textbf{y} \preceq -\textbf{b}_1 \quad \to \quad -\textbf{A}_1 \textbf{y} + \textbf{s}_1 = -\textbf{b}_1, \quad \textbf{s}_1 \succeq 0
+\end{align}
+
+Inequality 3: call \texttt{lower\_ineq\_to\_eq}
+\begin{align}
+    z \leq 2 \quad \to \quad z + s_2 = 2, \quad s_2 \succeq 0
+\end{align}
+
+
+Final combined system:
+\begin{align}
+    \text{minimize} & \quad -\textbf{c}_0^\top \textbf{w} + \textbf{c}_1^\top \textbf{y} - c_2 z \\
+    \text{subject to} & \quad 
+    \begin{bmatrix}
+        \textbf{A}_0 & -\textbf{A}_1 & 0 \\
+        \textbf{A}_0 & 0 & 0 \\
+        0 & -\textbf{A}_1 & 0 \\
+        0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y} \\ z
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+        0 \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \textbf{b}_0 \\ \textbf{b}_0 \\ -\textbf{b}_1 \\ 2
+    \end{bmatrix}, \quad
+    \begin{bmatrix}
+        \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    \succeq 0
+\end{align}
+
+To fold the adding variables into the matrix equation, we can augment the matrix \(\textbf{A}\) and the variable vector \(\textbf{x}\) to include the slack variables. Here's how you can rewrite the final combined system:
+
+\begin{align}
+    \text{minimize} & 
+    \begin{bmatrix}
+        -\textbf{c}_0^\top & \textbf{c}_1^\top & -c_2 & \textbf{0} & \textbf{0} & \textbf{0}
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y} \\ z \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+     \\
+    \text{subject to} & \quad 
+    \begin{bmatrix}
+        \textbf{A}_0 & -\textbf{A}_1 & 0 & 0 & 0 & 0 \\
+        \textbf{A}_0 & 0 & 0 & \textbf{I} & 0 & 0 \\
+        0 & -\textbf{A}_1 & 0 & 0 & \textbf{I} & 0 \\
+        0 & 0 & 1 & 0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y} \\ z \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \textbf{b}_0 \\ \textbf{b}_0 \\ -\textbf{b}_1 \\ 2
+    \end{bmatrix}
+    \\
+    & \quad 
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2 
+    \end{bmatrix}
+    \succeq 0
+\end{align}
+
+Here, the slack variables \(\textbf{s}_0, \textbf{s}_1, s_2\) are now part of the augmented variable vector, and the identity matrices \(\textbf{I}\) are used to incorporate the slack variables into the constraints. This ensures that the system remains in the form \(\textbf{A} \textbf{x} = \textbf{b}\), where \(\textbf{x}\) includes all original variables and slack variables.
+
+Finally, we call \texttt{bound\_all\_vars} to bound the variables that have not been bounded yet.
+\begin{align}
+    \text{minimize} & 
+    \begin{bmatrix}
+        -\textbf{c}_0^\top & \textbf{c}_1^\top & -\textbf{c}_1^\top & -c_2 & c_2 & \textbf{0} & \textbf{0} & \textbf{0}
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y}^+ \\ \textbf{y}^- \\ z^+ \\ z^- \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+     \\
+    \text{subject to} & \quad 
+    \begin{bmatrix}
+        \textbf{A}_0 & -\textbf{A}_1 & \textbf{A}_1 & 0 &  0 & 0 & 0 & 0 \\
+        \textbf{A}_0 & 0 & 0 & 0& 0 & \textbf{I} & 0 & 0 \\
+        0 & -\textbf{A}_1 & \textbf{A}_1 & 0 & 0 & 0 & \textbf{I} & 0 \\
+        0 & 0 & 0 & 1 & -1 & 0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y}^+ \\ \textbf{y}^- \\ z^+ \\ z^- \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \textbf{b}_0 \\ \textbf{b}_0 \\ -\textbf{b}_1 \\ 2
+    \end{bmatrix}
+    \\
+    & \quad 
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y}^+ \\ \textbf{y}^- \\ z^+ \\ z^- \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    \succeq 0
+\end{align}
+
+\section{Notes}
+In order to have good OOP practice, I think there should be the following classes:
+\texttt{Variable, Parameter, Operation, Constraint, Problem}.
+Some of my thoughts are that \texttt{Operation} should inheret from \texttt{Variable}.
+
+\begin{itemize}
+    \item Parameter +,/,*,@,- Parameter = Parameter
+    \item Parameter +,-,@ Variable = Operation
+    \item Variable +,- Variable = Operation
+    \item Operation +,- Operation = Operation
+\end{itemize}
 
 \end{document}
