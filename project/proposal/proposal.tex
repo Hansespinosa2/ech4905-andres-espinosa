@@ -23,14 +23,48 @@ The project will use \texttt{numpy} as the linear algebra package behind the sol
 \section{Methodology}
 For me to complete this project, I think this is the best way to approach the problem.
 \begin{enumerate}
-    \item First, create a \texttt{simplex\_phase\_2} method which will take a feasible initial $x_0$ as well as $A,b$ and return the optimal solution to the problem $x^*$.
+    \item First, create a \texttt{simplex\_phase\_2} method which will take a feasible initial $\textbf{x}_0$ as well as $\textbf{A},\textbf{b}, \textbf{c}$ and return the optimal solution to the problem $x^*$.
           Some different variations on the entering variable algorithm are listed below.
           I will also investigate how these algorithms perform on different problem sizes.
         \begin{itemize}
             \item Steepest descent - picking the value with the greatest negative value to enter the basis.
-            \item First negative - picking the variable with the first negative value as the entering variable.
+            \item Bland's Rule - picking the variable with the first negative value as the entering variable.
             \item Secretary's rule - I want to try using the Secretary's rule, where you do the first $\frac{1}{e}$ proportion of variables, and pick the one with first value greater than that.
+                  I expect this won't work super well but I read that it is supposed to be the most efficient way to find the optimal sequential choice.
         \end{itemize}
+    \item Second, create a \texttt{simplex\_phase\_1} method which will take in any of the parameters $\textbf{A},\textbf{b}, \textbf{c}$ and return a feasible start (or an output stating that the problem is infeasible).
+          I expect that this phase $1$ simplex method will create the arbitrary variables $\textbf{h}$ and then call the simplex phase 2 to solve it.
+          It will identify infeasibility as a solution to the auxilary problem that is not $\textbf{1}^\top \textbf{h} = 0$.
+    \item Third, and likely the most complex part of this project, I will implement a \texttt{python} module called \texttt{lp\_reductions.py} that will take any LP and turn it into standard form.
+          In order to accomplish this, I plan to do the following:
+          \begin{enumerate}
+            \item Implement a class of Variable and Expression.
+                  \texttt{Variables} will track the variables of a problem. It will probably have some methods like \texttt{intermediate, non-negative, etc} that will be helpful for the below things.
+                  \texttt{Expression} will track the equalities and objective function of a problem.
+                  Each variable will be assumed to be a vector $\mathbb{R}^n$ and each expression be an affine matrix inequality or equality.
+            \item Accept an arbitrary number of $\textbf{A}_i \textbf{x}_i = \textbf{b}_i, \textbf{x}_i \succeq 0$ equations.
+                  
+                Implement a \texttt{condense\_standard\_forms} function that will take the arbitrary number of affine matrix equalities and concatenate into one $\textbf{A} \textbf{x} = \textbf{b}, \textbf{x} \succeq 0$ problem.
+            \item Implement a function \texttt{lower\_ineq\_to\_eq}. 
+                  This function should take in the expression $\textbf{A} \textbf{x} \preceq \textbf{b}$ and add slack variables to turn it into $\textbf{A}_s \textbf{x}_s = \textbf{b}_s$
+            \item Implement a function \texttt{greater\_ineq\_to\_lower\_ineq}. 
+                  This function will turn $\textbf{A} \textbf{x} \succeq \textbf{b}$ into $-\textbf{A} \textbf{x} \preceq -\textbf{b}$
+            \item Implement a function \texttt{convert\_objective\_to\_standard\_form}.  This function will take a maximization problem $\max \textbf{c}^\top \textbf{x}$ and convert it into a minimization problem $\min -\textbf{c}^\top \textbf{x}$, which is the standard form for LP solvers.
+            \item Implement a function that will combine any linear combinations of matrix vector multiplications.
+                  $\textbf{A}_0 \textbf{x}_0 + \textbf{A}_1 \textbf{x}_1 + \dots \textbf{A}_n \textbf{x}_n = \textbf{A}_{tot} \textbf{x}_{tot}$ where
+                  \begin{align*}
+                    \textbf{A}_{tot} = 
+                    \begin{bmatrix}
+                       \textbf{A}_0 & \textbf{A}_1 & \dots & \textbf{A}_n
+                    \end{bmatrix},
+                    \textbf{x}_{tot} = 
+                    \begin{bmatrix}
+                        \textbf{x}_0 \\ \textbf{x}_1 \\ \vdots \\ \textbf{x}_n
+                    \end{bmatrix}
+                  \end{align*}
+            \item Implement a function \texttt{bound\_all\_vars} which will accept a $\textbf{A} \textbf{x} = \textbf{b}$ and if it is not already bounded by non-negativity, it will split it into $x^+, x^-$ and make them non-negative.
+          \end{enumerate}
+        \item Finally, put this altogether by testing it with some available toy and real-world LP problems with accessible data.
 \end{enumerate}
 
 
