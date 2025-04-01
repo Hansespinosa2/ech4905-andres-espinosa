@@ -113,9 +113,9 @@ class Problem:
         b = self.constraints[0].right.array
         c = self.objective.left
 
-        x = self.simplex_phase_2(A, b, c, x0)
-        feasible = True
+        # x = self.simplex_phase_2(A, b, c, x0)
+        # feasible = True
 
-        return (x, c.T @ x, feasible)
+        # return (x, c.T @ x, feasible)
 
 
