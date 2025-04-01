@@ -50,7 +50,7 @@ For me to complete this project, I think this is the best way to approach the pr
             \item Implement a function \texttt{greater\_ineq\_to\_lower\_ineq}. 
                   This function will turn $\textbf{A} \textbf{x} \succeq \textbf{b}$ into $-\textbf{A} \textbf{x} \preceq -\textbf{b}$
             \item Implement a function \texttt{convert\_objective\_to\_standard\_form}.  This function will take a maximization problem $\max \textbf{c}^\top \textbf{x}$ and convert it into a minimization problem $\min -\textbf{c}^\top \textbf{x}$, which is the standard form for LP solvers.
-            \item Implement a function that will combine any linear combinations of matrix vector multiplications.
+            \item Implement a function \texttt{combine\_multivar\_equality} that will combine any linear combinations of matrix vector multiplications.
                   $\textbf{A}_0 \textbf{x}_0 + \textbf{A}_1 \textbf{x}_1 + \dots \textbf{A}_n \textbf{x}_n = \textbf{A}_{tot} \textbf{x}_{tot}$ where
                   \begin{align*}
                     \textbf{A}_{tot} = 
@@ -65,7 +65,143 @@ For me to complete this project, I think this is the best way to approach the pr
             \item Implement a function \texttt{bound\_all\_vars} which will accept a $\textbf{A} \textbf{x} = \textbf{b}$ and if it is not already bounded by non-negativity, it will split it into $x^+, x^-$ and make them non-negative.
           \end{enumerate}
         \item Finally, put this altogether by testing it with some available toy and real-world LP problems with accessible data.
+        \item If I have time, it would be nice to make it so that variables can appear on any side of the equation and still work. Otherwise I think it is still sufficient to have to enter variables on the left side of the equation.
 \end{enumerate}
 
 
+\section{Example Logic}
+To test how this logic will work, I will set up a problem below and show the outline of the future algorithm I will use to solve it.
+
+Consider a problem with variables $\textbf{w} \in \mathbb{R}^{20}, \textbf{y} \in \mathbb{R}^{10}, z \in \mathbb{R}$
+and the parameters $\textbf{A}_0 \in \mathbb{R}^{5 \times 20},\textbf{A}_1 \in \mathbb{R}^{5 \times 10}, \textbf{b}_0 \in \mathbb{R}^5, \textbf{b}_1 \in \mathbb{R}^5, \textbf{c}_0 \in \mathbb{R}^{20}, \textbf{c}_1 \in \mathbb{R}^{10}, c_2 \in \mathbb{R}$
+
+\begin{align}
+  \text{maximize} & \quad \textbf{c}_0^\top \textbf{w} - \textbf{c}_1^\top \textbf{y} + c_2 z \\
+  \text{subject to} & \quad \textbf{A}_0 \textbf{w} - \textbf{A}_1 \textbf{y} =  \textbf{b}_0 \\
+  & \quad \textbf{A}_0 \textbf{w} \preceq \textbf{b}_0 \\
+  & \quad \textbf{A}_1 \textbf{y} \succeq \textbf{b}_1 \\
+  & \quad z \leq 2 \\ 
+  & \quad \textbf{w} \succeq 0 
+\end{align}
+We can handle this line by line.
+
+Objective function: call \texttt{convert\_objective\_to\_standard\_form}
+\begin{align}
+    \text{maximize} & \quad \textbf{c}_0^\top \textbf{w} - \textbf{c}_1^\top \textbf{y} + c_2 z \quad \to \quad \text{minimize} \quad -\textbf{c}_0^\top \textbf{w} + \textbf{c}_1^\top \textbf{y} - c_2 z 
+\end{align}
+Equality 1: call \texttt{combine\_multivar\_equality}
+\begin{align}
+    \textbf{A}_0 \textbf{w} - \textbf{A}_1 \textbf{y} =  \textbf{b}_0 + c_2 z \quad \to \quad \quad \textbf{A}_{01} \textbf{x}_{wy}  =  \textbf{b}_0
+\end{align}
+where $\textbf{A}_{01}$ is a column concatenation of the parameters and $\textbf{x}_{wy}$ is a row contenation of the variables.
+
+Inequality 1: call \texttt{lower\_ineq\_to\_eq}
+\begin{align}
+    \textbf{A}_0 \textbf{w} \preceq \textbf{b}_0 \quad \to \quad \textbf{A}_0 \textbf{w} + \textbf{s}_0 = \textbf{b}_0, \quad \textbf{s}_0 \succeq 0
+\end{align}
+
+Inequality 2: call \texttt{greater\_ineq\_to\_lower\_ineq} and then \texttt{lower\_ineq\_to\_eq}
+\begin{align}
+    \textbf{A}_1 \textbf{y} \succeq \textbf{b}_1 \quad \to \quad -\textbf{A}_1 \textbf{y} \preceq -\textbf{b}_1 \quad \to \quad -\textbf{A}_1 \textbf{y} + \textbf{s}_1 = -\textbf{b}_1, \quad \textbf{s}_1 \succeq 0
+\end{align}
+
+Inequality 3: call \texttt{lower\_ineq\_to\_eq}
+\begin{align}
+    z \leq 2 \quad \to \quad z + s_2 = 2, \quad s_2 \succeq 0
+\end{align}
+
+
+Final combined system:
+\begin{align}
+    \text{minimize} & \quad -\textbf{c}_0^\top \textbf{w} + \textbf{c}_1^\top \textbf{y} - c_2 z \\
+    \text{subject to} & \quad 
+    \begin{bmatrix}
+        \textbf{A}_0 & -\textbf{A}_1 & 0 \\
+        \textbf{A}_0 & 0 & 0 \\
+        0 & -\textbf{A}_1 & 0 \\
+        0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y} \\ z
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+        0 \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \textbf{b}_0 \\ \textbf{b}_0 \\ -\textbf{b}_1 \\ 2
+    \end{bmatrix}, \quad
+    \begin{bmatrix}
+        \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    \succeq 0
+\end{align}
+
+To fold the adding variables into the matrix equation, we can augment the matrix \(\textbf{A}\) and the variable vector \(\textbf{x}\) to include the slack variables. Here's how you can rewrite the final combined system:
+
+\begin{align}
+    \text{minimize} & 
+    \begin{bmatrix}
+        -\textbf{c}_0^\top & \textbf{c}_1^\top & -c_2 & \textbf{0} & \textbf{0} & \textbf{0}
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y} \\ z \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+     \\
+    \text{subject to} & \quad 
+    \begin{bmatrix}
+        \textbf{A}_0 & -\textbf{A}_1 & 0 & 0 & 0 & 0 \\
+        \textbf{A}_0 & 0 & 0 & \textbf{I} & 0 & 0 \\
+        0 & -\textbf{A}_1 & 0 & 0 & \textbf{I} & 0 \\
+        0 & 0 & 1 & 0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y} \\ z \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \textbf{b}_0 \\ \textbf{b}_0 \\ -\textbf{b}_1 \\ 2
+    \end{bmatrix}
+    \\
+    & \quad 
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2 
+    \end{bmatrix}
+    \succeq 0
+\end{align}
+
+Here, the slack variables \(\textbf{s}_0, \textbf{s}_1, s_2\) are now part of the augmented variable vector, and the identity matrices \(\textbf{I}\) are used to incorporate the slack variables into the constraints. This ensures that the system remains in the form \(\textbf{A} \textbf{x} = \textbf{b}\), where \(\textbf{x}\) includes all original variables and slack variables.
+
+Finally, we call \texttt{bound\_all\_vars} to bound the variables that have not been bounded yet.
+\begin{align}
+    \text{minimize} & 
+    \begin{bmatrix}
+        -\textbf{c}_0^\top & \textbf{c}_1^\top & -\textbf{c}_1^\top & -c_2 & c_2 & \textbf{0} & \textbf{0} & \textbf{0}
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y}^+ \\ \textbf{y}^- \\ z^+ \\ z^- \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+     \\
+    \text{subject to} & \quad 
+    \begin{bmatrix}
+        \textbf{A}_0 & -\textbf{A}_1 & \textbf{A}_1 & 0 &  0 & 0 & 0 & 0 \\
+        \textbf{A}_0 & 0 & 0 & 0& 0 & \textbf{I} & 0 & 0 \\
+        0 & -\textbf{A}_1 & \textbf{A}_1 & 0 & 0 & 0 & \textbf{I} & 0 \\
+        0 & 0 & 0 & 1 & -1 & 0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y}^+ \\ \textbf{y}^- \\ z^+ \\ z^- \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \textbf{b}_0 \\ \textbf{b}_0 \\ -\textbf{b}_1 \\ 2
+    \end{bmatrix}
+    \\
+    & \quad 
+    \begin{bmatrix}
+        \textbf{w} \\ \textbf{y}^+ \\ \textbf{y}^- \\ z^+ \\ z^- \\ \textbf{s}_0 \\ \textbf{s}_1 \\ s_2
+    \end{bmatrix}
+    \succeq 0
+\end{align}
 \end{document}
