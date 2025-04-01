@@ -3,3 +3,22 @@
 The first step of the branch and bound algorithm to solve a MILP is to first solve its LP relaxation.
 We then go through branching to identify integers that are fractional.
 We create two subproblems, one which is concerned with the left branch and one that is concerned with the right branch.
+
+\subsubsection{Example Problem}
+Consider an example LP relaxation problem written below:
+
+\begin{align}
+  \text{minimize} & \quad  86y_1 + 4y_2 + 40y_3\\
+  \text{subject to} & \quad 744 y_1 + 76y_2 + 42y_3 \leq 875 \\
+  & \quad 67y_1 + 27y_2 + 53y_3 \leq 875 \\
+  & \quad 0 \leq y_1, y_2, y_3 \leq 1
+\end{align}
+
+The optimal solution to this relaxed problem is 
+$y_1, y_2,y_3 = 1, 0.776, 1; f = 129.6$
+
+Since $y_2$ is a decimal, we branch it to $y_2 = 0,1$ and solve the LP relaxation of two subproblems.
+When $y_2 = 0$, we get the solution $(1,0,1); f = 126$. 
+When $y_2=1$, we get the solution $(0.978,1,1); f = 128.11$.
+This improves our bounds because we get the lower bound of $126$ and upper bound of 128.11.
+Our worst LP relaxed optimal value is 128.11 and our best feasible optimal value is 126.
