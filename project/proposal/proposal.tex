@@ -204,4 +204,17 @@ Finally, we call \texttt{bound\_all\_vars} to bound the variables that have not 
     \end{bmatrix}
     \succeq 0
 \end{align}
+
+\section{Notes}
+In order to have good OOP practice, I think there should be the following classes:
+\texttt{Variable, Parameter, Operation, Constraint, Problem}.
+Some of my thoughts are that \texttt{Operation} should inheret from \texttt{Variable}.
+
+\begin{itemize}
+    \item Parameter +,/,*,@,- Parameter = Parameter
+    \item Parameter +,-,@ Variable = Operation
+    \item Variable +,- Variable = Operation
+    \item Operation +,- Operation = Operation
+\end{itemize}
+
 \end{document}
