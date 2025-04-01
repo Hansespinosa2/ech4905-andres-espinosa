@@ -11,7 +11,7 @@ x = Variable(len(c))  # Start with zeros
 
 
 problem_def = {
-    "minimize": [c.T @ x],
+    "minimize": c.T @ x,
     "constraints": [
         A @ x == b,
         x >= 0
@@ -21,3 +21,4 @@ problem_def = {
 
 problem = Problem(problem_def)
 
+problem.solve()

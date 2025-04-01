@@ -15,6 +15,9 @@ class Parameter:
     @property
     def T(self):
         return Parameter(self.array.T)
+    
+    def __repr__(self):
+        return f"({self.array})"
 
 class Variable:
     """
@@ -22,12 +25,12 @@ class Variable:
     Supports matrix multiplication and constraint creation.
     """
     def __init__(self, shape):
-        self.x0 = np.zeros(shape)
+        self.array = np.zeros(shape)
 
     def __matmul__(self, other):
         """Overload @ operator for matrix multiplication"""
         if isinstance(other, (np.ndarray, Variable)):
-            return MatrixOperation(other, self.x0, "matmul")
+            return MatrixOperation(other, self.array, "matmul")
         raise TypeError("Invalid type for matrix multiplication.")
 
     def __ge__(self, b):
@@ -41,6 +44,9 @@ class Variable:
     def __eq__(self, b):
         """Overload == operator for constraints"""
         return Constraint(self, b, "==")
+    
+    def __repr__(self):
+        return f"({self.x0})"
 
 
 class MatrixOperation:
@@ -100,6 +106,13 @@ class Problem:
             self.constraints = problem_def['constraints']
         else:
             raise ValueError("The constraint definition must contain either 'subject to' or 'constraints' as a key.")
-        print(self.constraints)
+
+    def solve(self):
+        A = self.constraints[0].left.left
+        x0 = self.constraints[0].left.right.array
+        b = self.constraints[0].right.array
+        c = self.objective.left
+
+        print(A,b,c,x0)
         
 
