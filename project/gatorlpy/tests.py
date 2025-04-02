@@ -24,12 +24,12 @@ def run_test_0():
     solution = problem.solve()
 
     # VARIABLES
-    x = cp.Variable(2)
+    x_cvx = cp.Variable(2)
     # PROBLEM
-    objective = cp.Minimize(c.T @ x)
+    objective = cp.Minimize(c_arr.T @ x_cvx)
     constraints = [
-        A @ x == b,
-        x >= 0
+        A_arr @ x_cvx == b_arr,
+        x_cvx >= 0
     ]
     problem_cvx = cp.Problem(objective, constraints)
 

@@ -1,11 +1,11 @@
 import numpy as np
-c = np.array([1, 1, 0, 0, 0])
-A = np.array([
-    [-1, 1, 1, 0, 0],
-    [ 1, 0, 0, 1, 0],
-    [ 0, 1, 0, 0, 1]
-])
-b = np.array([2, 4, 4])
+# c = np.array([1, 1, 0, 0, 0])
+# A = np.array([
+#     [-1, 1, 1, 0, 0],
+#     [ 1, 0, 0, 1, 0],
+#     [ 0, 1, 0, 0, 1]
+# ])
+# b = np.array([2, 4, 4])
 
 def to_tableau(A:np.ndarray, b:np.ndarray, c:np.ndarray):
     xb = np.hstack([A, b[:, None]])  # Combine A and b (column-wise stack)
@@ -69,5 +69,5 @@ def simplex(A:np.ndarray, b:np.ndarray, c:np.ndarray):
     f_star = c.T @ x_star
     return (f_star, x_star, True)
 
-solution = simplex(A, b, c)
-print('solution: ', solution)
+# solution = simplex(A, b, c)
+# print('solution: ', solution)

@@ -1,4 +1,5 @@
 import numpy as np
+from simplex import simplex
 class Parameter:
     def __init__(self,array:np.ndarray):
         self.array = array
@@ -113,9 +114,7 @@ class Problem:
         b = self.constraints[0].right.array
         c = self.objective.left
 
-        # x = self.simplex_phase_2(A, b, c, x0)
-        # feasible = True
-
-        # return (c.T @ x, x, feasible)
+        f_star, x_star, feasible = simplex(A, b, c)
+        return f_star, x_star, feasible
 
 
