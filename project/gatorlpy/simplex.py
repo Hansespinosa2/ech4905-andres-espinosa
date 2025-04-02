@@ -47,7 +47,7 @@ def pivot_step(tableau:np.ndarray, pivot_position:tuple[int]):
 def is_basic(column:np.ndarray):
     return np.sum(column) == 1 and np.count_nonzero(column == 0) == len(column) - 1
 
-def get_solution(tableau:np.ndarray):
+def get_solution(tableau:np.ndarray) -> np.ndarray:
     columns = tableau.T
     solutions = []
     for column in columns[:-1]:
@@ -56,7 +56,7 @@ def get_solution(tableau:np.ndarray):
             one_index = np.where(column == 1)[0][0]  # Index of 1 in column
             solution = columns[-1, one_index]
         solutions.append(solution)
-    return solutions
+    return np.array(solutions)
 
 def simplex(A:np.ndarray, b:np.ndarray, c:np.ndarray):
     tableau = to_tableau(A, b, c)
