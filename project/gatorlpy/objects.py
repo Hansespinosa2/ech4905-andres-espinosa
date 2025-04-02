@@ -7,7 +7,7 @@ class Parameter:
     def __matmul__(self, other):
         """Overload @ operator for matrix multiplication"""
         if isinstance(other, (np.ndarray, Variable)):
-            return MatrixOperation(self.array, other, "matmul")
+            return Operation(self.array, other, "matmul")
         raise TypeError("Invalid type for matrix multiplication.")
     
     def __len__(self):
@@ -19,6 +19,15 @@ class Parameter:
     
     def __repr__(self):
         return f"({self.array})"
+    
+    def __add__(self, other):
+        if isinstance(other, Parameter):
+            if len(self) != len(other):
+                raise ValueError("Parameters must have the same length for addition.")
+            return Parameter(self.array + other.array)
+    
+    def __neg__(self):
+        return Parameter(-self.array)
 
 class Variable:
     """
@@ -31,7 +40,7 @@ class Variable:
     def __matmul__(self, other):
         """Overload @ operator for matrix multiplication"""
         if isinstance(other, (np.ndarray, Variable)):
-            return MatrixOperation(other, self.array, "matmul")
+            return Operation(other, self.array, "matmul")
         raise TypeError("Invalid type for matrix multiplication.")
 
     def __ge__(self, b):
@@ -47,10 +56,10 @@ class Variable:
         return Constraint(self, b, "==")
     
     def __repr__(self):
-        return f"({self.x0})"
+        return f"({self.array})"
 
 
-class MatrixOperation:
+class Operation:
     """
     Represents a matrix operation (e.g., A @ x).
     """
@@ -79,7 +88,7 @@ class Constraint:
     """
     Represents a linear constraint: A @ x <= b, >=, or ==.
     """
-    def __init__(self, left:np.ndarray|Variable|MatrixOperation,right:np.ndarray|Variable,eq_type:str):
+    def __init__(self, left:np.ndarray|Variable|Operation,right:np.ndarray|Variable,eq_type:str):
         self.left = left
         self.right = right
         self.eq_type = eq_type
