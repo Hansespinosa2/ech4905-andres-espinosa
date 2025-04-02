@@ -14,11 +14,13 @@ def to_tableau(c, A, b):
 
 def can_be_improved(tableau):
     z = tableau[-1]
-    return np.any(z[:-1] > 0)
+    return np.any(z[:-1] < 0)
 
 def get_pivot_position(tableau):
     z = tableau[-1]
-    column = np.argmax(z[:-1] > 0)  # Find the first positive entry in z
+    column = np.argmin(z[:-1])  # Find the first positive entry in z
+    
+    ratios = []
     
     restrictions = np.array([
         np.inf if eq[column] <= 0 else eq[-1] / eq[column] 

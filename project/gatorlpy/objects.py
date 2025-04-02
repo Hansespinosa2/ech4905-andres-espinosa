@@ -116,6 +116,6 @@ class Problem:
         # x = self.simplex_phase_2(A, b, c, x0)
         # feasible = True
 
-        # return (x, c.T @ x, feasible)
+        # return (c.T @ x, x, feasible)
 
 
