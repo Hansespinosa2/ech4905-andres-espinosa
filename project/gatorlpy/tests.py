@@ -38,3 +38,12 @@ def run_test_0():
     print(np.round(problem_cvx.value,2), np.array([np.round(x.value,2) for x in problem_cvx.variables()]))
     print(solution)
     
+# c = np.array([1, 1, 0, 0, 0])
+# A = np.array([
+#     [-1, 1, 1, 0, 0],
+#     [ 1, 0, 0, 1, 0],
+#     [ 0, 1, 0, 0, 1]
+# ])
+# b = np.array([2, 4, 4])
+# solution = simplex(A, b, c)
+# print('solution: ', solution)
