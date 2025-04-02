@@ -7,16 +7,16 @@ A = np.array([
 ])
 b = np.array([2, 4, 4])
 
-def to_tableau(c, A, b):
+def to_tableau(A:np.ndarray, b:np.ndarray, c:np.ndarray):
     xb = np.hstack([A, b[:, None]])  # Combine A and b (column-wise stack)
     z = np.hstack([c, [0]])  # Append a zero to c
     return np.vstack([xb, z])  # Combine xb and z (row-wise stack)
 
-def can_be_improved(tableau):
+def can_be_improved(tableau:np.ndarray):
     z = tableau[-1]
     return np.any(z[:-1] < 0)
 
-def get_pivot_position(tableau):
+def get_pivot_position(tableau:np.ndarray):
     z = tableau[-1]
     column = np.argmin(z[:-1])  # Find the first positive entry in z
     
@@ -30,7 +30,7 @@ def get_pivot_position(tableau):
     row = np.argmin(restrictions)
     return row, column
 
-def pivot_step(tableau, pivot_position):
+def pivot_step(tableau:np.ndarray, pivot_position:tuple[int]):
     new_tableau = tableau.copy()
     
     i, j = pivot_position
@@ -44,10 +44,10 @@ def pivot_step(tableau, pivot_position):
     
     return new_tableau
 
-def is_basic(column):
+def is_basic(column:np.ndarray):
     return np.sum(column) == 1 and np.count_nonzero(column == 0) == len(column) - 1
 
-def get_solution(tableau):
+def get_solution(tableau:np.ndarray):
     columns = tableau.T
     solutions = []
     for column in columns[:-1]:
@@ -58,8 +58,8 @@ def get_solution(tableau):
         solutions.append(solution)
     return solutions
 
-def simplex(c, A, b):
-    tableau = to_tableau(c, A, b)
+def simplex(A:np.ndarray, b:np.ndarray, c:np.ndarray):
+    tableau = to_tableau(A, b, c)
 
     while can_be_improved(tableau):
         pivot_position = get_pivot_position(tableau)
@@ -69,5 +69,5 @@ def simplex(c, A, b):
     f_star = c.T @ x_star
     return (f_star, x_star, True)
 
-solution = simplex(-c, A, b)
+solution = simplex(A, b, c)
 print('solution: ', solution)
