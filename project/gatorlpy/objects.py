@@ -1,5 +1,5 @@
 import numpy as np
-from simplex import simplex
+from simplex import simplex, two_phase_simplex
 class Parameter:
     def __init__(self,array:np.ndarray):
         self.array = array
@@ -116,7 +116,7 @@ class Problem:
         elif 'constraints' in problem_def and 'subject to' not in problem_def:
             self.constraints = problem_def['constraints']
         else:
-            raise ValueError("The constraint definition must contain either 'subject to' or 'constraints' as a key.")
+            raise ValueError("The constraint definition must contain either 'subject to' xor 'constraints' as a key.")
 
     def solve(self)->tuple[np.ndarray,bool]:
         A = self.constraints[0].left.left
@@ -124,7 +124,7 @@ class Problem:
         b = self.constraints[0].right.array
         c = self.objective.left
 
-        f_star, x_star, feasible = simplex(A, b, c)
+        f_star, x_star, feasible = two_phase_simplex(A, b, c)
         return f_star, x_star, feasible
 
 
