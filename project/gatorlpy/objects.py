@@ -3,12 +3,13 @@ from simplex import two_phase_simplex
 
 class Expression:
     """Base class for variables, parameters, and operations in a computation graph."""
-    def __init__(self, parents:list=[]):
+    def __init__(self, expression_type:str, parents:list=[]):
+        self.expression_type = expression_type
         self.parents = parents
-
+        
 class Parameter(Expression):
     def __init__(self, array:np.ndarray, parents:list=[]):
-        super().__init__(parents)
+        super().__init__("param", parents)
         self.array = array
                 
     @property
@@ -45,7 +46,7 @@ class Variable(Expression):
     Supports matrix multiplication and constraint creation.
     """
     def __init__(self, shape:int, parents:list=[]):
-        super().__init__(parents)
+        super().__init__("var", parents)
         self.array = np.zeros(shape)
 
     def __matmul__(self, other):
@@ -58,17 +59,18 @@ class Variable(Expression):
         if isinstance(other, Variable):
             return Operation(self, other, "var_add_var", [self, other])
 
-    def __ge__(self, b):
+    def __ge__(self, other):
         """Overload >= operator for constraints"""
-        return Constraint(self, b, ">=")
 
-    def __le__(self, b):
+        return Constraint(Operation(self, self, "identity", [self]), other, ">=")
+
+    def __le__(self, other):
         """Overload <= operator for constraints"""
-        return Constraint(self, b, "<=")
+        return Constraint(Operation(self, self, "identity", [self]), other, "<=")
 
-    def __eq__(self, b):
+    def __eq__(self, other):
         """Overload == operator for constraints"""
-        return Constraint(self, b, "==")
+        return Constraint(Operation(self, self, "identity", [self]), other, "==")
     
     def __repr__(self):
         return f"({self.array})"
@@ -80,7 +82,7 @@ class Operation(Expression):
     possible ops: 
     """
     def __init__(self, left:Expression, right:Expression, op:str, parents:list=[]):
-        super().__init__(parents)
+        super().__init__("op", parents)
         self.left = left
         self.right = right
         self.op = op
@@ -88,27 +90,28 @@ class Operation(Expression):
     def __repr__(self):
         return f"({self.left} {self.op} {self.right})"
     
-    def __ge__(self, b):
+    def __ge__(self, other):
         """Overload >= operator for constraints"""
-        return Constraint(self, b, ">=")
+        return Constraint(self, other, "geq")
 
-    def __le__(self, b):
+    def __le__(self, other):
         """Overload <= operator for constraints"""
-        return Constraint(self, b, "<=")
+        return Constraint(self, other, "leq")
 
-    def __eq__(self, b):
+    def __eq__(self, other):
         """Overload == operator for constraints"""
-        return Constraint(self, b, "==")
+        return Constraint(self, other, "eq")
 
 
 class Constraint:
     """
     Represents a linear constraint: A @ x <= b, >=, or ==.
     """
-    def __init__(self, left:Expression, right:Expression, eq_type:str):
+    def __init__(self, left:Operation, right:Expression, eq_type:str):
         self.left = left
         self.right = right
         self.eq_type = eq_type
+        self.constraint_type = self.left.op + "_" + self.eq_type + "_" + self.right.expression_type
 
     def __repr__(self):
         return f"{self.left} {self.eq_type} {self.right}"         
