@@ -1,13 +1,13 @@
 import numpy as np
-from objects import Problem, Parameter, Variable
 import cvxpy as cp
+from objects import Problem, Parameter, Variable
 
 
 def run_test_0():
     # PARAMETERS
     A_arr = np.c_[np.array([[2, 1], [1, 3], [3, 1]]),np.eye(3)]
-    b_arr = np.array([10,18,15])
-    c_arr = np.r_[np.array([5,4]),np.zeros(3)]
+    b_arr = np.array([10,-18,15])
+    c_arr = -np.r_[np.array([5,4]),np.zeros(3)]
     A = Parameter(A_arr)
     b = Parameter(b_arr)
     c = Parameter(c_arr)
@@ -35,9 +35,13 @@ def run_test_0():
 
     # SOLVE
     problem_cvx.solve()
-    print(np.round(problem_cvx.value,2), np.array([np.round(x.value,2) for x in problem_cvx.variables()]))
+    if problem_cvx.value != np.inf:
+        print(np.round(problem_cvx.value,2), np.array([np.round(x.value,2) if x is not None else 0 for x in problem_cvx.variables() ]))
     print(solution)
     
+
+if __name__ == "__main__":
+    run_test_0()
 # c = np.array([1, 1, 0, 0, 0])
 # A = np.array([
 #     [-1, 1, 1, 0, 0],

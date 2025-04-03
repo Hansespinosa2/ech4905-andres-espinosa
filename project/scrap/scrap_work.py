@@ -1,6 +1,4 @@
-# python3
-from sys import stdin
-import itertools
+import numpy as np
 EPS = 1e-4
 
 class Position:
@@ -22,44 +20,36 @@ class Position:
 # a = [[1,1,-3],[-5,10,0],[3,-2,-4]]
 # b = [10, 50, 9]
 # c = [1, 6, -3]
-def ReadEquation():
-    n, m = map(int, input().split())
-    a = []
-    for row in range(n):
-        a.append(list(map(float, input().split())))
-    b = list(map(float, input().split()))
-    c = list(map(float, input().split()))
-    return a, b, c, n, m
 
-#A tableau is created of size (m + n + 1) x (n + 1). Each inequality is placed in a row in the tableau and a slack variable is added to
+#A tableau is created of size (m + 1) x (n + 1). Each inequality is placed in a row in the tableau and a slack variable is added to
 #each inequality. A slack variable in inequality equations are added to transform the equations to an equalities.
 #In the provided example, the tableau would look as such for the standard format (non 2 phase structure):
 # [ 1,  1, -3, 1, 0, 0, 10]
 # [-5, 10,  0, 0, 1, 0, 50]
 # [ 3, -2, -4, 0, 0, 1,  9]
 # [-1, -6,  3, 0, 0, 0,  0]
-def CreateTableau(a, b, c, n, phase_one_optimization):
-  tableau = []
-  phase_one_row = [0] * (len(c) + n + 2)
-  for i in range (n):
-    #For phase 1 optimization in a the 2-phase simplex method, any inequalities that have a solution less than zero will be flipped
-    #For example 2x -3y <= -10 --> -2x + 3y <= 10
-    #The slack variable is added to the tableau with value -1 to account for the flip in sign
-    #Recall that the two phase approach will ONLY occur if an optimal solution was not initially found
-    if phase_one_optimization and b[i] < 0:
-      slack_variables = [0] * n
-      slack_variables[i] = -1.0
-      tableau_row = [-1*x for x in a[i]] + slack_variables + [-1 * b[i]]
-      tableau.append(tableau_row)
-      phase_one_row = [a + b for a, b in zip(phase_one_row, tableau_row)]
-    else:
-      slack_variables = [0] * n
-      slack_variables[i] = 1.0
-      tableau_row = a[i] + slack_variables + [b[i]]
-      tableau.append(tableau_row)
-  final_row = [-1*x for x in c] + [0] * n + [0]
-  tableau.append(final_row)
-  return tableau, phase_one_row
+def CreateTableau(A, b, c, n, phase_one_optimization):
+    tableau = []
+    phase_one_row = [0] * (len(c) + n + 2)
+    for i in range (n):
+        #For phase 1 optimization in a the 2-phase simplex method, any inequalities that have a solution less than zero will be flipped
+        #For example 2x -3y <= -10 --> -2x + 3y <= 10
+        #The slack variable is added to the tableau with value -1 to account for the flip in sign
+        #Recall that the two phase approach will ONLY occur if an optimal solution was not initially found
+        if phase_one_optimization and b[i] < 0:
+            slack_variables = [0] * n
+            slack_variables[i] = -1.0
+            tableau_row = [-1*x for x in a[i]] + slack_variables + [-1 * b[i]]
+            tableau.append(tableau_row)
+            phase_one_row = [a + b for a, b in zip(phase_one_row, tableau_row)]
+        else:
+            slack_variables = [0] * n
+            slack_variables[i] = 1.0
+            tableau_row = a[i] + slack_variables + [b[i]]
+            tableau.append(tableau_row)
+    final_row = [-1*x for x in c] + [0] * n + [0]
+    tableau.append(final_row)
+    return tableau, phase_one_row
 
 #Bland's Rule will be used for selecting the pivot element:
 # 1. Choose the leftmost column that is negative
@@ -120,10 +110,8 @@ def ProcessPivotElement(a,pivot_element, phase_one_optimization, phase_one_row):
 #The algorithm will first attempt to solve the tableau assuming a basic feasible solution has been provided. If the tableau provided by the first attempt leads to an invalid solution,
 #meaning one of the inequality equations is violated with one of the values in the initial optimal values, then the algorithm will create a new tableau 
 #and proceed to a two-phase simplex method approach.
-def SolveEquation(a, b, c, n, m):
-    if all(i <= 0 for i in c) and all(i >= 0 for i in b):
-      return [0] * m
-    tableau, phase_one_row = CreateTableau(a, b, c, n, False)
+def SolveEquation(A:np.ndarray, b:np.ndarray, c:np.ndarray):
+    tableau, phase_one_row = CreateTableau(A, b, c)
     ans, phase_one_answer = solveTableau(tableau, a, b, m, n, False, phase_one_row)
     #break immediately if the tableau reduced to 
     if ans == [-1] or ans == [float("inf")]:

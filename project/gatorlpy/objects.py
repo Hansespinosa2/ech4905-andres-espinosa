@@ -3,31 +3,32 @@ from simplex import simplex
 class Parameter:
     def __init__(self,array:np.ndarray):
         self.array = array
-    
+
     def __matmul__(self, other):
         """Overload @ operator for matrix multiplication"""
         if isinstance(other, (np.ndarray, Variable)):
             return Operation(self.array, other, "matmul")
         raise TypeError("Invalid type for matrix multiplication.")
-    
+
     def __len__(self):
         return len(self.array)
-    
+
     @property
     def T(self):
         return Parameter(self.array.T)
-    
+
     def __repr__(self):
         return f"({self.array})"
-    
+
     def __add__(self, other):
         if isinstance(other, Parameter):
             if len(self) != len(other):
                 raise ValueError("Parameters must have the same length for addition.")
             return Parameter(self.array + other.array)
-    
+
     def __neg__(self):
         return Parameter(-self.array)
+    
 
 class Variable:
     """
