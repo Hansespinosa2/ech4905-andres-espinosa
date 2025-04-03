@@ -22,3 +22,139 @@ When $y_2 = 0$, we get the solution $(1,0,1); f = 126$.
 When $y_2=1$, we get the solution $(0.978,1,1); f = 128.11$.
 This improves our bounds because we get the lower bound of $126$ and upper bound of 128.11.
 Our worst LP relaxed optimal value is 128.11 and our best feasible optimal value is 126.
+
+\subsection{Cutting Planes}
+In order to simplify and reduce the feasible region, we can employ cutting planes that introduce constraints that reduce the feasible search space.
+\subsubsection{Gomory}
+Given a simplex tableau with the following parameters
+
+\begin{align}
+  A = 
+  \begin{bmatrix}
+     B & N
+  \end{bmatrix}, 
+  \quad
+  x =
+  \begin{bmatrix}
+    x_b \\ x_n
+  \end{bmatrix}
+\end{align}
+
+we can derive the constraints
+\begin{align}
+  x_j + \sum_{i \in N} \sqcup{\alpha_{i,j}} x_j \leq \sqcup{x^*_{B,j}}
+\end{align}
+
+\subsubsection{Example}
+take the IP optimization problem
+\begin{align}
+  \text{minimize} & \quad x_1 - 2x_2 \\
+  \text{subject to} & \quad  -4x_1 + 6x_2 \leq 5 \\
+  & \quad x_1 + x_2 \leq 5 \\
+  & \quad x_1, x_2 \geq 0 \\
+  & \quad x_1, x_2 \in \mathbb{N}
+\end{align}
+
+we can relax this problem into an LP
+\begin{align}
+  \text{minimize} & \quad x_1 - 2x_2 \\
+  \text{subject to} & \quad  -4x_1 + 6x_2 \leq 5 \\
+  & \quad x_1 + x_2 \leq 5 \\
+  & \quad x_1, x_2 \geq 0 \\
+  & \quad x_1, x_2 \in \mathbb{R}
+\end{align}
+
+Transforming this problem into slack form:
+\begin{align}
+  \text{minimize} & \quad x_1 - 2x_2 \\
+  \text{subject to} & \quad  -4x_1 + 6x_2 + x_3 = 5 \\
+  & \quad x_1 + x_2 + x_4 = 5 \\
+  & \quad x_1, x_2, x_3, x_4 \geq 0 \\
+  & \quad x_1, x_2, x_3, x_4 \in \mathbb{R}
+\end{align}
+
+The tableau that comes from this is:
+\[
+\begin{array}{c|cccc|c}
+\text{Basic} & x_1 & x_2 & x_3 & x_4 & \text{RHS} \\
+\hline
+x_3 & -4 & 6 & 1 & 0 & 5 \\
+x_4 & 1 & 1 & 0 & 1 & 5 \\
+\hline
+\text{Z} & 1 & -2 & 0 & 0 & 0 \\
+\end{array}
+\]
+
+We get the solved simplex
+\[
+\begin{array}{c|cccc|c}
+\text{Basic} & x_1 & x_2 & x_3 & x_4 & \text{RHS} \\
+\hline
+x_2 & 0 & 1 & 0.1 & 0.4 & 2.5 \\
+x_1 & 1 & 0 & -0.1 & 0.6 & 2.5 \\
+\hline
+\text{Z} & 1 & -2 & 0 & 0 & 0 \\
+\end{array}
+\]
+
+From this, we can get the constraints for the cutting planes by doing the following:
+
+\begin{align}
+  x_2 + \sqcup{0.1} x_3 + \sqcup{0.4} x_4 \leq \sqcup{2.5} \\
+  x_1 + \sqcup{-0.1} x_3 + \sqcup{0.6} x_4 \leq \sqcup{2.5} \\
+  = \\
+  x_2  \leq 2 \\
+  x_1 - x_3 \leq \sqcup{2}
+\end{align}
+We introduce the cuts on whichever $x_i$ of the LP relaxed solution variables are not integers.
+So, we at most introduce $m$ constraints, the number of original constraints in the problem.
+
+\subsubsection{Another Example}
+
+\begin{align}
+  \text{minimize} & \quad 13x_1 - 13x_2 \\
+  \text{subject to} & \quad 2x_1 + 9x_2 + x_3 = 29 \\
+  & \quad 11x_1 - 8x_2 + x_4 = 79 \\
+  & \quad x_i \geq 0 \\
+  & \quad x_i \in \mathbb{N} 
+\end{align}
+
+This simplex can be solved to be 
+\[
+\begin{array}{c|cccc|c}
+\text{Basic} & x_1 & x_2 & x_3 & x_4 & \text{RHS} \\
+\hline
+x_2 & 0 & 1 & 0.1 & -0.002 & 4 \\
+x_1 & 1 & 0 & 0.04 & 0.08 & 8.2 \\
+\hline
+\text{Z} & 0 & 0 & 1.45 & 0.01 & 4.8 \\
+\end{array}
+\]
+We then can solve and get the Gomory cuts from this problem.
+
+\subsection{MINLP}
+The general MINLP problem below
+
+\begin{align}
+  \text{minimize} & \quad f(x,y) \\
+  \text{subject to} & \quad h(x,y) = 0 \\
+  & \quad g(x,y) \leq 0 \\
+  & \quad x \in \mathbb{R}^n, y \in \{ 0,1 \}^m
+\end{align}
+
+This can be turned into another type of MINLP (not always, but generally, that are easier to solve)
+
+\begin{align}
+  \text{minimize} & \quad c^\top y + f(x) \\
+  \text{subject to} & \quad h(x,y) = 0 \\
+  & \quad g(x) + By \leq 0 \\
+  & \quad Ay \leq a \\
+  & \quad x \in X, y \in \{ 0,1 \}^m
+\end{align}
+
+Branch and bround is typically difficult to apply on these types of problems.
+We also have decomposition approach where we fix the integer and continuous variables and solve the NLP to get the lower bound and MILP to get the upper bound.
+They then ideally converge to the same value.
+
+\subsection{Piecewise linearization}
+We can take MINLPs and then apply piecewise linearization to approximate the function.
