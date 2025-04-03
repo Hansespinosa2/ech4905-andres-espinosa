@@ -42,5 +42,26 @@ def run_test_0():
     print(solution)
     
 
+def run_test_1():
+    A_arr = np.hstack((np.array([[2, 1], [1, 3]]),np.eye(2)))
+    b_arr = np.array([4, 3])
+    c_arr = np.hstack((np.array([3, 2]), np.zeros(2)))
+    A = Parameter(A_arr)
+    b = Parameter(b_arr)
+    c = Parameter(c_arr)
+    # VARIABLES
+    x = Variable(4) 
+    # PROBLEM
+    problem = Problem({
+        'minimize': c.T @ x,
+        'subject to': [
+            A @ x == b,
+            x >= 0
+        ]
+    })
+    solution = problem.solve()
+    print(solution)
+
 if __name__ == "__main__":
     run_test_0()
+    # run_test_1()

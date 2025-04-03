@@ -100,7 +100,8 @@ def find_leaving_variable(tableau:np.ndarray, entering_col_index:int) -> int:
     ratios = []
     for row_index in range(tableau.shape[0] -1):
         if tableau[row_index, entering_col_index] > 0:
-            ratios.append((tableau[row_index, -1] / tableau[row_index, entering_col_index], row_index))
+            ratio = tableau[row_index, -1] / tableau[row_index, entering_col_index]
+            ratios.append((ratio, row_index))
     return min(ratios, default=(None,None))[1] if ratios else None
 
 
@@ -111,6 +112,9 @@ def simplex_phase_1(A:np.ndarray, b:np.ndarray):
     tableau = np.hstack((A_aux, b.reshape(-1,1)))
     tableau = np.vstack((tableau, np.hstack((-c_aux, [0]))))
     basis = list(range(n,n+m))
+
+    tableau[-1, :-1] = -np.sum(tableau[:-1, :-1], axis=0)
+    tableau[-1,-1] = -np.sum(tableau[:-1,-1])
 
     while True:
         entering_col_index = find_entering_variable(tableau, rule='blands')
@@ -124,7 +128,6 @@ def simplex_phase_1(A:np.ndarray, b:np.ndarray):
 
     if tableau[-1,-1] > 1e-8:
         return None, None, False # Infeasible Solution to original problem
-    print(tableau, basis)
     return tableau[:m,:n], tableau[:-1,-1], basis[:m]
 
 def simplex_phase_2(A:np.ndarray, b:np.ndarray, c:np.ndarray, basis:list[int]) -> tuple[np.ndarray|bool]:
@@ -133,6 +136,10 @@ def simplex_phase_2(A:np.ndarray, b:np.ndarray, c:np.ndarray, basis:list[int]) -
     tableau[:-1,:-1] = A
     tableau[:-1, -1] = b
     tableau[-1, :-1] = -c
+
+    for row_index, col_index in enumerate(basis):
+        tableau[-1, :-1] += c[col_index] * tableau[row_index, :-1]
+        tableau[-1,-1] += c[col_index] * tableau[row_index, -1]
 
     while True:
         entering_col_index = find_entering_variable(tableau, "blands")
