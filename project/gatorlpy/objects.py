@@ -1,5 +1,5 @@
 import numpy as np
-from simplex import simplex, two_phase_simplex
+from simplex import two_phase_simplex
 class Parameter:
     def __init__(self,array:np.ndarray):
         self.array = array
