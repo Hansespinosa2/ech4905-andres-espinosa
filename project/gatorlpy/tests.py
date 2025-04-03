@@ -60,8 +60,27 @@ def run_test_1():
         ]
     })
     solution = problem.solve()
+    
+
+    # VARIABLES
+    x_cvx = cp.Variable(4)
+    # PROBLEM
+    objective = cp.Minimize(c_arr @ x_cvx)
+    constraints = [
+        A_arr @ x_cvx == b_arr,
+        x_cvx >= 0
+    ]
+    problem_cvx = cp.Problem(objective, constraints)
+
+    # SOLVE
+    problem_cvx.solve()
+    if problem_cvx.value != np.inf:
+        print(np.round(problem_cvx.value,2), np.array([np.round(x.value,2) if x is not None else 0 for x in problem_cvx.variables() ]))
+    else:
+        print(problem_cvx.solution)
     print(solution)
+
 
 if __name__ == "__main__":
     run_test_0()
-    # run_test_1()
+    run_test_1()

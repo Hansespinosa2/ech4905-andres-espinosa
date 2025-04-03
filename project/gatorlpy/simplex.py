@@ -1,5 +1,11 @@
 import numpy as np
 
+FLOAT_POINT_ROUND = 8
+EPSILON = 10**-FLOAT_POINT_ROUND
+
+def zero_if_close_to_zero(x):
+    return np.where(np.abs(x) < EPSILON, 0, x)
+
 def pivot(tableau:np.ndarray, row_index:int, col_index:int) -> np.ndarray:
     tableau[row_index, :] /= tableau[row_index, col_index]
     for i in range(tableau.shape[0]):
@@ -10,7 +16,7 @@ def pivot(tableau:np.ndarray, row_index:int, col_index:int) -> np.ndarray:
 def find_entering_variable(tableau:np.ndarray,rule:str) -> int:
     if rule == 'blands':
         for col_index in range(tableau.shape[1] -1):
-            if tableau[-1, col_index] < 0:
+            if tableau[-1, col_index] < -EPSILON:
                 return col_index
         return None
     else:
@@ -19,7 +25,7 @@ def find_entering_variable(tableau:np.ndarray,rule:str) -> int:
 def find_leaving_variable(tableau:np.ndarray, entering_col_index:int) -> int:
     ratios = []
     for row_index in range(tableau.shape[0] -1):
-        if tableau[row_index, entering_col_index] > 0:
+        if tableau[row_index, entering_col_index] > EPSILON:
             ratio = tableau[row_index, -1] / tableau[row_index, entering_col_index]
             ratios.append((ratio, row_index))
     return min(ratios, default=(None,None))[1] if ratios else None
@@ -46,7 +52,7 @@ def simplex_phase_1(A:np.ndarray, b:np.ndarray):
         tableau = pivot(tableau, leaving_row_index, entering_col_index)
         basis[leaving_row_index] = entering_col_index
 
-    if tableau[-1,-1] > 1e-8:
+    if tableau[-1,-1] > EPSILON:
         return None, None, False # Infeasible Solution to original problem
     return tableau[:m,:n], tableau[:-1,-1], basis[:m]
 
@@ -72,8 +78,8 @@ def simplex_phase_2(A:np.ndarray, b:np.ndarray, c:np.ndarray, basis:list[int]) -
         basis[leaving_row_index] = entering_col_index
     
     solution = np.zeros(n)
-    solution[basis] = tableau[:-1,-1]
-    optimal_value = -tableau[-1,-1]
+    solution[basis] = zero_if_close_to_zero(tableau[:-1,-1])
+    optimal_value = zero_if_close_to_zero(tableau[-1,-1])
 
     return optimal_value, solution, True
 
@@ -81,5 +87,5 @@ def two_phase_simplex(A:np.ndarray, b:np.ndarray, c:np.ndarray) -> tuple[np.ndar
     A, b, basis = simplex_phase_1(A,b)
     if A is None:
         return None, None, False # Problem is infeasible
-    f_star, x_star, feasible = simplex_phase_2(A,b,c,basis)
+    f_star, x_star, feasible = simplex_phase_2(A,b,-c,basis)
     return f_star, x_star, feasible

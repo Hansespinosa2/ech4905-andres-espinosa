@@ -120,10 +120,8 @@ class Problem:
 
     def solve(self)->tuple[np.ndarray,bool]:
         A = self.constraints[0].left.left
-        x0 = self.constraints[0].left.right.array
         b = self.constraints[0].right.array
         c = self.objective.left
-
         f_star, x_star, feasible = two_phase_simplex(A, b, c)
         return f_star, x_star, feasible
 
