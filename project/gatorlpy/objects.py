@@ -60,7 +60,9 @@ class Variable(Expression):
     
     def __add__(self, other):
         if isinstance(other, Variable):
-            return Operation(self, other, "var_add_var", [self, other])
+            left_op = Operation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self])
+            right_op = Operation(Parameter(np.eye(other.shape)), other, "param_matmul_var", [other])
+            return left_op + right_op
 
     def __ge__(self, other):
         """Overload >= operator for constraints"""
@@ -114,6 +116,18 @@ class Operation(Expression):
     def __eq__(self, other):
         """Overload == operator for constraints"""
         return Constraint(self, other, "eq")
+    
+    def __neg__(self):
+        return Operation(-self.left, self.right, "param_matmul_var", [self])
+    
+    def __add__(self, other):
+        if isinstance(other, Variable):
+            other = Operation(Parameter(np.eye(other.shape)), other, "param_matmul_var", [other])
+        A_concat = Parameter(np.hstack(self.left.array, other.left.array), [self.left, other.left])
+
+
+
+
 
 
 class Constraint(Expression):
@@ -133,8 +147,7 @@ class Constraint(Expression):
             slack_vars = Variable(self.right.shape,True)
             return Constraint(self.left + slack_vars,self.right, "eq",[self])
         elif self.constraint_type == "param_matmul_var_geq_param":
-            slack_vars = Variable(self.right.shape,True)
-            return Constraint(self.left - slack_vars, self.right, "eq", [self])
+            return Constraint(-self.left, -self.right, "leq", [self])
         
 
 
