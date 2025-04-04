@@ -11,6 +11,7 @@ class Parameter(Expression):
     def __init__(self, array:np.ndarray, parents:list=[]):
         super().__init__("param", parents)
         self.array = array
+        self.shape = array.shape
                 
     @property
     def T(self):
@@ -45,9 +46,11 @@ class Variable(Expression):
     Represents a decision variable with a given shape.
     Supports matrix multiplication and constraint creation.
     """
-    def __init__(self, shape:int, parents:list=[]):
+    def __init__(self, shape:int, non_negative:bool=False, parents:list=[]):
         super().__init__("var", parents)
         self.array = np.zeros(shape)
+        self.shape = shape
+        self.non_negative = non_negative
 
     def __matmul__(self, other):
         """Overload @ operator for matrix multiplication"""
@@ -61,16 +64,26 @@ class Variable(Expression):
 
     def __ge__(self, other):
         """Overload >= operator for constraints"""
-
-        return Constraint(Operation(self, self, "identity", [self]), other, ">=")
+        if isinstance(other, (int, float)):
+            other = Parameter(np.full_like(self.array, other))
+        
+        if np.all(other.array==0):
+            self.non_negative = True
+            return None
+        
+        return Constraint(Operation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "geq")
 
     def __le__(self, other):
         """Overload <= operator for constraints"""
-        return Constraint(Operation(self, self, "identity", [self]), other, "<=")
+        if isinstance(other, (int, float)):
+            other = Parameter(np.full_like(self.array, other))
+        return Constraint(Operation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "leq")
 
     def __eq__(self, other):
         """Overload == operator for constraints"""
-        return Constraint(Operation(self, self, "identity", [self]), other, "==")
+        if isinstance(other, (int, float)):
+            other = Parameter(np.full_like(self.array, other))
+        return Constraint(Operation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "eq")
     
     def __repr__(self):
         return f"({self.array})"
@@ -103,15 +116,28 @@ class Operation(Expression):
         return Constraint(self, other, "eq")
 
 
-class Constraint:
+class Constraint(Expression):
     """
     Represents a linear constraint: A @ x <= b, >=, or ==.
     """
-    def __init__(self, left:Operation, right:Expression, eq_type:str):
+    def __init__(self, left:Operation, right:Expression, eq_type:str, parents:list=[]):
+        super().__init__('constraint',parents)
         self.left = left
         self.right = right
         self.eq_type = eq_type
         self.constraint_type = self.left.op + "_" + self.eq_type + "_" + self.right.expression_type
+        self.non_negativity = False
+
+
+        if self.constraint_type == "param_matmul_var_leq_param":
+            slack_vars = Variable(self.right.shape,True)
+            return Constraint(self.left + slack_vars,self.right, "eq",[self])
+        elif self.constraint_type == "param_matmul_var_geq_param":
+            slack_vars = Variable(self.right.shape,True)
+            return Constraint(self.left - slack_vars, self.right, "eq", [self])
+        
+
+
 
     def __repr__(self):
         return f"{self.left} {self.eq_type} {self.right}"         
