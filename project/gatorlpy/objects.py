@@ -126,10 +126,6 @@ class Operation(Expression):
         A_concat = Parameter(np.hstack(self.left.array, other.left.array), [self.left, other.left])
 
 
-
-
-
-
 class Constraint(Expression):
     """
     Represents a linear constraint: A @ x <= b, >=, or ==.
