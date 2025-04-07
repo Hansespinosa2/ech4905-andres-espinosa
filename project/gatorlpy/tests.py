@@ -33,6 +33,7 @@ def run_test_0():
     A = Parameter(A_arr)
     b = Parameter(b_arr)
     c = Parameter(c_arr)
+    zeros = Parameter(np.zeros_like(c_arr))
     # VARIABLES
     x = Variable(5) 
     # PROBLEM
@@ -40,7 +41,7 @@ def run_test_0():
         'minimize': c.T @ x,
         'subject to': [
             A @ x == b,
-            x >= 0
+            x >= zeros
         ]
     })
 
@@ -64,6 +65,7 @@ def run_test_1():
     A = Parameter(A_arr)
     b = Parameter(b_arr)
     c = Parameter(c_arr)
+    zeros = Parameter(np.zeros_like(c_arr))
     # VARIABLES
     x = Variable(4) 
     # PROBLEM
@@ -71,7 +73,7 @@ def run_test_1():
         'minimize': c.T @ x,
         'subject to': [
             A @ x == b,
-            x >= 0
+            x >= zeros
         ]
     })
     # VARIABLES

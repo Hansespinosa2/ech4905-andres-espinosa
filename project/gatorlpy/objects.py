@@ -3,13 +3,37 @@ from simplex import two_phase_simplex
 
 class Expression:
     """Base class for variables, parameters, and operations in a computation graph."""
-    def __init__(self, expression_type:str, parents:list=[]):
+    def __init__(self, expression_type:str, parents:list=[], shape:tuple=None):
         self.expression_type = expression_type
         self.parents = parents
+        self.shape = shape
+
+    def convert_to_expression(self, other):
+        if isinstance(other, (float, int)):
+            return Parameter(np.full(self.shape))
+        elif isinstance(other, (np.ndarray)):
+            return Parameter(other)
+        elif isinstance(other, (Expression)):
+            return other
+        else:
+            raise TypeError("Unsupported type for conversion to Expression.")
         
 
 class Sum(Expression):
-    pass
+    def __init__(self, terms: list[Expression]):
+        super().__init__("sum", terms)
+        self.terms = terms
+
+    def __repr__(self):
+        return " + ".join(str(term) for term in self.terms)
+    
+    def __add__(self, other:Expression):
+        other = self.convert_to_expression(other)
+        if isinstance(other, Sum):
+            return Sum(self.terms + other.terms)
+        else: # if it is an LinearOperation, Variable, Parameter, 
+            return Sum(self.terms + [other])
+    
 class Parameter(Expression):
     def __init__(self, array:np.ndarray, parents:list=[]):
         super().__init__("param", parents)
@@ -23,27 +47,30 @@ class Parameter(Expression):
     def __matmul__(self, other):
         """Overload @ operator for matrix multiplication"""
         if isinstance(other, Variable):
-            return Operation(self, other, "param_matmul_var", [self, other])
+            return LinearOperation(self, other, "param_matmul_var", [self, other])
         raise TypeError("Invalid type for matrix multiplication.")
 
     def __len__(self):
-        return len(self.array)
+        return self.shape[0]
 
     def __repr__(self):
         return f"({self.array})"
 
-    def __add__(self, other):
+    def __add__(self, other:Expression):
+        other = self.convert_to_expression(other)
         if isinstance(other, Parameter):
             if len(self) != len(other):
                 raise ValueError("Parameters must have the same length for addition.")
-            return Parameter(self.array + other.array, [self, other])
+            return Sum([self,other])
         elif isinstance(other, Variable):
-            return Operation(self, other, "param_add_var", [self, other])
+            return LinearOperation(self, other, "param_add_var", [self, other])
 
     def __neg__(self):
         return Parameter(-self.array, [self])
     
-
+    def __sub__(self, other):
+        return self.__add__(-other)
+    
 class Variable(Expression):
     """
     Represents a decision variable with a given shape.
@@ -55,88 +82,93 @@ class Variable(Expression):
         self.shape = shape
         self.non_negative = non_negative
 
-    def __matmul__(self, other):
+    def __matmul__(self, other): # I think this doesnt need to be implemented
         """Overload @ operator for matrix multiplication"""
         if isinstance(other, Parameter):
-            return Operation(self, other, "var_matmul_param", [self, other])
+            return LinearOperation(self, other, "var_matmul_param", [self, other])
         raise TypeError("Invalid type for matrix multiplication.")
     
-    def __add__(self, other):
-        if isinstance(other, Variable):
-            left_op = Operation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self])
-            right_op = Operation(Parameter(np.eye(other.shape)), other, "param_matmul_var", [other])
-            return left_op + right_op
+    def __add__(self, other:Expression):
+        other = self.convert_to_expression(other)
+        return Sum([self, other])
 
     def __ge__(self, other):
         """Overload >= operator for constraints"""
-        if isinstance(other, (int, float)):
-            other = Parameter(np.full_like(self.array, other))
-        
-        if np.all(other.array==0):
-            self.non_negative = True
-            return None
-        
-        return Constraint(Operation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "geq")
+        other = self.convert_to_expression(other)       
+        return Constraint(LinearOperation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "geq")
 
     def __le__(self, other):
         """Overload <= operator for constraints"""
-        if isinstance(other, (int, float)):
-            other = Parameter(np.full_like(self.array, other))
-        return Constraint(Operation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "leq")
+        other = self.convert_to_expression(other)
+        return Constraint(LinearOperation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "leq")
 
     def __eq__(self, other):
         """Overload == operator for constraints"""
-        if isinstance(other, (int, float)):
-            other = Parameter(np.full_like(self.array, other))
-        return Constraint(Operation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "eq")
+        other = self.convert_to_expression(other)
+        return Constraint(LinearOperation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "eq")
     
     def __repr__(self):
         return f"({self.array})"
+    
+    def __len__(self):
+        return self.shape[0]
+    
+    def __sub__(self,other):
+        return self.__add__(-other)
 
 
-class Operation(Expression):
+class LinearOperation(Expression):
     """
     Represents a matrix operation (e.g., A @ x).
     possible ops: 
     """
-    def __init__(self, left:Expression, right:Expression, op:str, parents:list=[]):
+    def __init__(self, left:Parameter, right:Variable, op:str, parents:list=[]):
         super().__init__("op", parents)
-        self.left = left
-        self.right = right
+        self.parameter = left
+        self.variable = right
         self.op = op
+        self.shape = right.shape
 
     def __repr__(self):
-        return f"({self.left} {self.op} {self.right})"
+        return f"({self.parameter} {self.op} {self.variable})"
     
     def __ge__(self, other):
         """Overload >= operator for constraints"""
+        other = self.convert_to_expression(other)
         return Constraint(self, other, "geq")
 
     def __le__(self, other):
         """Overload <= operator for constraints"""
+        other = self.convert_to_expression(other)
         return Constraint(self, other, "leq")
 
     def __eq__(self, other):
         """Overload == operator for constraints"""
+        other = self.convert_to_expression(other)
         return Constraint(self, other, "eq")
     
     def __neg__(self):
-        return Operation(-self.left, self.right, "param_matmul_var", [self])
+        return LinearOperation(-self.parameter, self.variable, "param_matmul_var", [self])
     
-    def __add__(self, other):
-        if isinstance(other, Variable): # Still need to handle parameter
-            other = Operation(Parameter(np.eye(other.shape)), other, "param_matmul_var", [other])
-        A_concat = Parameter(np.hstack(self.left.array, other.left.array), [self.left, other.left])
-        var_concat = Variable(self.right.shape + other.right.shape,(self.right.non_negative and other.right.non_negative),[self.right, other.right])
-        return Operation(A_concat,var_concat,"param_matmul_var",[self, other])
+    def __add__(self, other:Expression):
+        other = self.convert_to_expression(other)
+        return Sum([self, other])
+    
+    def __len__(self):
+        return self.parameter.shape[0]
+    
+    def __sub__(self, other:Expression):
+        return self.__add__(-other)
 
 
 class Constraint(Expression):
     """
     Represents a linear constraint: A @ x <= b, >=, or ==.
     """
-    def __init__(self, left:Operation, right:Expression, eq_type:str, parents:list=[]):
+    def __init__(self, left:Expression, right:Expression, eq_type:str, parents:list=[]):
         super().__init__('constraint',parents)
+        left = self.convert_to_expression(left)
+        right = self.convert_to_expression(right)
         self.left = left
         self.right = right
         self.eq_type = eq_type
@@ -150,9 +182,6 @@ class Constraint(Expression):
         elif self.constraint_type == "param_matmul_var_geq_param":
             return Constraint(-self.left, -self.right, "leq", [self])
         
-
-
-
     def __repr__(self):
         return f"{self.left} {self.eq_type} {self.right}"         
 
@@ -173,11 +202,30 @@ class Problem:
             self.constraints = problem_def['constraints']
         else:
             raise ValueError("The constraint definition must contain either 'subject to' xor 'constraints' as a key.")
+        
+    def to_slack_form(self):
+        # each constraint should be Expression >=,<=,== Expression
+        # where Expression is either Sum, Parameter, Variable, or LinearOperation
+        # It should turn each constraint into a linear constraint Sum <=, >=, == Parameter
+        # It should then make a pass to understand which variables are constrained or not
+        # Turn the non_negative ones non_negative and then go to the unconstrained ones
+        # then split them and constrain them
+        # and then turn it into one stacked constraint Ax == b, x non-negative
+        for constraint in self.constraints:
+            if isinstance(constraint.left, Parameter):
+                pass
+
+    def any_constraint_to_sum_constraint(self):
+        # Here I should turn any constraint into a Sum >=,<=,== Sum constraint
+        pass
+    def sum_constraint_to_linear_constraint(self):
+        # Here I should turn a sum constreaint into a Sum <=,>=,== Parameter Constraint
+        pass
 
     def solve(self)->tuple[np.ndarray,bool]:
-        A = self.constraints[0].left.left.array
+        A = self.constraints[0].left.parameter.array
         b = self.constraints[0].right.array
-        c = self.objective.left.array
+        c = self.objective.parameter.array
         f_star, x_star, feasible = two_phase_simplex(A, b, c)
         return f_star, x_star, feasible
 
