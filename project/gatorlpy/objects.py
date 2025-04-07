@@ -7,6 +7,9 @@ class Expression:
         self.expression_type = expression_type
         self.parents = parents
         
+
+class Sum(Expression):
+    pass
 class Parameter(Expression):
     def __init__(self, array:np.ndarray, parents:list=[]):
         super().__init__("param", parents)
@@ -121,9 +124,11 @@ class Operation(Expression):
         return Operation(-self.left, self.right, "param_matmul_var", [self])
     
     def __add__(self, other):
-        if isinstance(other, Variable):
+        if isinstance(other, Variable): # Still need to handle parameter
             other = Operation(Parameter(np.eye(other.shape)), other, "param_matmul_var", [other])
         A_concat = Parameter(np.hstack(self.left.array, other.left.array), [self.left, other.left])
+        var_concat = Variable(self.right.shape + other.right.shape,(self.right.non_negative and other.right.non_negative),[self.right, other.right])
+        return Operation(A_concat,var_concat,"param_matmul_var",[self, other])
 
 
 class Constraint(Expression):
