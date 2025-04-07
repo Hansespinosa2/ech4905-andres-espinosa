@@ -2,6 +2,28 @@ import numpy as np
 import cvxpy as cp
 from objects import Problem, Parameter, Variable
 
+def get_test_results(glp_prob:Problem, cvxpy_prob:cp.Problem, test_id:int):
+    glp_solution = glp_prob.solve()
+    cvx_solution = cvxpy_prob.solve()
+
+    if cvxpy_prob.status in [cp.OPTIMAL, cp.OPTIMAL_INACCURATE]:
+        f_star = np.round(cvxpy_prob.value, 2)
+        x_star = np.array([np.round(var.value, 2) if var.value is not None else 0 for var in cvxpy_prob.variables()])
+        feasible = True
+    else:
+        f_star = None
+        x_star = None
+        feasible = False
+    # Compare results
+    if feasible and cvx_solution is not None:
+        passed = np.isclose(f_star, glp_solution[0], atol=1e-2) and np.allclose(x_star, glp_solution[1], atol=1e-2)
+    else:
+        passed = False
+    print(f"Test ID: {test_id}")
+    print(f"f_star: {f_star}, x_star: {x_star}, feasible: {feasible}")
+    print(glp_solution)
+    print(f"Test passed: {passed} \n")
+
 
 def run_test_0():
     # PARAMETERS
@@ -21,7 +43,6 @@ def run_test_0():
             x >= 0
         ]
     })
-    solution = problem.solve()
 
     # VARIABLES
     x_cvx = cp.Variable(5)
@@ -33,13 +54,7 @@ def run_test_0():
     ]
     problem_cvx = cp.Problem(objective, constraints)
 
-    # SOLVE
-    problem_cvx.solve()
-    if problem_cvx.value != np.inf:
-        print(np.round(problem_cvx.value,2), np.array([np.round(x.value,2) if x is not None else 0 for x in problem_cvx.variables() ]))
-    else:
-        print(problem_cvx.solution)
-    print(solution)
+    get_test_results(problem, problem_cvx, 1)
     
 
 def run_test_1():
@@ -59,9 +74,6 @@ def run_test_1():
             x >= 0
         ]
     })
-    solution = problem.solve()
-    
-
     # VARIABLES
     x_cvx = cp.Variable(4)
     # PROBLEM
@@ -72,26 +84,7 @@ def run_test_1():
     ]
     problem_cvx = cp.Problem(objective, constraints)
 
-    # SOLVE
-    problem_cvx.solve()
-    if problem_cvx.status in [cp.OPTIMAL, cp.OPTIMAL_INACCURATE]:
-        f_star = np.round(problem_cvx.value, 2)
-        x_star = np.array([np.round(var.value, 2) if var.value is not None else 0 for var in problem_cvx.variables()])
-        feasible = True
-    else:
-        f_star = None
-        x_star = None
-        feasible = False
-
-    print(f"f_star: {f_star}, x_star: {x_star}, feasible: {feasible}")
-    print(solution)
-    # Compare results
-    if feasible and solution is not None:
-        passed = np.isclose(f_star, solution[0], atol=1e-2) and np.allclose(x_star, solution[1], atol=1e-2)
-    else:
-        passed = False
-
-    print(f"Test passed: {passed} \n")
+    get_test_results(problem, problem_cvx, 2)
 
 
 
