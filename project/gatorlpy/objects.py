@@ -138,7 +138,7 @@ class Constraint(Expression):
         self.constraint_type = self.left.op + "_" + self.eq_type + "_" + self.right.expression_type
         self.non_negativity = False
 
-
+    def to_slack_form(self):
         if self.constraint_type == "param_matmul_var_leq_param":
             slack_vars = Variable(self.right.shape,True)
             return Constraint(self.left + slack_vars,self.right, "eq",[self])

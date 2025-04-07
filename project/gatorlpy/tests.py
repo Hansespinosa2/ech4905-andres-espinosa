@@ -74,11 +74,25 @@ def run_test_1():
 
     # SOLVE
     problem_cvx.solve()
-    if problem_cvx.value != np.inf:
-        print(np.round(problem_cvx.value,2), np.array([np.round(x.value,2) if x is not None else 0 for x in problem_cvx.variables() ]))
+    if problem_cvx.status in [cp.OPTIMAL, cp.OPTIMAL_INACCURATE]:
+        f_star = np.round(problem_cvx.value, 2)
+        x_star = np.array([np.round(var.value, 2) if var.value is not None else 0 for var in problem_cvx.variables()])
+        feasible = True
     else:
-        print(problem_cvx.solution)
+        f_star = None
+        x_star = None
+        feasible = False
+
+    print(f"f_star: {f_star}, x_star: {x_star}, feasible: {feasible}")
     print(solution)
+    # Compare results
+    if feasible and solution is not None:
+        passed = np.isclose(f_star, solution[0], atol=1e-2) and np.allclose(x_star, solution[1], atol=1e-2)
+    else:
+        passed = False
+
+    print(f"Test passed: {passed} \n")
+
 
 
 if __name__ == "__main__":
