@@ -10,7 +10,7 @@ class Expression:
 
     def convert_to_expression(self, any):
         if isinstance(any, (float, int)):
-            return Parameter(np.full(self.shape))
+            return Parameter(np.full(self.shape,any))
         elif isinstance(any, (np.ndarray)):
             return Parameter(any)
         elif isinstance(any, (Expression)):
@@ -63,12 +63,17 @@ class Sum(Expression):
         return self.__add__(-other)
         
     def split_to_like_terms(self):
-        assert self.is_linear_sum()
+        assert self.is_sum_of_type((LinearOperation,Parameter))
         return Sum(self.get_terms_of_type(LinearOperation)), Sum(self.get_terms_of_type(Parameter))
     
-    def is_linear_sum(self) -> bool:
+    def is_sum_of_type(self, types:tuple[type]) -> bool:
         """Check if the Sum contains only Parameter or LinearOperation objects."""
-        return all(isinstance(term, (Parameter, LinearOperation)) for term in self.terms)
+        return all(isinstance(term, types) for term in self.terms)
+    
+    def combine_like_params(self):
+        assert self.is_sum_of_type(Parameter)
+        array = np.array([array for array in self.terms])
+        return Parameter(np.sum(array,axis=0),[self])
         
 
     
@@ -210,14 +215,13 @@ class Constraint(Expression):
     Represents a linear constraint: A @ x <= b, >=, or ==.
     """
     def __init__(self, left:Expression, right:Expression, eq_type:str, parents:list=[]):
-        super().__init__('constraint',parents)
+        super().__init__('constraint', parents)
         left = self.convert_to_expression(left)
         right = self.convert_to_expression(right)
         self.left = left
         self.right = right
         self.eq_type = eq_type
         self.constraint_type = self.left.op + "_" + self.eq_type + "_" + self.right.expression_type
-        self.non_negativity = False
 
     def to_slack_form(self):
         if self.constraint_type == "param_matmul_var_leq_param":
@@ -238,13 +242,24 @@ class Constraint(Expression):
         right_sum = self.right 
         left_lin_ops, left_params = left_sum.split_to_like_terms()
         right_lin_ops, right_params = right_sum.split_to_like_terms()
-        combined_lin_ops = left_lin_ops - right_lin_ops
-        combined_params = right_params - left_params
+        lin_op_sum = left_lin_ops - right_lin_ops
+        param_sum = right_params - left_params
+        param = param_sum.combine_like_params()
 
-        return Constraint(combined_lin_ops, combined_params, self.eq_type, [self])
+        return Constraint(lin_op_sum, param, self.eq_type, [self])
 
     def is_sum_constraint(self) -> bool:
         return (isinstance(self.left, Sum) and isinstance(self.right, Sum))
+    
+    def is_non_negativity_constraint(self) -> bool:
+        left_is_var = isinstance(self.left, (Variable))
+        right_is_param = isinstance(self.right, (Parameter))
+        if right_is_param:
+            right_is_zeros = np.all(self.right.array == 0)
+        else:
+            right_is_zeros = False
+        self_is_geq = (self.eq_type == "geq")
+        return all([left_is_var, right_is_param, right_is_zeros, self_is_geq])
 
 
 
@@ -266,6 +281,7 @@ class Problem:
         else:
             raise ValueError("The constraint definition must contain either 'subject to' xor 'constraints' as a key.")
         
+        
     def to_slack_form(self):
         # each constraint should be Expression >=,<=,== Expression
         # where Expression is either Sum, Parameter, Variable, or LinearOperation
@@ -275,8 +291,12 @@ class Problem:
         # then split them and constrain them
         # and then turn it into one stacked constraint Ax == b, x non-negative
         for constraint in self.constraints:
+            if constraint.is_non_negativity_constraint():
+                constraint.left.non_negative = True
+                continue
             constraint = constraint.any_constraint_to_sum_constraint()
             constraint = constraint.sum_constraint_to_linear_constraint()
+
 
 
     def solve(self)->tuple[np.ndarray,bool]:
