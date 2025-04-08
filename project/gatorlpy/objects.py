@@ -208,6 +208,7 @@ class LinearOperation(Expression):
     
     def __sub__(self, other:Expression):
         return self.__add__(-other)
+    
 
 
 class Constraint(Expression):
@@ -261,6 +262,30 @@ class Constraint(Expression):
         self_is_geq = (self.eq_type == "geq")
         return all([left_is_var, right_is_param, right_is_zeros, self_is_geq])
 
+    def is_linear_constraint(self) -> bool: # this is not correct
+        return (isinstance(self.left, Sum) and isinstance(self.right, Variable) and self.left.is_sum_of_type(LinearOperation))
+    
+    def fix_unbounded_linear_constraint(self):
+        assert self.is_linear_constraint()
+        lin_terms = []
+        for lin_op_term in self.left.terms:
+            var = lin_op_term.variable
+            if not var.non_negative:
+                var_plus = Variable(var.shape, True, [var])
+                var_neg = Variable(var.shape, True, [var])
+                lin_op_var_plus = LinearOperation(lin_op_term.parameter, var_plus, "param_matmul_var", [lin_op_term])
+                lin_op_var_neg = LinearOperation(-lin_op_term.parameter, var_neg, "param_matmul_var", [lin_op_term])
+                lin_terms.append(lin_op_var_plus)
+                lin_terms.append(lin_op_var_neg)
+            else:
+                lin_terms.append(lin_op_term)
+        
+        return Constraint(Sum(lin_terms), self.right, self.eq_type, [self])
+
+
+
+
+
 
 class Problem:
     def __init__(self, problem_def:dict):
@@ -289,10 +314,20 @@ class Problem:
         # Turn the non_negative ones non_negative and then go to the unconstrained ones
         # then split them and constrain them
         # and then turn it into one stacked constraint Ax == b, x non-negative
+        self.remove_non_negativity_constraints()
+        self.fix_non_negative_variables()
+        
+    def remove_non_negativity_constraints(self):
         for constraint in self.constraints[:]:  # Iterate over a copy of the list to allow removal
             if constraint.is_non_negativity_constraint():
                 constraint.left.non_negative = True
                 self.constraints.remove(constraint)
+    
+    def fix_non_negative_variables(self):
+        for constraint in self.constraints[:]:
+            assert not constraint.is_non_negatitivity_constraint()
+            constraint = constraint.fix_unbounded_linear_constraint()
+            
 
 
     def solve(self)->tuple[np.ndarray,bool]:
