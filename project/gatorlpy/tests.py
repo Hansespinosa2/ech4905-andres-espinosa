@@ -20,7 +20,7 @@ def get_test_results(glp_prob:Problem, cvxpy_prob:cp.Problem, test_id:int):
     else:
         passed = False
     print(f"Test ID: {test_id}")
-    print(f"f_star: {f_star}, x_star: {x_star}, feasible: {feasible}")
+    print((f_star, x_star, feasible))
     print(glp_solution)
     print(f"Test passed: {passed} \n")
 
