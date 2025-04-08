@@ -8,16 +8,33 @@ class Expression:
         self.parents = parents
         self.shape = shape
 
-    def convert_to_expression(self, other):
-        if isinstance(other, (float, int)):
+    def convert_to_expression(self, any):
+        if isinstance(any, (float, int)):
             return Parameter(np.full(self.shape))
-        elif isinstance(other, (np.ndarray)):
-            return Parameter(other)
-        elif isinstance(other, (Expression)):
-            return other
+        elif isinstance(any, (np.ndarray)):
+            return Parameter(any)
+        elif isinstance(any, (Expression)):
+            return any
         else:
             raise TypeError("Unsupported type for conversion to Expression.")
         
+    def expression_to_linear_sum(self):
+        if isinstance(self, (Parameter)):
+            return Sum([self])
+        elif isinstance(self, (Variable)):
+            return Sum([self.var_to_lin_op()])
+        elif isinstance(self, (LinearOperation)):
+            return Sum([self])
+        elif isinstance(self, (Sum)):
+            sum_list = []
+            for item in self.terms:
+                if isinstance(item, (Variable)):
+                    sum_list.append(item.var_to_lin_op())
+                elif isinstance(item, (Parameter, LinearOperation)):
+                    sum_list.append(item)
+                else:
+                    raise TypeError("Unsupported type for conversion to Linear Sum.")
+            return Sum(sum_list)
 
 class Sum(Expression):
     def __init__(self, terms: list[Expression]):
@@ -33,6 +50,27 @@ class Sum(Expression):
             return Sum(self.terms + other.terms)
         else: # if it is an LinearOperation, Variable, Parameter, 
             return Sum(self.terms + [other])
+        
+    def get_terms_of_type(self, term_type: type) -> list:
+        """Retrieve all terms of a specific type from the sum."""
+        return [term for term in self.terms if isinstance(term, term_type)]
+    
+    def __neg__(self):
+        neg_terms = [-term for term in self.terms]
+        return Sum(neg_terms)
+    
+    def __sub__(self, other):
+        return self.__add__(-other)
+        
+    def split_to_like_terms(self):
+        assert self.is_linear_sum()
+        return Sum(self.get_terms_of_type(LinearOperation)), Sum(self.get_terms_of_type(Parameter))
+    
+    def is_linear_sum(self) -> bool:
+        """Check if the Sum contains only Parameter or LinearOperation objects."""
+        return all(isinstance(term, (Parameter, LinearOperation)) for term in self.terms)
+        
+
     
 class Parameter(Expression):
     def __init__(self, array:np.ndarray, parents:list=[]):
@@ -56,7 +94,7 @@ class Parameter(Expression):
     def __repr__(self):
         return f"({self.array})"
 
-    def __add__(self, other:Expression):
+    def __add__(self, other):
         other = self.convert_to_expression(other)
         if isinstance(other, Parameter):
             if len(self) != len(other):
@@ -95,17 +133,17 @@ class Variable(Expression):
     def __ge__(self, other):
         """Overload >= operator for constraints"""
         other = self.convert_to_expression(other)       
-        return Constraint(LinearOperation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "geq")
+        return Constraint(self.var_to_lin_op(), other, "geq")
 
     def __le__(self, other):
         """Overload <= operator for constraints"""
         other = self.convert_to_expression(other)
-        return Constraint(LinearOperation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "leq")
+        return Constraint(self.var_to_lin_op(), other, "leq")
 
     def __eq__(self, other):
         """Overload == operator for constraints"""
         other = self.convert_to_expression(other)
-        return Constraint(LinearOperation(Parameter(np.eye(self.shape)), self, "param_matmul_var", [self]), other, "eq")
+        return Constraint(self.var_to_lin_op(), other, "eq")
     
     def __repr__(self):
         return f"({self.array})"
@@ -113,8 +151,14 @@ class Variable(Expression):
     def __len__(self):
         return self.shape[0]
     
+    def __neg__(self):
+        return self.var_to_lin_op(-1)
+    
     def __sub__(self,other):
         return self.__add__(-other)
+    
+    def var_to_lin_op(self, coeff:int|float=1):
+        return LinearOperation(Parameter(coeff * np.eye(self.shape)), self, "param_matmul_var", [self])
 
 
 class LinearOperation(Expression):
@@ -183,7 +227,26 @@ class Constraint(Expression):
             return Constraint(-self.left, -self.right, "leq", [self])
         
     def __repr__(self):
-        return f"{self.left} {self.eq_type} {self.right}"         
+        return f"{self.left} {self.eq_type} {self.right}"
+
+    def any_constraint_to_sum_constraint(self):
+        return Constraint(self.left.expression_to_linear_sum(), self.right.expression_to_linear_sum(),self.eq_type,[self])
+    
+    def sum_constraint_to_linear_constraint(self):
+        assert self.is_sum_constraint()
+        left_sum = self.left
+        right_sum = self.right 
+        left_lin_ops, left_params = left_sum.split_to_like_terms()
+        right_lin_ops, right_params = right_sum.split_to_like_terms()
+        combined_lin_ops = left_lin_ops - right_lin_ops
+        combined_params = right_params - left_params
+
+        return Constraint(combined_lin_ops, combined_params, self.eq_type, [self])
+
+    def is_sum_constraint(self) -> bool:
+        return (isinstance(self.left, Sum) and isinstance(self.right, Sum))
+
+
 
 class Problem:
     def __init__(self, problem_def:dict):
@@ -212,15 +275,9 @@ class Problem:
         # then split them and constrain them
         # and then turn it into one stacked constraint Ax == b, x non-negative
         for constraint in self.constraints:
-            if isinstance(constraint.left, Parameter):
-                pass
+            constraint = constraint.any_constraint_to_sum_constraint()
+            constraint = constraint.sum_constraint_to_linear_constraint()
 
-    def any_constraint_to_sum_constraint(self):
-        # Here I should turn any constraint into a Sum >=,<=,== Sum constraint
-        pass
-    def sum_constraint_to_linear_constraint(self):
-        # Here I should turn a sum constreaint into a Sum <=,>=,== Parameter Constraint
-        pass
 
     def solve(self)->tuple[np.ndarray,bool]:
         A = self.constraints[0].left.parameter.array
