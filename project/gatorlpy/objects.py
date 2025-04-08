@@ -262,7 +262,6 @@ class Constraint(Expression):
         return all([left_is_var, right_is_param, right_is_zeros, self_is_geq])
 
 
-
 class Problem:
     def __init__(self, problem_def:dict):
         if 'minimize' in problem_def and 'maximize' not in problem_def:
@@ -290,13 +289,10 @@ class Problem:
         # Turn the non_negative ones non_negative and then go to the unconstrained ones
         # then split them and constrain them
         # and then turn it into one stacked constraint Ax == b, x non-negative
-        for constraint in self.constraints:
+        for constraint in self.constraints[:]:  # Iterate over a copy of the list to allow removal
             if constraint.is_non_negativity_constraint():
                 constraint.left.non_negative = True
-                continue
-            constraint = constraint.any_constraint_to_sum_constraint()
-            constraint = constraint.sum_constraint_to_linear_constraint()
-
+                self.constraints.remove(constraint)
 
 
     def solve(self)->tuple[np.ndarray,bool]:
