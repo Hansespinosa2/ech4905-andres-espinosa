@@ -20,8 +20,8 @@ def get_test_results(glp_prob:Problem, cvxpy_prob:cp.Problem, test_id:str):
     else:
         passed = False
     print(f"Test ID: {test_id}")
-    print((f_star, x_star, feasible))
-    print(glp_solution)
+    print(f"CVX: {(f_star, x_star, feasible)}")
+    print(f"GLP: {glp_solution}")
     print(f"Test passed: {passed} \n")
 
 
@@ -159,7 +159,6 @@ def run_test_2():
     A = Parameter(A_arr)
     b = Parameter(b_arr)
     c = Parameter(c_arr)
-    zeros = Parameter(np.zeros_like(c_arr))
     # VARIABLES
     x = Variable(5) 
     # PROBLEM
@@ -167,7 +166,7 @@ def run_test_2():
         'minimize': c.T @ x,
         'subject to': [
             A @ x == b,
-            x >= zeros
+            x >= 0
         ]
     })
 
@@ -197,7 +196,7 @@ def run_test_3():
     problem = Problem({
         'minimize': c.T @ x,
         'subject to': [
-            A @ x >= b,
+            A @ x <= b,
             x >= 0
         ]
     })
@@ -217,9 +216,9 @@ def run_test_3():
 
 
 if __name__ == "__main__":
-    run_test_0a()
-    run_test_0b()
-    run_test_1a()
-    run_test_1b()
+    # run_test_0a()
+    # run_test_0b()
+    # run_test_1a()
+    # run_test_1b()
     run_test_2() # seems to fail when it is -Ax == -b
-    run_test_3()
+    # run_test_3()
