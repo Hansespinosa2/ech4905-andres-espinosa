@@ -130,17 +130,17 @@ class Variable(Expression):
     def __ge__(self, other):
         """Overload >= operator for constraints"""
         other = convert_to_expression(other,self.shape)       
-        return Constraint(self.var_to_lin_op(), other, "geq")
+        return Constraint(var_to_lin_op(self), other, "geq")
 
     def __le__(self, other):
         """Overload <= operator for constraints"""
         other = convert_to_expression(other,self.shape)
-        return Constraint(self.var_to_lin_op(), other, "leq")
+        return Constraint(var_to_lin_op(self), other, "leq")
 
     def __eq__(self, other):
         """Overload == operator for constraints"""
         other = convert_to_expression(other,self.shape)
-        return Constraint(self.var_to_lin_op(), other, "eq")
+        return Constraint(var_to_lin_op(self), other, "eq")
     
     def __repr__(self):
         return f"({self.array})"
@@ -149,13 +149,10 @@ class Variable(Expression):
         return self.shape
     
     def __neg__(self):
-        return self.var_to_lin_op(-1)
+        return var_to_lin_op(self,-1)
     
     def __sub__(self,other):
         return self.__add__(-other)
-    
-    def var_to_lin_op(self, coeff:int|float=1):
-        return LinearOperation(Parameter(coeff * np.eye(self.shape)), self, "param_matmul_var", [self])
     
     def __hash__(self):
         return id(self)
@@ -282,11 +279,11 @@ class Constraint(Expression):
         if self.eq_type == "eq":
             return self, []
         elif self.eq_type == "leq":
-            slack_var = Variable(self.right.shape)
-            return Constraint(self.left + slack_var.var_to_lin_op(), self.right, "eq", [self]), [slack_var]
+            slack_var = Variable(self.right.shape[0])
+            return Constraint(self.left + var_to_lin_op(slack_var), self.right, "eq", [self]), [slack_var]
         elif self.eq_type == "geq":
-            slack_var = Variable(self.right.shape)
-            return Constraint(-self.left + slack_var.var_to_lin_op(), -self.right, "eq", [self]), [slack_var]
+            slack_var = Variable(self.right.shape[0])
+            return Constraint(-self.left + var_to_lin_op(slack_var), -self.right, "eq", [self]), [slack_var]
         else:
             raise ValueError(f"Unsupported eq_type: {self.eq_type}")
 
@@ -417,7 +414,7 @@ class Problem:
         for constraint in self.constraints:
             constraint, slack_var = constraint.turn_linear_constraint_to_equality()
             if slack_var:
-                self.bounded_vars.append(slack_var)
+                self.bounded_vars.extend(slack_var)
             updated_constraints.append(constraint)
         self.constraints = updated_constraints
 
@@ -427,6 +424,7 @@ class Problem:
         for var in self.bounded_vars:
            end_index = var.shape + start_index
            self.problem_var_map[var] =  (start_index, end_index)
+           start_index = end_index
         self.total_var_length = end_index
 
     def get_final_variable(self):
@@ -461,14 +459,14 @@ def expression_to_linear_sum(exp:Expression) -> Sum:
     if isinstance(exp, (Parameter)):
         return Sum([exp])
     elif isinstance(exp, (Variable)):
-        return Sum([exp.var_to_lin_op()])
+        return Sum([var_to_lin_op(exp)])
     elif isinstance(exp, (LinearOperation)):
         return Sum([exp])
     elif isinstance(exp, (Sum)):
         sum_list = []
         for item in exp.terms:
             if isinstance(item, (Variable)):
-                sum_list.append(item.var_to_lin_op())
+                sum_list.append(var_to_lin_op(item))
             elif isinstance(item, (Parameter, LinearOperation)):
                 sum_list.append(item)
             else:
@@ -487,3 +485,6 @@ def convert_to_expression(any, shape_hint:tuple|int=None) -> Expression:
         return any
     else:
         raise TypeError("Unsupported type for conversion to Expression.")
+    
+def var_to_lin_op(var:Variable, coeff:int|float=1) -> LinearOperation:
+    return LinearOperation(Parameter(coeff * np.eye(var.shape)), var, "param_matmul_var", [var])

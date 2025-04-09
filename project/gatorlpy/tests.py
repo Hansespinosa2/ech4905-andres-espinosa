@@ -2,7 +2,7 @@ import numpy as np
 import cvxpy as cp
 from lp_reductions import Problem, Parameter, Variable
 
-def get_test_results(glp_prob:Problem, cvxpy_prob:cp.Problem, test_id:int):
+def get_test_results(glp_prob:Problem, cvxpy_prob:cp.Problem, test_id:str):
     glp_solution = glp_prob.solve()
     cvx_solution = cvxpy_prob.solve()
 
@@ -55,7 +55,7 @@ def run_test_0():
     ]
     problem_cvx = cp.Problem(objective, constraints)
 
-    get_test_results(problem, problem_cvx, 1)
+    get_test_results(problem, problem_cvx, "1 matrix constraint, 1 var, n = 5, Slack Form, Minimize")
     
 
 def run_test_1():
@@ -86,10 +86,42 @@ def run_test_1():
     ]
     problem_cvx = cp.Problem(objective, constraints)
 
-    get_test_results(problem, problem_cvx, 2)
+    get_test_results(problem, problem_cvx, "1 matrix constraint, 1 var, n = 4, Slack Form, Minimize")
+
+def run_test_2():
+        # PARAMETERS
+    A_arr = np.c_[np.array([[2, 1], [1, 3], [3, 1]])]
+    b_arr = np.array([10,18,15])
+    c_arr = np.r_[np.array([5,4])]
+    A = Parameter(A_arr)
+    b = Parameter(b_arr)
+    c = Parameter(c_arr)
+    # VARIABLES
+    x = Variable(2) 
+    # PROBLEM
+    problem = Problem({
+        'minimize': c.T @ x,
+        'subject to': [
+            A @ x >= b,
+            x >= 0
+        ]
+    })
+
+    # VARIABLES
+    x_cvx = cp.Variable(2)
+    # PROBLEM
+    objective = cp.Minimize(c_arr @ x_cvx)
+    constraints = [
+        A_arr @ x_cvx >= b_arr,
+        x_cvx >= 0
+    ]
+    problem_cvx = cp.Problem(objective, constraints)
+
+    get_test_results(problem, problem_cvx, "1 matrix constraint, 1 var, n = 2, Standard Form, Minimize")
 
 
 
 if __name__ == "__main__":
-    run_test_0()
-    run_test_1()
+    # run_test_0()
+    # run_test_1()
+    run_test_2()
