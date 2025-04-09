@@ -33,6 +33,10 @@ def find_leaving_variable(tableau:np.ndarray, entering_col_index:int) -> int:
 
 def simplex_phase_1(A:np.ndarray, b:np.ndarray):
     m, n = A.shape
+    for i in range(m):
+        if b[i] < 0:
+            A[i, :] *= -1
+            b[i] *= -1
     A_aux = np.hstack((A, np.eye(m)))
     c_aux = np.hstack((np.zeros(n), np.ones(m)))
     tableau = np.hstack((A_aux, b.reshape(-1,1)))
@@ -43,6 +47,8 @@ def simplex_phase_1(A:np.ndarray, b:np.ndarray):
     tableau[-1,-1] = -np.sum(tableau[:-1,-1])
 
     while True:
+        print("Current Tableau \n")
+        print(tableau)
         entering_col_index = find_entering_variable(tableau, rule='blands')
         if entering_col_index is None:
             break
@@ -54,6 +60,7 @@ def simplex_phase_1(A:np.ndarray, b:np.ndarray):
 
     if tableau[-1,-1] > EPSILON:
         return None, None, False # Infeasible Solution to original problem
+    print(basis)
     return tableau[:m,:n], tableau[:-1,-1], basis[:m]
 
 def simplex_phase_2(A:np.ndarray, b:np.ndarray, c:np.ndarray, basis:list[int]) -> tuple[np.ndarray|bool]:
