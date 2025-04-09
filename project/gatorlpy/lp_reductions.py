@@ -439,7 +439,13 @@ class Problem:
         
     def standard_form_constraint_params(self):
         self.A_big = np.vstack([constraint.left.parameter.array for constraint in self.constraints])
-        self.b_big = np.vstack([constraint.right.array.flatten() for constraint in self.constraints]).flatten()
+        seee = [constraint.right.array.flatten() for constraint in self.constraints]
+        self.b_big = np.vstack([constraint.right.array.flatten().reshape(-1,1) for constraint in self.constraints]).flatten()
+        for i in range(self.A_big.shape[0]):
+            if self.b_big[i] < 0:
+                self.A_big[i, :] *= -1
+                self.b_big[i] *= -1
+            
             
     def standard_form_objective(self): 
         objective = expression_to_linear_sum(self.objective) #This could still be a problem since there could be feasibility problems
@@ -451,6 +457,7 @@ class Problem:
         if self.objective_direction == "maximize":
             self.objective = -self.objective
             self.c_big = -self.c_big
+    
 
     def solve(self)->tuple[np.ndarray,bool]:
         self.to_slack_form()

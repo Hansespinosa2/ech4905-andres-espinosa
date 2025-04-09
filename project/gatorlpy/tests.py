@@ -196,7 +196,7 @@ def run_test_3():
     problem = Problem({
         'minimize': c.T @ x,
         'subject to': [
-            A @ x <= b,
+            A @ x >= b,
             x >= 0
         ]
     })
@@ -213,6 +213,42 @@ def run_test_3():
 
     get_test_results(problem, problem_cvx, "1 matrix constraint, 1 var, n = 2, Standard Form, Minimize")
 
+def run_test_4a():
+    # PARAMETERS
+    A_arr =np.array([[1, 0], [0, 2]])
+    A_eq = np.array([[3,2]])
+    b_arr = np.array([4,12])
+    b_eq = np.array([18,])
+    c_arr = np.array([3,5])
+    A = Parameter(A_arr)
+    A_e = Parameter(A_eq)
+    b = Parameter(b_arr)
+    b_e = Parameter(b_eq)
+    c = Parameter(c_arr)
+    # VARIABLES
+    x = Variable(2) 
+    # PROBLEM
+    problem = Problem({
+        'minimize': c.T @ x,
+        'subject to': [
+            A @ x <= b,
+            A_e @ x == b_e,
+            x >= 0
+        ]
+    })
+
+    # VARIABLES
+    x_cvx = cp.Variable(2)
+    # PROBLEM
+    objective = cp.Minimize(c_arr @ x_cvx)
+    constraints = [
+        A_arr @ x_cvx <= b_arr,
+        A_eq @ x_cvx == b_eq, 
+        x_cvx >= 0
+    ]
+    problem_cvx = cp.Problem(objective, constraints)
+
+    get_test_results(problem, problem_cvx, "2 matrix constraint, 1 var, n = 2, Mixed Eq and Leq, Minimize")
 
 
 if __name__ == "__main__":
@@ -220,5 +256,6 @@ if __name__ == "__main__":
     # run_test_0b()
     # run_test_1a()
     # run_test_1b()
-    run_test_2() # seems to fail when it is -Ax == -b
+    # run_test_2() # seems to fail when it is -Ax == -b
     # run_test_3()
+    run_test_4a()
