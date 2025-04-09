@@ -252,10 +252,10 @@ def run_test_4a():
 
 
 if __name__ == "__main__":
-    # run_test_0a()
-    # run_test_0b()
-    # run_test_1a()
-    # run_test_1b()
-    # run_test_2() # seems to fail when it is -Ax == -b
-    # run_test_3()
+    run_test_0a()
+    run_test_0b()
+    run_test_1a()
+    run_test_1b()
+    run_test_2() # seems to fail when it is -Ax == -b
+    run_test_3()
     run_test_4a()
