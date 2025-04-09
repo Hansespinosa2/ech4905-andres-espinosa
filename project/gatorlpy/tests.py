@@ -221,5 +221,5 @@ if __name__ == "__main__":
     run_test_0b()
     run_test_1a()
     run_test_1b()
-    run_test_2()
+    run_test_2() # seems to fail when it is -Ax == -b
     run_test_3()

@@ -447,8 +447,14 @@ class Problem:
         objective_const = Constraint(objective, Parameter(np.zeros(1)), "obj")
         self.c_big = objective_const.linear_equality_to_matrix_equality(self.problem_var_map, self.x_big).left.parameter.array.flatten()
 
+    def to_min_problem(self):
+        if self.objective_direction == "maximize":
+            self.objective = -self.objective
+            self.c_big = -self.c_big
+
     def solve(self)->tuple[np.ndarray,bool]:
         self.to_slack_form()
+        self.to_min_problem()
         f_star, x_star, feasible = two_phase_simplex(self.A_big, self.b_big, self.c_big)
         return f_star, x_star, feasible
 
