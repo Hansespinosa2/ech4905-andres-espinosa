@@ -48,8 +48,10 @@ class Sum(Expression):
         other = self.convert_to_expression(other)
         if isinstance(other, Sum):
             return Sum(self.terms + other.terms)
-        else: # if it is an LinearOperation, Variable, Parameter, 
+        elif isinstance(other, (LinearOperation, Variable, Parameter)):
             return Sum(self.terms + [other])
+        else:
+            raise TypeError("Unsupported type for addition to Sum.")
         
     def get_terms_of_type(self, term_type: type) -> list:
         """Retrieve all terms of a specific type from the sum."""
@@ -62,7 +64,7 @@ class Sum(Expression):
     def __sub__(self, other):
         return self.__add__(-other)
         
-    def split_to_like_terms(self):
+    def split_to_like_terms(self) -> tuple:
         assert self.is_sum_of_type((LinearOperation,Parameter))
         return Sum(self.get_terms_of_type(LinearOperation)), Sum(self.get_terms_of_type(Parameter))
     
@@ -72,8 +74,21 @@ class Sum(Expression):
     
     def combine_like_params(self):
         assert self.is_sum_of_type(Parameter)
-        array = np.array([array for array in self.terms])
+        array = np.array([term.array for term in self.terms])
         return Parameter(np.sum(array,axis=0),[self])
+    
+    def combine_like_vars(self):
+        pass # Will likely have to create some function that will take the vars like Ax + Bx and make it (A+B)x
+    
+    def get_sum_vars(self) -> list:
+        assert self.is_sum_of_type(LinearOperation)
+        return [term.variable for term in self.terms]
+    
+    def drop_terms_of_type(self, types:tuple[type]):
+        filtered_terms = [term for term in self.terms if not isinstance(term, types)]
+        return Sum(filtered_terms)
+
+
         
 
     
@@ -154,7 +169,7 @@ class Variable(Expression):
         return f"({self.array})"
     
     def __len__(self):
-        return self.shape[0]
+        return self.shape
     
     def __neg__(self):
         return self.var_to_lin_op(-1)
@@ -164,6 +179,9 @@ class Variable(Expression):
     
     def var_to_lin_op(self, coeff:int|float=1):
         return LinearOperation(Parameter(coeff * np.eye(self.shape)), self, "param_matmul_var", [self])
+    
+    def __hash__(self):
+        return id(self)
 
 
 class LinearOperation(Expression):
@@ -222,14 +240,6 @@ class Constraint(Expression):
         self.left = left
         self.right = right
         self.eq_type = eq_type
-        self.constraint_type = self.left.op + "_" + self.eq_type + "_" + self.right.expression_type
-
-    def to_slack_form(self):
-        if self.constraint_type == "param_matmul_var_leq_param":
-            slack_vars = Variable(self.right.shape,True)
-            return Constraint(self.left + slack_vars,self.right, "eq",[self])
-        elif self.constraint_type == "param_matmul_var_geq_param":
-            return Constraint(-self.left, -self.right, "leq", [self])
         
     def __repr__(self):
         return f"{self.left} {self.eq_type} {self.right}"
@@ -253,26 +263,34 @@ class Constraint(Expression):
         return (isinstance(self.left, Sum) and isinstance(self.right, Sum))
     
     def is_non_negativity_constraint(self) -> bool:
-        left_is_var = isinstance(self.left, (Variable))
+        left_is_lin_op = isinstance(self.left, LinearOperation)
+        if left_is_lin_op:
+            lin_op_param_is_square = (self.left.parameter.array.shape[0] == self.left.parameter.array.shape[1])
+        else:
+            lin_op_param_is_square = False
+        if lin_op_param_is_square:
+            lin_op_param_is_diag = np.allclose(self.left.parameter.array, np.diag(np.full(self.left.parameter.shape[0], self.left.parameter.array[0, 0])))
+        else:
+            lin_op_param_is_diag = False
         right_is_param = isinstance(self.right, (Parameter))
         if right_is_param:
             right_is_zeros = np.all(self.right.array == 0)
         else:
             right_is_zeros = False
         self_is_geq = (self.eq_type == "geq")
-        return all([left_is_var, right_is_param, right_is_zeros, self_is_geq])
+        return all([lin_op_param_is_diag, right_is_zeros, self_is_geq])
 
     def is_linear_constraint(self) -> bool: # this is not correct
-        return (isinstance(self.left, Sum) and isinstance(self.right, Variable) and self.left.is_sum_of_type(LinearOperation))
+        return (isinstance(self.left, Sum) and isinstance(self.right, Parameter) and self.left.is_sum_of_type(LinearOperation))
     
-    def fix_unbounded_linear_constraint(self):
+    def fix_unbounded_linear_constraint(self, ub_b_map:dict):
         assert self.is_linear_constraint()
         lin_terms = []
         for lin_op_term in self.left.terms:
             var = lin_op_term.variable
-            if not var.non_negative:
-                var_plus = Variable(var.shape, True, [var])
-                var_neg = Variable(var.shape, True, [var])
+            if var in ub_b_map.keys():
+                var_plus = ub_b_map[var][0]
+                var_neg = ub_b_map[var][1]
                 lin_op_var_plus = LinearOperation(lin_op_term.parameter, var_plus, "param_matmul_var", [lin_op_term])
                 lin_op_var_neg = LinearOperation(-lin_op_term.parameter, var_neg, "param_matmul_var", [lin_op_term])
                 lin_terms.append(lin_op_var_plus)
@@ -281,6 +299,38 @@ class Constraint(Expression):
                 lin_terms.append(lin_op_term)
         
         return Constraint(Sum(lin_terms), self.right, self.eq_type, [self])
+    
+    def turn_linear_constraint_to_equality(self) -> tuple:
+        assert self.is_linear_constraint()
+        if self.eq_type == "eq":
+            return self, []
+        elif self.eq_type == "leq":
+            slack_var = Variable(self.right.shape)
+            return Constraint(self.left + slack_var.var_to_lin_op(), self.right, "eq", [self]), [slack_var]
+        elif self.eq_type == "geq":
+            slack_var = Variable(self.right.shape)
+            return Constraint(-self.left + slack_var.var_to_lin_op(), -self.right, "eq", [self]), [slack_var]
+        else:
+            raise ValueError(f"Unsupported eq_type: {self.eq_type}")
+
+    
+    def get_variables(self) -> list:
+        assert self.is_linear_constraint()
+        return self.left.get_sum_vars()
+    
+    def linear_equality_to_matrix_equality(self, problem_var_map:dict, x_big):
+        equality_matrix = np.zeros(shape=(self.right.shape[0], x_big.shape))
+        param_list = []
+        for term in self.left.terms:
+            start_index, end_index = problem_var_map[term.variable]
+            equality_matrix[:,start_index:end_index] += term.parameter.array
+            param_list.append(term.parameter)
+        A_constraint = Parameter(equality_matrix,param_list)
+        big_lin_op = LinearOperation(A_constraint,x_big,"param_matmul_var",self.left.terms)
+        return Constraint(big_lin_op, self.right, "eq", [self])
+
+
+
 
 
 
@@ -304,6 +354,15 @@ class Problem:
             self.constraints = problem_def['constraints']
         else:
             raise ValueError("The constraint definition must contain either 'subject to' xor 'constraints' as a key.")
+        self.unbounded_vars = []
+        self.bounded_vars = []
+        self.ub_b_map = {}
+        self.problem_var_map = {}
+        self.total_var_length = 0
+        self.A_big = None
+        self.b_big = None
+        self.c_big = None
+        self.x_big = None
         
         
     def to_slack_form(self):
@@ -314,27 +373,117 @@ class Problem:
         # Turn the non_negative ones non_negative and then go to the unconstrained ones
         # then split them and constrain them
         # and then turn it into one stacked constraint Ax == b, x non-negative
+        self.add_bounded_vars_to_list()
         self.remove_non_negativity_constraints()
+        self.turn_all_constraints_to_linear_form()
+        self.add_unbounded_vars_to_list()
+        self.turn_all_constraints_to_equalities()
+        self.add_unbounded_to_bounded_dict()
         self.fix_non_negative_variables()
+        self.get_problem_var_map()
+        self.get_final_variable()
+        self.turn_all_equalities_to_matrix_equalities()
+        self.standard_form_constraint_params()
+        self.standard_form_objective()
+        
         
     def remove_non_negativity_constraints(self):
-        for constraint in self.constraints[:]:  # Iterate over a copy of the list to allow removal
-            if constraint.is_non_negativity_constraint():
-                constraint.left.non_negative = True
-                self.constraints.remove(constraint)
+        updated_constraints = []
+        for constraint in self.constraints:  # Iterate over a copy of the list to allow removal
+            if not constraint.is_non_negativity_constraint():
+                updated_constraints.append(constraint)
+        self.constraints = updated_constraints
     
-    def fix_non_negative_variables(self):
-        for constraint in self.constraints[:]:
-            assert not constraint.is_non_negatitivity_constraint()
-            constraint = constraint.fix_unbounded_linear_constraint()
+    def add_bounded_vars_to_list(self):
+        for constraint in self.constraints:  # Iterate over a copy of the list to allow removal
+            if constraint.is_non_negativity_constraint():
+                var = constraint.left.variable
+                var.non_negative = True
+                if var not in self.bounded_vars:
+                    self.bounded_vars.append(var) 
+
+    def add_unbounded_vars_to_list(self):
+        for constraint in self.constraints:
+            constraint_vars = constraint.get_variables()
+            for var in constraint_vars:
+                if var not in self.unbounded_vars + self.bounded_vars:
+                    self.unbounded_vars.append(var)
             
+    def fix_non_negative_variables(self):
+        updated_constraints = []
+        for constraint in self.constraints:
+            assert not constraint.is_non_negativity_constraint()
+            constraint = constraint.fix_unbounded_linear_constraint(self.ub_b_map)
+            updated_constraints.append(constraint)
+        self.constraints = updated_constraints
+
+    def add_unbounded_to_bounded_dict(self):
+        unbounded_bounded_map = {}
+        for var in self.unbounded_vars:
+            var_plus = Variable(var.shape, True, [var])
+            self.bounded_vars.append(var_plus)
+            var_neg = Variable(var.shape, True, [var])
+            self.bounded_vars.append(var_neg)
+            unbounded_bounded_map[var] = [var_plus, var_neg]
+        self.ub_b_map = unbounded_bounded_map
+    
+    def turn_all_constraints_to_linear_form(self):
+        updated_constraints = []
+        for constraint in self.constraints:
+            constraint = constraint.any_constraint_to_sum_constraint()
+            constraint = constraint.sum_constraint_to_linear_constraint()
+            updated_constraints.append(constraint)
+        self.constraints = updated_constraints
+    
+    def turn_all_constraints_to_equalities(self):
+        updated_constraints = []
+        for constraint in self.constraints:
+            constraint, slack_var = constraint.turn_linear_constraint_to_equality()
+            if slack_var:
+                self.bounded_vars.append(slack_var)
+            updated_constraints.append(constraint)
+        self.constraints = updated_constraints
+
+    def get_problem_var_map(self) -> int:
+        start_index = 0
+        end_index = 0
+        for var in self.bounded_vars:
+           end_index = var.shape + start_index
+           self.problem_var_map[var] =  (start_index, end_index)
+        self.total_var_length = end_index
+
+    def get_final_variable(self):
+        self.x_big = Variable(sum([var.shape for var in self.bounded_vars]),True, self.bounded_vars)
+
+    def turn_all_equalities_to_matrix_equalities(self):
+        updated_constraints = []
+        for constraint in self.constraints:
+            constraint = constraint.linear_equality_to_matrix_equality(self.problem_var_map, self.x_big)
+            updated_constraints.append(constraint)
+        self.constraints = updated_constraints
+        
+    def standard_form_constraint_params(self):
+        self.A_big = np.vstack([constraint.left.parameter.array for constraint in self.constraints])
+        self.b_big = np.vstack([constraint.right.array.flatten() for constraint in self.constraints]).flatten()
+            
+    def standard_form_objective(self): 
+        objective = self.objective.expression_to_linear_sum() #This could still be a problem since there could be feasibility problems
+        objective = objective.drop_terms_of_type(Parameter)
+        objective_const = Constraint(objective, Parameter(np.zeros(1)), "obj")
+        self.c_big = objective_const.linear_equality_to_matrix_equality(self.problem_var_map, self.x_big).left.parameter.array.flatten()
+
+
+
+
+
+
+        
+           
 
 
     def solve(self)->tuple[np.ndarray,bool]:
-        A = self.constraints[0].left.parameter.array
-        b = self.constraints[0].right.array
-        c = self.objective.parameter.array
-        f_star, x_star, feasible = two_phase_simplex(A, b, c)
+        self.to_slack_form()
+        f_star, x_star, feasible = two_phase_simplex(self.A_big, self.b_big, self.c_big)
         return f_star, x_star, feasible
 
 
