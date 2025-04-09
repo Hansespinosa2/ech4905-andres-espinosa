@@ -1,6 +1,6 @@
 import numpy as np
 import cvxpy as cp
-from objects import Problem, Parameter, Variable
+from lp_reductions import Problem, Parameter, Variable
 
 def get_test_results(glp_prob:Problem, cvxpy_prob:cp.Problem, test_id:int):
     glp_solution = glp_prob.solve()

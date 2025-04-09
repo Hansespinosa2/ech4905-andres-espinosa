@@ -1,5 +1,5 @@
 import numpy as np
-from objects import Variable, Problem, Parameter
+from lp_reductions import Variable, Problem, Parameter
 
 # Defining the way problems are made
 A = Parameter(np.array([[1, 2], [4, 0], [0, 4]]))  # Coefficients of the constraints
