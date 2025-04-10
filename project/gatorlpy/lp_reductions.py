@@ -1,15 +1,68 @@
+from __future__ import annotations
 import numpy as np
 from simplex import two_phase_simplex
 
 class Expression:
-    """Base class for variables, parameters, and operations in a computation graph."""
-    def __init__(self, expression_type:str, parents:list=[], shape:tuple=None):
+    """
+    Represents a base class for variables, parameters, and operations in a computation graph.
+
+    Attributes:
+        expression_type (str): The type of the expression (e.g., variable, parameter, operation).
+        parents (list): A list of parent Expression objects that this expression depends on.
+                        Defaults to an empty list if not provided.
+        shape (tuple): The shape of the expression, typically used for tensors or arrays.
+                       Defaults to None if not specified.
+
+    Args:
+        expression_type (str): The type of the expression.
+        parents (list, optional): A list of parent Expression objects. Defaults to None.
+        shape (tuple, optional): The shape of the expression. Defaults to None.
+    """
+    def __init__(self, expression_type:str, parents:list=None, shape:tuple=None):
         self.expression_type = expression_type
-        self.parents = parents
+        if parents is None:
+            self.parents = []
+        else:
+            self.parents = parents
         self.shape = shape
 
 class Sum(Expression):
-    def __init__(self, terms: list[Expression]):
+    """
+    Represents a summation of multiple Expression objects. The Sum class ensures
+    that all terms have the same shape and provides methods for manipulating and
+    analyzing the summation.
+    Attributes:
+        terms (list[Expression]): A list of Expression objects that make up the sum.
+        shape (tuple or None): The shape of the terms in the sum, or None if there are no terms.
+    Methods:
+        __repr__():
+            Returns a string representation of the Sum object as a summation of its terms.
+        __add__(other):
+            Adds another Expression or Sum to the current Sum. Returns a new Sum object.
+        get_terms_of_type(term_type: type) -> list:
+            Retrieves all terms of a specific type from the sum.
+        __neg__():
+            Negates all terms in the Sum and returns a new Sum object.
+        __sub__(other):
+            Subtracts another Expression or Sum from the current Sum. Returns a new Sum object.
+        split_to_like_terms() -> tuple:
+            Splits the Sum into two separate Sums: one containing LinearOperation terms
+            and the other containing Parameter terms. Returns a tuple of these two Sums.
+        is_sum_of_type(types: tuple[type]) -> bool:
+            Checks if the Sum contains only terms of the specified types.
+        combine_like_params():
+            Combines all Parameter terms in the Sum into a single Parameter object.
+            Returns the combined Parameter.
+        combine_like_vars():
+            Placeholder method for combining Variable terms in the Sum. Intended to
+            simplify terms like Ax + Bx into (A+B)x.
+        get_sum_vars() -> list:
+            Retrieves the variables from all LinearOperation terms in the Sum.
+        drop_terms_of_type(types: tuple[type]):
+            Removes all terms of the specified types from the Sum and returns a new Sum object.
+    """
+
+    def __init__(self, terms:list[Expression]):
         super().__init__("sum", terms)
         self.terms = terms
         shapes = [term.shape for term in self.terms]
@@ -18,58 +71,119 @@ class Sum(Expression):
         self.shape = shapes[0] if self.terms else None
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return " + ".join(str(term) for term in self.terms)
-    
-    def __add__(self, other):
-        other = convert_to_expression(other,self.shape)
+
+    def __add__(self, other) -> Sum:
+        other = convert_to_expression(other, self.shape)
         if isinstance(other, Sum):
             return Sum(self.terms + other.terms)
-        elif isinstance(other, (LinearOperation, Variable, Parameter)):
+        if isinstance(other, (LinearOperation, Variable, Parameter)):
             return Sum(self.terms + [other])
-        else:
-            raise TypeError("Unsupported type for addition to Sum.")
-        
-    def get_terms_of_type(self, term_type: type) -> list:
+        raise TypeError("Unsupported type for addition to Sum.")
+
+    def get_terms_of_type(self, term_type:type) -> list:
         """Retrieve all terms of a specific type from the sum."""
         return [term for term in self.terms if isinstance(term, term_type)]
-    
-    def __neg__(self):
+
+    def __neg__(self) -> Sum:
         neg_terms = [-term for term in self.terms]
         return Sum(neg_terms)
-    
-    def __sub__(self, other):
+
+    def __sub__(self, other) -> Sum:
         return self.__add__(-other)
-        
+
     def split_to_like_terms(self) -> tuple:
-        assert self.is_sum_of_type((LinearOperation,Parameter))
+        """
+        Splits the current object into two separate sums based on the type of terms.
+        Returns:
+            tuple: A tuple containing two `Sum` objects:
+                - The first `Sum` contains all terms of type `LinearOperation`.
+                - The second `Sum` contains all terms of type `Parameter`.
+        Raises:
+            AssertionError: If the current object is not a sum of terms of type 
+                            `LinearOperation` or `Parameter`.
+        """
+        if not self.is_sum_of_type((LinearOperation, Parameter)):
+            raise TypeError("The Sum must contain only LinearOperation or Parameter terms.")
         return Sum(self.get_terms_of_type(LinearOperation)), Sum(self.get_terms_of_type(Parameter))
-    
+
     def is_sum_of_type(self, types:tuple[type]) -> bool:
-        """Check if the Sum contains only Parameter or LinearOperation objects."""
+        """
+        Checks if all terms in the current object are instances of the specified types.
+        Args:
+            types (tuple[type]): A tuple of types to check against.
+        Returns:
+            bool: True if all terms are instances of the specified types, False otherwise.
+        """
         return all(isinstance(term, types) for term in self.terms)
-    
-    def combine_like_params(self):
-        assert self.is_sum_of_type(Parameter)
+
+    def combine_like_params(self) -> Parameter:
+        """
+        Combines terms of the current Sum object that are of type `Parameter` 
+        into a single `Parameter` object by summing their arrays.
+        Returns:
+            Parameter: A new `Parameter` object with the combined array 
+            and a reference to the current Sum object as its parent.
+        Raises:
+            TypeError: If the Sum object contains terms that are not of type `Parameter`.
+        """
+
+        if not self.is_sum_of_type((Parameter,)):
+            raise TypeError("The Sum must contain only Parameter terms to combine them.")
         array = np.array([term.array for term in self.terms])
-        return Parameter(np.sum(array,axis=0),[self])
-    
+        return Parameter(np.sum(array, axis=0), [self])
+
     def combine_like_vars(self):
         pass # Will likely have to create some function that will take the vars like Ax + Bx and make it (A+B)x
-    
+
     def get_sum_vars(self) -> list:
-        assert self.is_sum_of_type(LinearOperation)
+        """
+        Retrieve the list of variables from the terms of the sum.
+        Returns:
+            list: A list of variables extracted from the terms of the sum.
+        Raises:
+            TypeError: If the sum does not exclusively contain terms of type `LinearOperation`.
+        """
+
+        if not self.is_sum_of_type((LinearOperation,)):
+            raise TypeError("The Sum must contain only LinearOperation terms to retrieve variables.")
         return [term.variable for term in self.terms]
-    
-    def drop_terms_of_type(self, types:tuple[type]):
+
+    def drop_terms_of_type(self, types:tuple[type]) -> Sum:
         filtered_terms = [term for term in self.terms if not isinstance(term, types)]
         return Sum(filtered_terms)
 
 
-        
-
-    
 class Parameter(Expression):
+    class Parameter:
+        """
+        Represents a parameter in a linear programming expression. This class extends the `Expression` class
+        and provides functionality for matrix operations, addition, subtraction, and transposition.
+        Attributes:
+            array (np.ndarray): The numerical array representing the parameter's values.
+            shape (tuple): The shape of the parameter's array.
+        Methods:
+            T:
+                Returns the transpose of the parameter as a new `Parameter` object.
+            __matmul__(other):
+                Overloads the `@` operator for matrix multiplication. Supports multiplication with `Variable` objects.
+                Raises:
+                    TypeError: If the other operand is not of a valid type.
+            __len__():
+                Returns the number of rows in the parameter's array.
+            __repr__():
+                Returns a string representation of the parameter's array.
+            __add__(other):
+                Overloads the `+` operator for addition. Supports addition with other `Parameter` or `Variable` objects.
+                Raises:
+                    ValueError: If the lengths of the parameters do not match for addition.
+            __neg__():
+                Returns the negation of the parameter as a new `Parameter` object.
+            __sub__(other):
+                Overloads the `-` operator for subtraction. Equivalent to adding the negation of the other operand.
+        """
+
     def __init__(self, array:np.ndarray, parents:list=[]):
         super().__init__("param", parents)
         self.array = array
@@ -469,13 +583,29 @@ class Problem:
 
 
 def expression_to_linear_sum(exp:Expression) -> Sum:
+    """
+    Converts a given expression into a linear sum representation.
+    This function takes an expression and ensures it is represented as a `Sum` object,
+    which is a collection of terms that can include `Parameter`, `Variable`, or 
+    `LinearOperation` objects. If the input expression is already a `Sum`, it processes 
+    its terms to ensure all variables are converted to linear operations.
+    Args:
+        exp (Expression): The input expression to be converted. It can be of type 
+                            `Parameter`, `Variable`, `LinearOperation`, or `Sum`.
+    Returns:
+        Sum: A `Sum` object representing the linear sum of the input expression.
+    Raises:
+        TypeError: If the input expression contains unsupported types that cannot 
+                    be converted to a linear sum.
+    """
+
     if isinstance(exp, (Parameter)):
         return Sum([exp])
-    elif isinstance(exp, (Variable)):
+    if isinstance(exp, (Variable)):
         return Sum([var_to_lin_op(exp)])
-    elif isinstance(exp, (LinearOperation)):
+    if isinstance(exp, (LinearOperation)):
         return Sum([exp])
-    elif isinstance(exp, (Sum)):
+    if isinstance(exp, (Sum)):
         sum_list = []
         for item in exp.terms:
             if isinstance(item, (Variable)):
@@ -485,19 +615,64 @@ def expression_to_linear_sum(exp:Expression) -> Sum:
             else:
                 raise TypeError("Unsupported type for conversion to Linear Sum.")
         return Sum(sum_list)
-    
-def convert_to_expression(any, shape_hint:tuple|int=None) -> Expression:
-    
-    if isinstance(any, (float, int)):
+    raise TypeError("Unsupported type for conversion to Linear Sum.")
+
+def convert_to_expression(any_obj:float|int|np.ndarray|Expression,
+                          shape_hint:tuple|int=None) -> Expression:
+    """
+    Converts the input into an Expression object.
+    Parameters:
+    -----------
+    any : float, int, np.ndarray, or Expression
+        The input to be converted into an Expression. Supported types are:
+        - float or int: A scalar value. Requires `shape_hint` to specify the shape.
+        - np.ndarray: A NumPy array that will be directly converted into an Expression.
+        - Expression: An existing Expression object, which will be returned as-is.
+    shape_hint : tuple or int, optional
+        The shape of the resulting Expression if the input is a scalar (float or int).
+        Must be provided when `any` is a scalar. Ignored for other input types.
+    Returns:
+        Expression object of the input
+    --------
+    Expression
+        The converted Expression object.
+    Raises:
+    -------
+    ValueError
+        If `any` is a scalar (float or int) and `shape_hint` is not provided.
+    TypeError
+        If `any` is of an unsupported type.
+    Examples:
+    ---------
+    >>> convert_to_expression(5, shape_hint=(2, 2))
+    Parameter()
+    >>> convert_to_expression(np.array([1, 2, 3]))
+    Parameter()
+    >>> expr = Expression(...)
+    >>> convert_to_expression(expr)
+    Expression()
+    """
+
+    if isinstance(any_obj, (float, int)):
         if shape_hint is None:
             raise ValueError("Must provide a shape_hint if the input is a float or int.")
-        return Parameter(np.full(shape_hint, any))
-    elif isinstance(any, (np.ndarray)):
-        return Parameter(any)
-    elif isinstance(any, (Expression)):
-        return any
-    else:
-        raise TypeError("Unsupported type for conversion to Expression.")
-    
+        return Parameter(np.full(shape_hint, any_obj))
+    if isinstance(any_obj, (np.ndarray)):
+        return Parameter(any_obj)
+    if isinstance(any_obj, (Expression)):
+        return any_obj
+    raise TypeError("Unsupported type for conversion to Expression.")
+
 def var_to_lin_op(var:Variable, coeff:int|float=1) -> LinearOperation:
+    """
+    Converts a variable into a linear operation by applying a scalar coefficient.
+    Args:
+        var (Variable): The variable to be converted into a linear operation.
+        coeff (int | float, optional): The scalar coefficient to multiply with the identity matrix. 
+            Defaults to 1.
+    Returns:
+        LinearOperation: A linear operation object representing the parameterized 
+        matrix multiplication of the variable.
+    """
+
     return LinearOperation(Parameter(coeff * np.eye(var.shape)), var, "param_matmul_var", [var])
