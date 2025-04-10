@@ -1,0 +1,44 @@
+\section{Optimization Under Uncertainty}
+There are a few ways to deal with optimization problems that have a degree of uncertainty in them.
+Some popular ways are listed below: 
+\begin{itemize}
+    \item Parametric optimization: Model the problem as a function of the uncertainty parameters.
+    \item Stochastic programming: Probability distributions that attempt to model the uncertainty at hand.
+    \item Robust optimization: Do well in the worst case scenario of uncertainty
+    \item Chance constrained optimization: Constraints are not strict, instead we attempt to satisfy them with a certain probabilities.
+\end{itemize}
+There are some important similarities and differences between these ideas on how to model unceratinty in optimization.
+In stochastic programming, the key assumption is that the probability distribution is available and known.
+The objective in stochastic programming is to minimize the expectation under the probability parameter.
+In robust programming, the parametrized uncertainty $\theta$ is bounded.
+The objective in robust optimization is to minimize the maximum value under the probability parameter.
+
+\subsection{General Form}
+The general form of an optimization problem with uncertainty can be as follows:
+
+\begin{align}
+  \text{minimize}_{x,y} & \quad f(x,y,\theta) \\
+  \text{subject to} & \quad g(x,y,\theta) \preceq 0
+\end{align}
+\subsection{Example}
+For example, we could have a cost of a good that is not constant, but is stochastic.
+\begin{equation}
+    profit = (price - \theta_{cost})^\top \textbf{x}
+\end{equation}
+In this example, we can balance between conservative ways of modeling to ensure we do well in worst case scenarios and reliable ways where we want to be accurate in our predictions.
+
+\subsection{Stochastic Programming}
+In stochastic programming, we define a vector of probability parameters $\theta$.
+We create scenarios that have a probability $p$ and then minimize over the expectation of the probabilities of each scenario.
+When we have a lot of parameters, this can cause problem size explosion as there are more and more scenarios.
+
+\subsubsection{Formulation}
+We can formulate stochastic programming problems as such:
+
+\begin{itemize}
+    \item $\theta \in \Theta$: The set of probability parameters for each scenario.
+    \item $\textbf{x} \in X$: The set of decision variables that correspond to each scenario before uncertainty is revealed.
+    \item $z \in Z$: the set of decision variables after uncertainty is revealed for each scenario.
+\end{itemize}
+We can then decompose the objective function into two parts: The parts of the function before uncertainty is revealed, and the part that depends on variables after uncertainty is revealed.
+This makes every problem have two stages of decision, the first stage which does not include any uncertainty and the second stage which incorporates the uncertainty.
