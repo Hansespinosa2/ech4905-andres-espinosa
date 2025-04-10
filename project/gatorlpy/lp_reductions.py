@@ -156,76 +156,108 @@ class Sum(Expression):
 
 
 class Parameter(Expression):
-    class Parameter:
-        """
-        Represents a parameter in a linear programming expression. This class extends the `Expression` class
-        and provides functionality for matrix operations, addition, subtraction, and transposition.
-        Attributes:
-            array (np.ndarray): The numerical array representing the parameter's values.
-            shape (tuple): The shape of the parameter's array.
-        Methods:
-            T:
-                Returns the transpose of the parameter as a new `Parameter` object.
-            __matmul__(other):
-                Overloads the `@` operator for matrix multiplication. Supports multiplication with `Variable` objects.
-                Raises:
-                    TypeError: If the other operand is not of a valid type.
-            __len__():
-                Returns the number of rows in the parameter's array.
-            __repr__():
-                Returns a string representation of the parameter's array.
-            __add__(other):
-                Overloads the `+` operator for addition. Supports addition with other `Parameter` or `Variable` objects.
-                Raises:
-                    ValueError: If the lengths of the parameters do not match for addition.
-            __neg__():
-                Returns the negation of the parameter as a new `Parameter` object.
-            __sub__(other):
-                Overloads the `-` operator for subtraction. Equivalent to adding the negation of the other operand.
-        """
-
-    def __init__(self, array:np.ndarray, parents:list=[]):
+    """
+    Represents a parameter in a linear programming expression. This class extends the `Expression` class
+    and provides functionality for matrix operations, addition, subtraction, and transposition.
+    Attributes:
+        array (np.ndarray): The numerical array representing the parameter's values.
+        shape (tuple): The shape of the parameter's array.
+    Methods:
+        T:
+            Returns the transpose of the parameter as a new `Parameter` object.
+        __matmul__(other):
+            Overloads the `@` operator for matrix multiplication. Supports multiplication with `Variable` objects.
+            Raises:
+                TypeError: If the other operand is not of a valid type.
+        __len__():
+            Returns the number of rows in the parameter's array.
+        __repr__():
+            Returns a string representation of the parameter's array.
+        __add__(other):
+            Overloads the `+` operator for addition. Supports addition with other `Parameter` or `Variable` objects.
+            Raises:
+                ValueError: If the lengths of the parameters do not match for addition.
+        __neg__():
+            Returns the negation of the parameter as a new `Parameter` object.
+        __sub__(other):
+            Overloads the `-` operator for subtraction. Equivalent to adding the negation of the other operand.
+    """
+    def __init__(self, array:np.ndarray, parents:list=None):
         super().__init__("param", parents)
         self.array = array
         self.shape = array.shape
-                
+
     @property
-    def T(self):
+    def T(self) -> Parameter:
+        """Returns the transpose of the parameter as a new Parameter object."""
         return Parameter(self.array.T)
 
-    def __matmul__(self, other):
+    def __matmul__(self, other:Variable) -> LinearOperation:
         """Overload @ operator for matrix multiplication"""
         if isinstance(other, Variable):
             return LinearOperation(self, other, "param_matmul_var", [self, other])
         raise TypeError("Invalid type for matrix multiplication.")
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.shape[0]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"({self.array})"
 
-    def __add__(self, other):
+    def __add__(self, other) -> Sum:
         other = convert_to_expression(other, self.shape)
         if isinstance(other, Parameter):
             if len(self) != len(other):
                 raise ValueError("Parameters must have the same length for addition.")
             return Sum([self,other])
-        elif isinstance(other, Variable):
-            return LinearOperation(self, other, "param_add_var", [self, other])
+        if isinstance(other, Variable):
+            return Sum([self, other])
+        raise TypeError("Unsupported type for addition with Parameter.")        
 
-    def __neg__(self):
+    def __neg__(self) -> Parameter:
         return Parameter(-self.array, [self])
-    
-    def __sub__(self, other):
+
+    def __sub__(self, other) -> Sum:
         return self.__add__(-other)
     
 class Variable(Expression):
     """
-    Represents a decision variable with a given shape.
-    Supports matrix multiplication and constraint creation.
+    Represents a variable in a linear programming model.
+    Attributes:
+        shape (int): The size or dimensionality of the variable.
+        non_negative (bool): Indicates whether the variable is constrained to be non-negative.
+        array (numpy.ndarray): An array initialized with zeros representing the variable's values.
+        parents (list): A list of parent expressions associated with this variable.
+    Methods:
+        __matmul__(other):
+            Overloads the @ operator for matrix multiplication with a Parameter object.
+            Raises:
+                TypeError: If the other operand is not of type Parameter.
+        __add__(other):
+            Overloads the + operator to add this variable to another Expression.
+            Converts the other operand to an Expression if necessary.
+        __ge__(other):
+            Overloads the >= operator to create a "greater than or equal to" constraint.
+            Converts the other operand to an Expression if necessary.
+        __le__(other):
+            Overloads the <= operator to create a "less than or equal to" constraint.
+            Converts the other operand to an Expression if necessary.
+        __eq__(other):
+            Overloads the == operator to create an equality constraint.
+            Converts the other operand to an Expression if necessary.
+        __repr__():
+            Returns a string representation of the variable's array.
+        __len__():
+            Returns the shape (size) of the variable.
+        __neg__():
+            Overloads the unary - operator to negate the variable.
+        __sub__(other):
+            Overloads the - operator to subtract another Expression from this variable.
+        __hash__():
+            Returns a unique hash value for the variable based on its ID.
     """
-    def __init__(self, shape:int, non_negative:bool=False, parents:list=[]):
+
+    def __init__(self, shape:int, non_negative:bool=False, parents:list=None): #TODO shape should be tuple not int
         super().__init__("var", parents)
         self.array = np.zeros(shape)
         self.shape = shape
@@ -236,83 +268,107 @@ class Variable(Expression):
         if isinstance(other, Parameter):
             return LinearOperation(self, other, "var_matmul_param", [self, other])
         raise TypeError("Invalid type for matrix multiplication.")
-    
-    def __add__(self, other:Expression):
+
+    def __add__(self, other) -> Sum:
         other = convert_to_expression(other,self.shape)
         return Sum([self, other])
 
-    def __ge__(self, other):
+    def __ge__(self, other) -> Constraint:
         """Overload >= operator for constraints"""
         other = convert_to_expression(other,self.shape)       
         return Constraint(var_to_lin_op(self), other, "geq")
 
-    def __le__(self, other):
+    def __le__(self, other) -> Constraint:
         """Overload <= operator for constraints"""
         other = convert_to_expression(other,self.shape)
         return Constraint(var_to_lin_op(self), other, "leq")
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> Constraint:
         """Overload == operator for constraints"""
         other = convert_to_expression(other,self.shape)
         return Constraint(var_to_lin_op(self), other, "eq")
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"({self.array})"
     
-    def __len__(self):
+    def __len__(self) -> int:
         return self.shape
     
-    def __neg__(self):
+    def __neg__(self) -> LinearOperation:
         return var_to_lin_op(self,-1)
     
-    def __sub__(self,other):
+    def __sub__(self,other) -> Sum:
         return self.__add__(-other)
     
-    def __hash__(self):
+    def __hash__(self) -> int:
         return id(self)
 
 
 class LinearOperation(Expression):
-    """
-    Represents a matrix operation (e.g., A @ x).
-    possible ops: 
-    """
-    def __init__(self, left:Parameter, right:Variable, op:str, parents:list=[]):
+    class LinearOperation:
+        """
+        Represents a linear operation between a parameter and a variable, with support for 
+        various mathematical operations and constraints.
+        Attributes:
+            parameter (Parameter): The left-hand side parameter of the operation.
+            variable (Variable): The right-hand side variable of the operation.
+            op (str): The operation type (e.g., "param_matmul_var").
+            shape (int): The shape of the parameter (assumes 1D shape for now).
+        Methods:
+            __repr__():
+                Returns a string representation of the linear operation.
+            __ge__(other):
+                Overloads the >= operator to create a "greater than or equal to" constraint.
+            __le__(other):
+                Overloads the <= operator to create a "less than or equal to" constraint.
+            __eq__(other):
+                Overloads the == operator to create an equality constraint.
+            __neg__():
+                Returns the negation of the linear operation.
+            __add__(other):
+                Overloads the + operator to add another expression to the linear operation.
+            __len__():
+                Returns the length of the parameter (number of rows in its shape).
+            __sub__(other):
+                Overloads the - operator to subtract another expression from the linear operation.
+        """
+
+    def __init__(self, left:Parameter, right:Variable, op:str, parents:list=None): #TODO: get rid of op, it is always linear
         super().__init__("op", parents)
         self.parameter = left
         self.variable = right
         self.op = op
         self.shape = self.parameter.shape[0]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"({self.parameter} {self.op} {self.variable})"
     
-    def __ge__(self, other):
+    def __ge__(self, other) -> Constraint:
         """Overload >= operator for constraints"""
         other = convert_to_expression(other,self.shape)
         return Constraint(self, other, "geq")
 
-    def __le__(self, other):
+    def __le__(self, other) -> Constraint:
         """Overload <= operator for constraints"""
         other = convert_to_expression(other,self.shape)
         return Constraint(self, other, "leq")
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> Constraint:
         """Overload == operator for constraints"""
         other = convert_to_expression(other,self.shape)
         return Constraint(self, other, "eq")
     
-    def __neg__(self):
+    def __neg__(self) -> LinearOperation:
         return LinearOperation(-self.parameter, self.variable, "param_matmul_var", [self])
     
-    def __add__(self, other:Expression):
+    def __add__(self, other:Expression) -> Sum:
         other = convert_to_expression(other,self.shape)
         return Sum([self, other])
     
-    def __len__(self):
+    def __len__(self) -> int:
         return self.parameter.shape[0]
     
-    def __sub__(self, other:Expression):
+    def __sub__(self, other:Expression) -> Sum:
         return self.__add__(-other)
     
 
@@ -321,7 +377,7 @@ class Constraint(Expression):
     """
     Represents a linear constraint: A @ x <= b, >=, or ==.
     """
-    def __init__(self, left:Expression, right:Expression, eq_type:str, parents:list=[]):
+    def __init__(self, left:Expression, right:Expression, eq_type:str, parents:list=None):
         super().__init__('constraint', parents)
         left = convert_to_expression(left)
         right = convert_to_expression(right)
@@ -329,14 +385,26 @@ class Constraint(Expression):
         self.right = right
         self.eq_type = eq_type
         
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.left} {self.eq_type} {self.right}"
 
-    def any_constraint_to_sum_constraint(self):
+    def any_constraint_to_sum_constraint(self) -> Constraint:
+        """
+        Converts any constraint into a sum constraint.
+        This method transforms the left-hand side and right-hand side expressions
+        of the constraint into linear sum expressions. It retains the equality type
+        and includes the original constraint as part of the resulting constraint.
+        Returns:
+            Constraint: A new constraint object with both sides converted to linear
+            sum expressions, preserving the equality type and referencing the original
+            constraint.
+        """
+
         return Constraint(expression_to_linear_sum(self.left), expression_to_linear_sum(self.right),self.eq_type,[self])
     
-    def sum_constraint_to_linear_constraint(self):
-        assert self.is_sum_constraint()
+    def sum_constraint_to_linear_constraint(self) -> Constraint:
+        if not self.is_sum_constraint():
+            raise TypeError("The constraint must be a sum constraint to convert it to a linear constraint.")
         left_sum = self.left
         right_sum = self.right 
         left_lin_ops, left_params = left_sum.split_to_like_terms()
