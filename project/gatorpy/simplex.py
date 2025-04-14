@@ -115,7 +115,7 @@ def simplex_phase_1(A:np.ndarray, b:np.ndarray):
       are properly defined and consistent.
     - The auxiliary problem is solved by introducing artificial variables and minimizing their sum.
     """
-
+    # TODO: Fix aux variables not leaving basis bug.
     m, n = A.shape
     A_aux = np.hstack((A, np.eye(m)))
     c_aux = np.hstack((np.zeros(n), np.ones(m)))
@@ -138,7 +138,22 @@ def simplex_phase_1(A:np.ndarray, b:np.ndarray):
 
     if tableau[-1,-1] > EPSILON:
         return None, None, False # Infeasible Solution to original problem
-    return tableau[:m,:n], tableau[:-1,-1], basis[:m]
+    
+    # GPT SOLUTION FOR REMOVING ARTIFICIAL VARIABLES TODO: This still fails the problem but at least runs
+    # Remove artificial variables from basis 
+    for i in range(len(basis)):
+        if basis[i] >= n:
+            # Look for a non-artificial variable to pivot in
+            for j in range(n):
+                if j not in basis and abs(tableau[i, j]) > EPSILON:
+                    tableau = pivot(tableau, i, j)
+                    basis[i] = j
+                    break
+            else:
+                # If no such variable exists, zero row: leave it as is
+                pass
+
+    return tableau[:m, :n], tableau[:-1, -1], basis[:m]
 
 def simplex_phase_2(A:np.ndarray, b:np.ndarray, c:np.ndarray, basis:list[int]) -> tuple[np.ndarray|bool]:
     m, n = A.shape

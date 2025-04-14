@@ -28,6 +28,7 @@ Consider the following integer programming problem:
 \end{align*}
 
 \subsection{Part a}
+\label{prob1parta}
 Solve the first relaxed LP subproblem by hand using the simplex method and derive Gomory cuts based on the LP relaxation.
 
 \textbf{Solution:} To tackle this problem we first relax the problem and then turn the problem above into the standard form so we can create a simplex tableau from it.
@@ -159,7 +160,149 @@ These turn into the cuts
 
 \subsection{Part b}
 Solve the above problem with the branch and bound method by enumerating nodes in the tree and solving the LP subproblems using GAMS.
-\textbf{Solution: }
 
+\textbf{Solution: }
+The initial LP relaxed problem is solved in \ref{prob1parta}, so we can start with the parent node.
+An important note for this question, I will be solving the LPs in my custom \texttt{gatorpy} LP solver so that I can use them as verification tests.
+The code used will be available in section 
+\begin{center}
+  \begin{adjustbox}{width=0.5\textwidth}
+  \begin{tikzpicture}[
+    level 1/.style={sibling distance=80mm},
+    level 2/.style={sibling distance=35mm},
+    level distance=3.5cm,
+    edge from parent/.style={draw, -latex, very thick},
+    every node/.style={draw, rounded corners, text width=10cm, align=center, very thick, font=\small}
+]
+    
+% Root node
+\node {
+  \begin{align*}
+      & [\frac{5}{7},  \frac{2}{7},0,0,\frac{2}{7},\frac{5}{7}], z = \frac{8}{7} \\
+      & \text{maximize} \quad 1.2y_1 + y_2 \\
+      & \text{subject to} \quad y_1 + y_2 + s_1 = 1, \\
+      & \quad 1.2y_1 + 0.5y_2 + s_2 = 1, \\
+      & \quad y_1 + s_3 = 1, \\
+      & \quad y_2 + s_4 = 1, \\
+      & \quad y_1, y_2, s_1, s_2, s_3, s_4 \geq 0. \\
+      & UB= \frac{8}{7}, LB = -inf
+  \end{align*}
+};
+\end{tikzpicture}
+\end{adjustbox}
+\end{center}
+Since all variables are fractional, we can pick the first one $y_1$ to branch on
+\begin{center}
+  \begin{adjustbox}{width=0.8\textwidth}
+  \begin{tikzpicture}[
+    level 1/.style={sibling distance=100mm},
+    level 2/.style={sibling distance=80mm},
+    level distance=10cm,
+    edge from parent/.style={draw, -latex, very thick},
+    every node/.style={draw, rounded corners, text width=10cm, align=center, very thick, font=\small}
+]
+    
+% Root node
+\node {
+  \begin{align*}
+      & [\frac{5}{7},  \frac{2}{7},0,0,\frac{2}{7},\frac{5}{7}], z = \frac{8}{7} \\
+      & \text{maximize} \quad 1.2y_1 + y_2 \\
+      & \text{subject to} \quad y_1 + y_2 + s_1 = 1, \\
+      & \quad 1.2y_1 + 0.5y_2 + s_2 = 1, \\
+      & \quad y_1 + s_3 = 1, \\
+      & \quad y_2 + s_4 = 1, \\
+      & \quad y_1, y_2, s_1, s_2, s_3, s_4 \geq 0. \\
+      & UB= \frac{8}{7}, LB = -inf
+  \end{align*}
+}
+    % Left child of Root
+    child {node {
+      \begin{align*}
+          & [0, \frac{2}{3}, 0, \frac{1}{3}, \frac{1}{3}, 1], z = \frac{2}{3} \\
+          & \text{maximize} \quad 1.2y_1 + y_2 \\
+          & \text{subject to} \quad y_1 \leq 0, \\
+          & \quad y_1 + y_2 + s_1 = 1, \\
+          & \quad 1.2y_1 + 0.5y_2 + s_2 = 1, \\
+          & \quad y_1 + s_3 = 1, \\
+          & \quad y_2 + s_4 = 1, \\
+          & \quad y_1, y_2, s_1, s_2, s_3, s_4 \geq 0. \\
+          & UB= \frac{2}{3}, LB = -inf
+      \end{align*}
+    }
+    edge from parent node[draw=none, pos=0.5, above left] {$y_1 = 0$}}
+    % Right child of Root
+    child {node {
+      \begin{align*}
+          & [1, 0, 0, 0, 0, 1], z = 1.2 \\
+          & \text{maximize} \quad 1.2y_1 + y_2 \\
+          & \text{subject to} \quad y_1 \geq 1, \\
+          & \quad y_1 + y_2 + s_1 = 1, \\
+          & \quad 1.2y_1 + 0.5y_2 + s_2 = 1, \\
+          & \quad y_1 + s_3 = 1, \\
+          & \quad y_2 + s_4 = 1, \\
+          & \quad y_1, y_2, s_1, s_2, s_3, s_4 \geq 0. \\
+          & UB= 1.2, LB = -inf
+      \end{align*}
+    }
+    edge from parent node[draw=none, pos=0.5, above right] {$y_1 = 1$}};
+\end{tikzpicture}
+\end{adjustbox}
+\end{center}
+
+
+
+% \begin{center}
+%   \begin{adjustbox}{width=0.925\textwidth}
+%   \begin{tikzpicture}[
+%     level 1/.style={sibling distance=80mm},
+%     level 2/.style={sibling distance=35mm},
+%     level distance=3.5cm,
+%     edge from parent/.style={draw, -latex, very thick},
+%     every node/.style={draw, rounded corners, text width=2.5cm, align=center, very thick, font=\small}
+% ]
+    
+% % Root node
+% \node {\textbf{$\mathbf{{x \leq 7}}$}\\ Samples: 8 \\ MSE: 8.69 \\ $\hat y = 4.75$}
+%     % Left child of Root
+%     child {node {\textbf{$\mathbf{{x \leq 4}}$}\\ Samples: 4 \\ MSE: 1.69 \\ $\hat y = 2.25$}
+%         % Left child of Node 1
+%         child {node {\textbf{\underline{Node 3:}} \\ Samples: 2 \\ MSE: 0.00 \\ $\hat y = 1.00$}
+%         edge from parent node[draw=none, pos=-0.4, above left, sloped] {{\color{blue}True}}}
+%         % Right child of Node 1
+%         child {node {\textbf{$\mathbf{{x \leq 5.5}}$} \\ Samples: 2 \\ MSE: 0.25 \\ $\hat y = 3.50$}
+%             % Left child of Node 4
+%             child {node {\textbf{\underline{Node 7:}} \\ Samples: 1 \\ MSE: 0.00 \\ $\hat y = 3.00$}
+%             edge from parent node[draw=none, pos=-0.4, above left, sloped] {{\color{blue}True}}}
+%             % Right child of Node 4
+%             child {node {\textbf{\underline{Node 8:}} \\ Samples: 1 \\ MSE: 0.00 \\ $\hat y = 4.00$}
+%             edge from parent node[draw=none, pos=-0.4, above right, sloped] {{\color{red}False}}
+%             }
+%         edge from parent node[draw=none, pos=-0.4, above right, sloped] {{\color{red}False}}}
+%         edge from parent node[draw=none, pos=-0.2, above left, sloped] {{\color{blue}True}}
+%     }
+%     % Right child of Root
+%     child {node {\textbf{$\mathbf{{x \leq 10.5}}$}\\ Samples: 4 \\ MSE: 3.19 \\ $\hat y = 7.25$}
+%         % Left child of Node 2
+%         child {node {\textbf{\underline{Node 5:}} \\ Samples: 2 \\ MSE: 0.0 \\ $\hat y = 9.00$}
+%         edge from parent node[draw=none, pos=-0.4, above left, sloped] {{\color{blue}True}}}
+%         % Right child of Node 2
+%         child {node {\textbf{$\mathbf{{x \leq 12}}$} \\ Samples: 2 \\ MSE: 0.25 \\ $\hat y = 5.5$}
+%             % Left child of Node 6
+%             child {node {\textbf{\underline{Node 9:}} \\ Samples: 1 \\ MSE: 0.00 \\ $\hat y = 6.00$}
+%             edge from parent node[draw=none, pos=-0.4, above left, sloped] {{\color{blue}True}}}
+%             % Right child of Node 6
+%             child {node {\textbf{\underline{Node 10:}} \\ Samples: 1 \\ MSE: 0.00 \\ $\hat y = 5.00$}
+%             edge from parent node[draw=none, pos=-0.4, above right, sloped] {{\color{red}False}}
+%             }
+%         edge from parent node[draw=none, pos=-0.4, above right, sloped] {{\color{red}False}}}
+%         edge from parent node[draw=none, pos=-0.2, above right, sloped] {{\color{red}False}}
+%     };
+% \end{tikzpicture}
+% \end{adjustbox}
+% \end{center}
+
+
+
+\section{}
 
 \end{document}

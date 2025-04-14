@@ -281,7 +281,64 @@ def run_test_hw5_1():
     ]
     problem_cvx = cp.Problem(objective, constraints)
     
-    get_test_results(problem, problem_cvx, "HW5 Problem 1 LP relaxation")
+    get_test_results(problem, problem_cvx, "HW5 Problem 1 initial LP relaxation")
+    # branch and bound arrays
+    I_y_1_arr = np.array([[1,0],[0,0]])
+    I_y_2_arr = np.array([[0,0],[0,1]])
+    I_y_1 = Parameter(I_y_1_arr)
+    I_y_2 = Parameter(I_y_2_arr)
+    # LEFT SPLIT
+    # Problem
+    problem = Problem({
+        'maximize': c.T @ y,
+        'subject to': [
+            A @ y <= b,
+            y >= 0,
+            y <= 1,
+            I_y_1 @ y <= 0,
+        ]
+    })
+
+    # CVX Vars
+    y_cvx = cp.Variable(2)
+    # CVX Problem
+    objective = cp.Maximize(c_arr @ y_cvx)
+    constraints = [
+        A_arr @ y_cvx <= b_arr,
+        y_cvx >= 0,
+        y_cvx <= 1,
+        I_y_1_arr @ y_cvx <= 0
+    ]
+    problem_cvx = cp.Problem(objective, constraints)
+
+    get_test_results(problem, problem_cvx, "HW5 Problem 1 Branch and Bound Left Split y_1 <= 0")
+    
+    # RIGHT SPLIT
+    # Problem
+    problem = Problem({
+        'maximize': c.T @ y,
+        'subject to': [
+            A @ y <= b,
+            y >= 0,
+            y <= 1,
+            I_y_1 @ y >= 1,
+        ]
+    })
+
+    # CVX Vars
+    y_cvx = cp.Variable(2)
+    # CVX Problem
+    objective = cp.Maximize(c_arr @ y_cvx)
+    constraints = [
+        A_arr @ y_cvx <= b_arr,
+        y_cvx >= 0,
+        y_cvx <= 1,
+        I_y_1_arr @ y_cvx >= 1
+    ]
+    problem_cvx = cp.Problem(objective, constraints)
+
+    get_test_results(problem, problem_cvx, "HW5 Problem 1 Branch and Bound Right Split y_1 >=1")
+
 
 if __name__ == "__main__":
     run_test_0a()
