@@ -16,12 +16,12 @@ def get_test_results(glp_prob:Problem, cvxpy_prob:cp.Problem, test_id:str):
         feasible = False
     # Compare results
     if feasible and cvx_solution is not None:
-        passed = np.isclose(f_star, glp_solution[0], atol=1e-2) and np.allclose(x_star, glp_solution[1], atol=1e-2)
+        passed = np.isclose(f_star, glp_solution[0].reshape(-1,1), atol=1e-2) and np.allclose(x_star, glp_solution[1].reshape(-1,1), atol=1e-2)
     else:
         passed = False
     print(f"Test ID: {test_id}")
     print(f"CVX: {(f_star, x_star, feasible)}")
-    print(f"GLP: {glp_solution}")
+    print(f"GatORPy: {glp_solution}")
     print(f"Test passed: {passed} \n")
 
 
@@ -250,6 +250,38 @@ def run_test_4a():
 
     get_test_results(problem, problem_cvx, "2 matrix constraint, 1 var, n = 2, Mixed Eq and Leq, Minimize")
 
+def run_test_hw5_1():
+    # Parameters
+    A_arr = np.array([[1,1],[1.2,0.5]])
+    b_arr = np.array([1,1])
+    c_arr = np.array([1.2,1])
+    A = Parameter(A_arr)
+    b = Parameter(b_arr)
+    c = Parameter(c_arr)
+    # Variables
+    y = Variable(2)
+    # Problem
+    problem = Problem({
+        'maximize': c.T @ y,
+        'subject to': [
+            A @ y <= b,
+            y >= 0,
+            y <= 1
+        ]
+    })
+
+    # CVX Vars
+    y_cvx = cp.Variable(2)
+    # CVX Problem
+    objective = cp.Maximize(c_arr @ y_cvx)
+    constraints = [
+        A_arr @ y_cvx <= b_arr,
+        y_cvx >= 0,
+        y_cvx <= 1
+    ]
+    problem_cvx = cp.Problem(objective, constraints)
+    
+    get_test_results(problem, problem_cvx, "HW5 Problem 1 LP relaxation")
 
 if __name__ == "__main__":
     run_test_0a()
@@ -259,3 +291,4 @@ if __name__ == "__main__":
     run_test_2() # seems to fail when it is -Ax == -b
     run_test_3()
     run_test_4a()
+    run_test_hw5_1()

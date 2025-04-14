@@ -55,6 +55,7 @@ def find_entering_variable(tableau:np.ndarray,rule:str) -> int:
         for col_index in range(tableau.shape[1] -1):
             if tableau[-1, col_index] < -EPSILON:
                 return col_index
+        return None
     raise ValueError(f"Unsupported rule selected: {rule}")
 
 def find_leaving_variable(tableau:np.ndarray, entering_col_index:int) -> int:
