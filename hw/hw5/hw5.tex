@@ -164,7 +164,7 @@ Solve the above problem with the branch and bound method by enumerating nodes in
 \textbf{Solution: }
 The initial LP relaxed problem is solved in \ref{prob1parta}, so we can start with the parent node.
 An important note for this question, I will be solving the LPs in my custom \texttt{gatorpy} LP solver so that I can use them as verification tests.
-The code used will be available in section 
+The code used will be available in section \ref{problem1code}
 \begin{center}
   \begin{adjustbox}{width=0.5\textwidth}
   \begin{tikzpicture}[
@@ -172,7 +172,7 @@ The code used will be available in section
     level 2/.style={sibling distance=35mm},
     level distance=3.5cm,
     edge from parent/.style={draw, -latex, very thick},
-    every node/.style={draw, rounded corners, text width=10cm, align=center, very thick, font=\small}
+    every node/.style={draw, rounded corners, text width=5cm, align=center, very thick, font=\small}
 ]
     
 % Root node
@@ -199,7 +199,7 @@ Since all variables are fractional, we can pick the first one $y_1$ to branch on
     level 2/.style={sibling distance=80mm},
     level distance=10cm,
     edge from parent/.style={draw, -latex, very thick},
-    every node/.style={draw, rounded corners, text width=10cm, align=center, very thick, font=\small}
+    every node/.style={draw, rounded corners, text width=5cm, align=center, very thick, font=\small}
 ]
     
 % Root node
@@ -218,30 +218,30 @@ Since all variables are fractional, we can pick the first one $y_1$ to branch on
     % Left child of Root
     child {node {
       \begin{align*}
-          & [0, \frac{2}{3}, 0, \frac{1}{3}, \frac{1}{3}, 1], z = \frac{2}{3} \\
+          & [0, 1], z = 1 \\
           & \text{maximize} \quad 1.2y_1 + y_2 \\
           & \text{subject to} \quad y_1 \leq 0, \\
-          & \quad y_1 + y_2 + s_1 = 1, \\
-          & \quad 1.2y_1 + 0.5y_2 + s_2 = 1, \\
-          & \quad y_1 + s_3 = 1, \\
-          & \quad y_2 + s_4 = 1, \\
-          & \quad y_1, y_2, s_1, s_2, s_3, s_4 \geq 0. \\
-          & UB= \frac{2}{3}, LB = -inf
+          & \quad y_1 + y_2 \leq 1, \\
+          & \quad 1.2y_1 + 0.5y_2 \leq 1, \\
+          & \quad y_1 \leq 1, \\
+          & \quad y_2 \leq1, \\
+          & \quad y_1, y_2 \geq 0. \\
+          & UB= \frac{8}{7}, LB = 1, optimal
       \end{align*}
     }
     edge from parent node[draw=none, pos=0.5, above left] {$y_1 = 0$}}
     % Right child of Root
     child {node {
       \begin{align*}
-          & [1, 0, 0, 0, 0, 1], z = 1.2 \\
+          & [1, 0], infeasible \\
           & \text{maximize} \quad 1.2y_1 + y_2 \\
           & \text{subject to} \quad y_1 \geq 1, \\
-          & \quad y_1 + y_2 + s_1 = 1, \\
-          & \quad 1.2y_1 + 0.5y_2 + s_2 = 1, \\
-          & \quad y_1 + s_3 = 1, \\
-          & \quad y_2 + s_4 = 1, \\
-          & \quad y_1, y_2, s_1, s_2, s_3, s_4 \geq 0. \\
-          & UB= 1.2, LB = -inf
+          & \quad y_1 + y_2 \leq 1, \\
+          & \quad 1.2y_1 + 0.5y_2 \leq 1, \\
+          & \quad y_1 \leq 1, \\
+          & \quad y_2 \leq1, \\
+          & \quad y_1, y_2 \geq 0. \\
+          & pruned
       \end{align*}
     }
     edge from parent node[draw=none, pos=0.5, above right] {$y_1 = 1$}};
@@ -249,60 +249,207 @@ Since all variables are fractional, we can pick the first one $y_1$ to branch on
 \end{adjustbox}
 \end{center}
 
+Via the branch and bound method, the optimal solution to the problem
+\begin{align*}
+  \text{maximize} & \quad 1.2y_1 + y_2 \\
+  \text{subject to} & \quad y_1 + y_2 \leq 1 \\
+  & \quad 1.2y_1 + 0.5y_2 \leq 1 \\
+  & \quad y_1, y_2 \in \{ 0,1 \}
+\end{align*}
+is $y_1=0,y_2=1,z=1$.
+
+\section{Problem 2}
+\label{prob2}
+\section{Problem 2}
+\label{prob2}
+
+Consider the following superstructure for the separation of four chemical components using sharp distillation columns. 
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=0.50\textwidth]{images/prob2_superstructure.png}}
+  \caption{Problem 2 superstructure}
+  \label{fig:prob2_superstructure}
+\end{figure}
+The total cost of a distillation column is calculated as follows:
+
+\[
+\text{cost}_k = \alpha_k + \beta_k F_k + \gamma_\text{Hot} Q_k^\text{Hot} + \gamma_\text{Cold} Q_k^\text{Cold}
+\]
+
+where:
+\begin{itemize}
+  \item $\alpha_k$ represents a fixed capital cost,
+  \item $\beta_k$ represents the variable investment cost,
+  \item $\gamma_{\text{Hot}/\text{Cold}}$ is the cost of hot/cold utilities, and
+  \item $Q_k^\text{Hot}/Q_k^\text{Cold}$ is the total demand of hot and cold utilities (assumed to be equal).
+\end{itemize}
+
+Given:
+\begin{itemize}
+  \item Initial feed: 1000 Kmol/h,
+  \item Feed composition (mole fraction): A = 0.15, B = 0.3, C = 0.35, D = 0.2.
+\end{itemize}
+and the following data:
+\begin{figure}[htbp]
+  \centerline{\includegraphics[width=0.50\textwidth]{images/prob2_table.png}}
+  \caption{Problem 2 Data}
+  \label{fig:prob2_table}
+\end{figure}
+
+\subsection{Part A: MILP Formulation}
+Formulate a Mixed-Integer Linear Programming (MILP) problem to find the optimal sequence of distillation columns. 
+Identify at least 2 logicx based equations that can be formulated to tighten the problem formulation.
 
 
-% \begin{center}
-%   \begin{adjustbox}{width=0.925\textwidth}
-%   \begin{tikzpicture}[
-%     level 1/.style={sibling distance=80mm},
-%     level 2/.style={sibling distance=35mm},
-%     level distance=3.5cm,
-%     edge from parent/.style={draw, -latex, very thick},
-%     every node/.style={draw, rounded corners, text width=2.5cm, align=center, very thick, font=\small}
-% ]
-    
-% % Root node
-% \node {\textbf{$\mathbf{{x \leq 7}}$}\\ Samples: 8 \\ MSE: 8.69 \\ $\hat y = 4.75$}
-%     % Left child of Root
-%     child {node {\textbf{$\mathbf{{x \leq 4}}$}\\ Samples: 4 \\ MSE: 1.69 \\ $\hat y = 2.25$}
-%         % Left child of Node 1
-%         child {node {\textbf{\underline{Node 3:}} \\ Samples: 2 \\ MSE: 0.00 \\ $\hat y = 1.00$}
-%         edge from parent node[draw=none, pos=-0.4, above left, sloped] {{\color{blue}True}}}
-%         % Right child of Node 1
-%         child {node {\textbf{$\mathbf{{x \leq 5.5}}$} \\ Samples: 2 \\ MSE: 0.25 \\ $\hat y = 3.50$}
-%             % Left child of Node 4
-%             child {node {\textbf{\underline{Node 7:}} \\ Samples: 1 \\ MSE: 0.00 \\ $\hat y = 3.00$}
-%             edge from parent node[draw=none, pos=-0.4, above left, sloped] {{\color{blue}True}}}
-%             % Right child of Node 4
-%             child {node {\textbf{\underline{Node 8:}} \\ Samples: 1 \\ MSE: 0.00 \\ $\hat y = 4.00$}
-%             edge from parent node[draw=none, pos=-0.4, above right, sloped] {{\color{red}False}}
-%             }
-%         edge from parent node[draw=none, pos=-0.4, above right, sloped] {{\color{red}False}}}
-%         edge from parent node[draw=none, pos=-0.2, above left, sloped] {{\color{blue}True}}
-%     }
-%     % Right child of Root
-%     child {node {\textbf{$\mathbf{{x \leq 10.5}}$}\\ Samples: 4 \\ MSE: 3.19 \\ $\hat y = 7.25$}
-%         % Left child of Node 2
-%         child {node {\textbf{\underline{Node 5:}} \\ Samples: 2 \\ MSE: 0.0 \\ $\hat y = 9.00$}
-%         edge from parent node[draw=none, pos=-0.4, above left, sloped] {{\color{blue}True}}}
-%         % Right child of Node 2
-%         child {node {\textbf{$\mathbf{{x \leq 12}}$} \\ Samples: 2 \\ MSE: 0.25 \\ $\hat y = 5.5$}
-%             % Left child of Node 6
-%             child {node {\textbf{\underline{Node 9:}} \\ Samples: 1 \\ MSE: 0.00 \\ $\hat y = 6.00$}
-%             edge from parent node[draw=none, pos=-0.4, above left, sloped] {{\color{blue}True}}}
-%             % Right child of Node 6
-%             child {node {\textbf{\underline{Node 10:}} \\ Samples: 1 \\ MSE: 0.00 \\ $\hat y = 5.00$}
-%             edge from parent node[draw=none, pos=-0.4, above right, sloped] {{\color{red}False}}
-%             }
-%         edge from parent node[draw=none, pos=-0.4, above right, sloped] {{\color{red}False}}}
-%         edge from parent node[draw=none, pos=-0.2, above right, sloped] {{\color{red}False}}
-%     };
-% \end{tikzpicture}
-% \end{adjustbox}
-% \end{center}
+\subsection{Part B: Solve Using GAMS}
+Solve the problem using GAMS.
+
+\subsection{Part C: Integer Cut}
+Once the solution is found:
+\begin{itemize}
+  \item Identify the active binary variables in the optimal solution.
+  \item Formulate an integer cut to exclude this solution from the feasible space.
+  \item Solve the problem again to find the next best solution.
+\end{itemize}
+
+
+\section{Problem 3}
+
+\section{Problem 3}
+\label{prob3}
+
+Given are three candidate reactors for the reaction \( A \rightarrow B \), where we would like to produce 10 kmol/h of \( B \). Up to 15 kmol/hr of reactant \( A \) are available at a price of \$2/kmol. The data on the three reactors is as follows:
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Reactor} & \textbf{Conversion} & \textbf{Cost} \\ \hline
+1 & 0.8 & \( 8 + 1.5 \cdot \text{Feed} \) \\ \hline
+2 & 0.667 & \( 5.4 + \text{Feed} \) \\ \hline
+3 & 0.555 & \( 2.7 + 0.5 \cdot \text{Feed} \) \\ \hline
+\end{tabular}
+\caption{Reactor Data}
+\label{tab:reactor_data}
+\end{table}
+
+\subsection{Part A: Superstructure Design}
+Design a superstructure to represent this problem.
+
+\subsection{Part B: MILP Formulation}
+Determine a MILP formulation.
+
+\subsection{Part C: Solve Using GAMS}
+Solve in GAMS.
 
 
 
-\section{}
+\section{Code}
+\subsection{Problem 1 Code}
+\label{problem1code}
+\begin{verbatim}
+  # Parameters
+  A_arr = np.array([[1,1],[1.2,0.5]])
+  b_arr = np.array([1,1])
+  c_arr = np.array([1.2,1])
+  A = Parameter(A_arr)
+  b = Parameter(b_arr)
+  c = Parameter(c_arr)
+  # Variables
+  y = Variable(2)
+  # Problem
+  problem = Problem({
+      'maximize': c.T @ y,
+      'subject to': [
+          A @ y <= b,
+          y >= 0,
+          y <= 1
+      ]
+  })
+  
+  # CVX Vars
+  y_cvx = cp.Variable(2)
+  # CVX Problem
+  objective = cp.Maximize(c_arr @ y_cvx)
+  constraints = [
+      A_arr @ y_cvx <= b_arr,
+      y_cvx >= 0,
+      y_cvx <= 1
+  ]
+  problem_cvx = cp.Problem(objective, constraints)
+  
+  get_test_results(problem, problem_cvx, "HW5 Problem 1 initial LP relaxation")
+  # branch and bound arrays
+  I_y_1_arr = np.array([[1,0],[0,0]])
+  I_y_2_arr = np.array([[0,0],[0,1]])
+  I_y_1 = Parameter(I_y_1_arr)
+  I_y_2 = Parameter(I_y_2_arr)
+  # LEFT SPLIT
+  # Problem
+  problem = Problem({
+      'maximize': c.T @ y,
+      'subject to': [
+          A @ y <= b,
+          y >= 0,
+          y <= 1,
+          I_y_1 @ y <= 0,
+      ]
+  })
+  
+  # CVX Vars
+  y_cvx = cp.Variable(2)
+  # CVX Problem
+  objective = cp.Maximize(c_arr @ y_cvx)
+  constraints = [
+      A_arr @ y_cvx <= b_arr,
+      y_cvx >= 0,
+      y_cvx <= 1,
+      I_y_1_arr @ y_cvx <= 0
+  ]
+  problem_cvx = cp.Problem(objective, constraints)
+  
+  get_test_results(problem, problem_cvx, "HW5 Problem 1 Branch and Bound Left Split y_1 <= 0")
+  
+  # RIGHT SPLIT
+  # Problem
+  problem = Problem({
+      'maximize': c.T @ y,
+      'subject to': [
+          A @ y <= b,
+          y >= 0,
+          y <= 1,
+          I_y_1 @ y >= 1,
+      ]
+  })
+  
+  # CVX Vars
+  y_cvx = cp.Variable(2)
+  # CVX Problem
+  objective = cp.Maximize(c_arr @ y_cvx)
+  constraints = [
+      A_arr @ y_cvx <= b_arr,
+      y_cvx >= 0,
+      y_cvx <= 1,
+      I_y_1_arr @ y_cvx >= 1
+  ]
+  problem_cvx = cp.Problem(objective, constraints)
+  
+  get_test_results(problem, problem_cvx, "HW5 Problem 1 Branch and Bound Right Split y_1 >=1") 
+  
+  Test ID: HW5 Problem 1 initial LP relaxation
+  CVX: (np.float64(1.14), array([[0.71, 0.29]]), True)
+  GatORPy: (array(1.14285714), array([0.71428571, 0.28571429, 0.        , 0.        , 0.28571429,
+         0.71428571]), True)
+  Test passed: False 
+  
+  Test ID: HW5 Problem 1 Branch and Bound Left Split y_1 <= 0
+  CVX: (np.float64(1.0), array([[0., 1.]]), True)
+  GatORPy: (array(1.), array([0. , 1. , 0. , 0.5, 1. , 0. , 0. , 0. ]), True)
+  Test passed: False 
+  
+  Test ID: HW5 Problem 1 Branch and Bound Right Split y_1 >=1
+  CVX: (None, None, False)
+  GatORPy: (array(0.8), array([ 1. , -0.4,  0.4,  0. ,  0. ,  1.4,  0. , -1. ]), True)
+  Test passed: False 
+\end{verbatim}
 
 \end{document}
