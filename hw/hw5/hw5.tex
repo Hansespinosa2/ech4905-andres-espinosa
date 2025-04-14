@@ -141,11 +141,25 @@ s_4 & 0 & 0 & -\frac{12}{7} &  \frac{60}{42} & 0 & 1 & \frac{30}{42} &  \\
 \]
 This is the optimal solution to the LP relaxed problem.
 Now we will derive Gomory cuts from this LP relaxed problem.
+Since each constraint has a non-integer solution, we can generate a Gomory cut on each constraint.
 
+\begin{align*}
+  y_2 + \text{floor}(\frac{12}{7}) s_1 + \text{floor}(\frac{-10}{7}) s_2 \leq \text{floor}(\frac{2}{7}) \\
+  y_1 + \text{floor}(\frac{-5}{7}) s_1 + \text{floor}(\frac{10}{7}) s_2 \leq \text{floor}(\frac{5}{7}) \\
+  s_3 + \text{floor}(\frac{5}{7}) s_1 + \text{floor}(\frac{-10}{7})s_2 \leq \text{floor}(\frac{2}{7}) \\
+  s_4 + \text{floor}(\frac{-12}{7}) s_1 + \text{floor}(\frac{10}{7}) s_2 \leq \text{floor}(\frac{5}{7})
+\end{align*}
+These turn into the cuts
+\begin{align*}
+  y_2 + s_1 -2 s_2 \leq 0 \\
+  y_1 - s_1 + s_2 \leq 0 \\
+  s_3 -2 s_2 \leq 0 \\
+  s_4 -2 s_1 + s_2 \leq 0
+\end{align*}
 
 \subsection{Part b}
 Solve the above problem with the branch and bound method by enumerating nodes in the tree and solving the LP subproblems using GAMS.
-
 \textbf{Solution: }
+
 
 \end{document}

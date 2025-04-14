@@ -160,7 +160,7 @@ def simplex_phase_2(A:np.ndarray, b:np.ndarray, c:np.ndarray, basis:list[int]) -
             return -np.inf, None, False # Unbounded solution
         tableau = pivot(tableau, leaving_row_index, entering_col_index)
         basis[leaving_row_index] = entering_col_index
-    
+
     solution = np.zeros(n)
     solution[basis] = zero_if_close_to_zero(tableau[:-1,-1])
     optimal_value = zero_if_close_to_zero(tableau[-1,-1])
