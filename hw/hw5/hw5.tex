@@ -17,7 +17,133 @@
 \maketitle
 
 \section{Problem 1}
+Consider the following integer programming problem:
+
+
+\begin{align*}
+  \text{maximize} & \quad 1.2y_1 + y_2 \\
+  \text{subject to} & \quad y_1 + y_2 \leq 1 \\
+  & \quad 1.2y_1 + 0.5y_2 \leq 1 \\
+  & \quad y_1, y_2 \in \{ 0,1 \}
+\end{align*}
+
 \subsection{Part a}
+Solve the first relaxed LP subproblem by hand using the simplex method and derive Gomory cuts based on the LP relaxation.
+
+\textbf{Solution:} To tackle this problem we first relax the problem and then turn the problem above into the standard form so we can create a simplex tableau from it.
+
+\begin{align*}
+    \text{maximize} & \quad 1.2y_1 + y_2 \\
+    \text{subject to} & \quad y_1 + y_2 + s_1= 1 \\
+    & \quad 1.2y_1 + 0.5y_2 + s_2 = 1 \\
+    & \quad y_1 + s_3 = 1 \\
+    & \quad y_2 + s_4 = 1 \\
+    & \quad y_1, y_2, s_1, s_2, s_3, s_4 \geq 0
+\end{align*}
+
+In matrix notation,
+\begin{align*}
+  \text{minimize} & \quad \textbf{c}^\top \textbf{x} \\
+  \text{subject to} & \quad \textbf{A} \textbf{x} = \textbf{b} \\
+  & \quad \textbf{x} \succeq 0
+\end{align*}
+where
+\begin{align*}
+    \textbf{c} = 
+  \begin{bmatrix}
+     -1.2 \\ -1 \\ 0 \\ 0 \\ 0 \\ 0
+  \end{bmatrix}, \quad
+  \textbf{A} = 
+  \begin{bmatrix}
+    1 & 1 & 1 & 0 & 0 & 0 \\
+    1.2 & 0.5 & 0 & 1 & 0 & 0 \\
+    1 & 0 & 0 & 0 & 1 & 0 \\
+    0 & 1 & 0 & 0 & 0 & 1
+  \end{bmatrix}, \quad
+  \textbf{b} = 
+  \begin{bmatrix}
+    1 \\ 1 \\ 1 \\ 1
+  \end{bmatrix}, \quad
+  \textbf{x} = 
+  \begin{bmatrix}
+    y_1 \\ y_2 \\ s_1 \\ s_2 \\ s_3 \\ s_4
+  \end{bmatrix}
+\end{align*}
+(with a flipped objective component)
+
+The initial simplex tableau for the problem is as follows:
+
+\[
+\begin{array}{c|cccccc|c|c}
+\text{Basic Var} & y_1 & y_2 & s_1 & s_2 & s_3 & s_4 & \text{RHS} & \alpha \\
+\hline
+s_1 & 1 & 1 & 1 & 0 & 0 & 0 & 1 &  \\
+s_2 & 1.2 & 0.5 & 0 & 1 & 0 & 0 & 1 &  \\
+s_3 & 1 & 0 & 0 & 0 & 1 & 0 & 1 &  \\
+s_4 & 0 & 1 & 0 & 0 & 0 & 1 & 1 &  \\
+\hline
+\text{obj} & -1.2 & -1 & 0 & 0 & 0 & 0 & - & - \\
+\end{array}
+\]
+we can define the slack variables equal to the right hand side, and this is in turn a basic feasible solution, so we can jump into phase 2.
+
+We select the $y_1$ as the entering variable and calculate the alpha value for each basic variable
+\[
+\begin{array}{c|cccccc|c|c}
+\text{Basic Var} & y_1 & y_2 & s_1 & s_2 & s_3 & s_4 & \text{RHS} & \alpha \\
+\hline
+s_1 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & \frac{1}{1} \\
+s_2 & 1.2 & 0.5 & 0 & 1 & 0 & 0 & 1 & \frac{1}{1.2} \\
+s_3 & 1 & 0 & 0 & 0 & 1 & 0 & 1 & \frac{1}{1} \\
+s_4 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & \frac{1}{0} \\
+\hline
+\text{obj} & -1.2 & -1 & 0 & 0 & 0 & 0 & - & - \\
+\end{array}
+\]
+We pivot this on the 1st column ($y_1$) and the 2nd row ($s_2$)
+\[
+\begin{array}{c|cccccc|c|c}
+\text{Basic Var} & y_1 & y_2 & s_1 & s_2 & s_3 & s_4 & \text{RHS} & \alpha \\
+\hline
+s_1 & 0 & \frac{7}{12} & 1 & -\frac{5}{6} & 0 & 0 & \frac{1}{6} &  \\
+y_1 & 1 & \frac{5}{12} & 0 & \frac{5}{6} & 0 & 0 & \frac{5}{6} &  \\
+s_3 & 0 & -\frac{5}{12} & 0 &  -\frac{5}{6} & 1 & 0 & \frac{1}{6} &  \\
+s_4 & 0 & 1 & 0 &  0 & 0 & 1 & 1 &  \\
+\hline
+\text{obj} & 0 & -0.5 & - & - & - & - & - & - \\
+\end{array}
+\]
+With blands rule, we pick $y_2$ and calculate the alpha value for each basic variable.
+\[
+\begin{array}{c|cccccc|c|c}
+\text{Basic Var} & y_1 & y_2 & s_1 & s_2 & s_3 & s_4 & \text{RHS} & \alpha \\
+\hline
+s_1 & 0 & \frac{7}{12} & 1 & -\frac{5}{6} & 0 & 0 & \frac{1}{6} & \frac{2}{7} \\
+y_1 & 1 & \frac{5}{12} & 0 & \frac{5}{6} & 0 & 0 & \frac{5}{6} & \frac{2}{1} \\
+s_3 & 0 & -\frac{5}{12} & 0 &  -\frac{5}{6} & 1 & 0 & \frac{1}{6} & -\frac{1}{5} \\
+s_4 & 0 & 1 & 0 &  0 & 0 & 1 & 1 & \frac{1}{1} \\
+\hline
+\text{obj} & 0 & -0.5 & - & - & - & - & - & - \\
+\end{array}
+\]
+We pivot on the 2nd column ($y_2$) and the 1st row ($s_1$).
+\[
+\begin{array}{c|cccccc|c|c}
+\text{Basic Var} & y_1 & y_2 & s_1 & s_2 & s_3 & s_4 & \text{RHS} & \alpha \\
+\hline
+y_2 & 0 & 1 & \frac{12}{7} & -\frac{10}{7} & 0 & 0 & \frac{2}{7} &  \\
+y_1 & 1 & 0 & -\frac{5}{7} & \frac{60}{42} & 0 & 0 & \frac{30}{42} &  \\
+s_3 & 0 & 0 & \frac{5}{7} &  -\frac{60}{42} & 1 & 0 & \frac{12}{42} &  \\
+s_4 & 0 & 0 & -\frac{12}{7} &  \frac{60}{42} & 0 & 1 & \frac{30}{42} &  \\
+\hline
+\text{obj} & 0 & 0 & 0.857 & 0.286  & 0 & 0 & 0 & -1.143 \\
+\end{array}
+\]
+This is the optimal solution to the LP relaxed problem.
+
+
+\subsection{Part b}
+Solve the above problem with the branch and bound method by enumerating nodes in the tree and solving the LP subproblems using GAMS.
 
 \textbf{Solution: }
 
