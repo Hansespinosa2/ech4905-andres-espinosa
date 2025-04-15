@@ -289,7 +289,7 @@ Given:
 \end{itemize}
 and the following data:
 \begin{figure}[htbp]
-  \centerline{\includegraphics[width=0.50\textwidth]{images/prob2_table.png}}
+  \centerline{\includegraphics[width=0.75\textwidth]{images/prob2_table.png}}
   \caption{Problem 2 Data}
   \label{fig:prob2_table}
 \end{figure}
@@ -297,6 +297,101 @@ and the following data:
 \subsection{Part A: MILP Formulation}
 Formulate a Mixed-Integer Linear Programming (MILP) problem to find the optimal sequence of distillation columns. 
 Identify at least 2 logicx based equations that can be formulated to tighten the problem formulation.
+
+\textbf{Solution:}
+In order to solve this problem, I will first identify the variables and model the binary flow and decision logic.
+Then, I will attempt to solve the problem while ignoring the Hot/Cold variables since I am much less confident on implementing that than the other sections.
+After getting a solution working while ignoring the hot/cold components, I will then implement those $\gamma, Q$ parameters into the problem.
+
+\subsubsection{Binary logic}
+To solve this, I will start by creating a series of statements that must be true for this flow to work.
+I will be using the same $y$ variables for each distillation column that can be seen in the superstructure diagram \ref{fig:prob2_superstructure}.
+\begin{itemize}
+  \item One of $y_1,y_2,y_3$ must be chosen.
+  \item If $y_1$ is chosen, then either $y_4$ xor $y_5$ must be chosen.
+  \item If $y_2$ is chosen, then both $y_8$ and $y_{10}$ must be chosen.
+  \item If $y_3$ is chosen, then either $y_6$ xor $y_7$ must be chosen.
+  \item If $y_4$ is chosen, then $y_8$ must be chosen.
+  \item If $y_5$ is chosen, then $y_9$ must be chosen.
+  \item If $y_6$ is chosen, then $y_9$ must be chosen.
+  \item If $y_7$ is chosen, then $y_{10}$ must be chosen.
+\end{itemize}
+I believe this to be a sufficient set of logic statements to model the problem of choosing a distillation problem.
+Getting rid of the implications:
+\begin{itemize}
+  \item One of $y_1,y_2,y_3$ must be chosen.
+  \item $y_1=0$ or either $y_4$ xor $y_5$ must be chosen.
+  \item $y_2=0$ or both $y_8$ and $y_{10}$ must be chosen.
+  \item $y_3=0$ or either $y_6$ xor $y_7$ must be chosen.
+  \item $y_4=0$ or $y_8$ must be chosen.
+  \item $y_5=0$ or $y_9$ must be chosen.
+  \item $y_6=0$ or $y_9$ must be chosen.
+  \item $y_7=0$ or $y_{10}$ must be chosen.
+\end{itemize}
+We can then translate these second parts into different clauses
+\begin{align*}
+  \text{One of $y_1,y_2,y_3$ must be chosen.} & \quad \rightarrow & y_1 + y_2 + y_3 = 1 \\
+  \text{Either $y_4$ xor $y_5$ must be chosen.} & \quad \rightarrow & y_4 + y_5 = 1 \\
+  \text{both $y_8$ and $y_{10}$ must be chosen.} & \quad \rightarrow & y_8 =1 \cap y_{10} = 1  \\
+  \text{Either $y_6$ xor $y_7$ must be chosen.} & \quad \rightarrow & y_6 + y_7 = 1 \\
+  \text{$y_8$ must be chosen.} & \quad \rightarrow & y_8 = 1 \\
+  \text{$y_9$ must be chosen.}& \quad \rightarrow & y_9 = 1 \\
+  \text{$y_9$ must be chosen.} & \quad \rightarrow & y_9 = 1 \\
+  \text{$y_{10}$ must be chosen.} & \quad \rightarrow & y_{10} =1
+\end{align*}
+which can in turn be converted to
+\begin{align*}
+  y_1 + y_2 + y_3 = 1 \\
+  y_1 = 0 & \cup y_4 + y_5 = 1 \\
+  y_2 = 0 & \cup (y_8 =1 \cap y_{10} = 1)  \\
+  y_3 = 0 & \cup y_6 + y_7 = 1 \\
+  y_4 = 0 & \cup y_8 = 1 \\
+  y_5 = 0 & \cup y_9 = 1 \\
+  y_6 = 0 & \cup y_9 = 1 \\
+  y_7 = 0 & \cup y_{10} =1
+\end{align*}
+We can subtract each variable on the left from 1 so we can add them together and distribute the and operation out for the third.
+\begin{align*}
+  y_1 + y_2 + y_3 = 1 \\
+ ( 1-y_1 = 1) & \cup( ((y_4=1)\cup (y_5=1)) \cap ((1-y_4=1)\cup (1-y_5=1))) \\
+ (( 1-y_2 = 1) \cup (y_8 = 1)) & \cap ( ( 1-y_2 = 1) \cup (y_{10} = 1))  \\
+( 1-y_3 = 1) & \cup( ((y_6=1)\cup (y_7=1)) \cap ((1-y_6=1)\cup (1-y_7=1))) \\
+  1-y_3 = 1 & \cup y_6 + y_7 = 1 \\
+  1-y_4 = 1 & \cup y_8 = 1 \\
+  1-y_5 = 1 & \cup y_9 = 1 \\
+  1-y_6 = 1 & \cup y_9 = 1 \\
+  1-y_7 = 1 & \cup y_{10} =1
+\end{align*}
+We turn this into the equivalent equations
+\begin{align*}
+  y_1 + y_2 + y_3 = 1 \\
+  (1-y_1 = 1) &\cup ((y_4=1\cup y_5=1))\\
+  (1-y_1 = 1) &\cup ((1-y_4=1)\cup (1-y_5=1)) \\
+  1-y_2 + y_8 \geq 1 \\
+  1-y_2 + y_{10} \geq 1 \\
+  (1-y_3 = 1) & \cup (y_6=1\cup y_7=1) \\
+  (1-y_3 = 1) & \cup ((1-y_6=1)\cup (1-y_7=1)) \\
+  1-y_4 + y_8 \geq 1 \\
+  1-y_5+ y_9 \geq 1 \\
+  1-y_6 + y_9 \geq 1 \\
+  1-y_7 + y_{10} \geq 1
+\end{align*}
+
+Finally, we can bring them all into pure math below
+\begin{align*}
+  y_1 + y_2 + y_3 = 1 \\
+  1-y_1 + y_4 + y_5 \geq 1 \\
+  1-y_1 + 1-y_4 + 1-y_5 \geq 1 \\
+  1-y_2 + y_8 \geq 1 \\
+  1-y_2 + y_{10} \geq 1 \\
+  1-y_3 + y_6 + y_7 \geq 1 \\
+  1-y_3 + 1 - y_6 + 1- y_7 \geq 1 \\
+  1-y_4 + y_8 \geq 1 \\
+  1-y_5+ y_9 \geq 1 \\
+  1-y_6 + y_9 \geq 1 \\
+  1-y_7 + y_{10} \geq 1
+\end{align*}
+
 
 
 \subsection{Part B: Solve Using GAMS}
