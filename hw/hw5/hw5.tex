@@ -391,7 +391,51 @@ Finally, we can bring them all into pure math below
   1-y_6 + y_9 \geq 1 \\
   1-y_7 + y_{10} \geq 1
 \end{align*}
+Note: These equations are not completely sufficient on themselves, they require that each distillation column has a non-negative cost component.
+Otherwise, it could be possible for $y_8$ and $y_7$ to be chosen, but it isn't necessary since the optimization should only yield a solution where distillation columns are used if they are needed to.
+\subsection{Model w/o HotCold}
+After having solved the binary logic problems above, I will start by denoting the parameters for the model.
+This model is actually not too bad (unless I am missing the importance of the feed composition asides from flow removal).
 
+\textit{Parameters:}
+This problem has a feed composition parameter set $f_A=0.15,f_B,0.30,f_C=0.35,f_D=0.2$. 
+(Important note: I am using $x$ for the flow, so $f$ is a parameter for feed composition).
+There is the input supply $S=1000$.
+Fixed capital cost $\alpha_k$ for each $k \in [1,\dots,10]$ distillation column and variable cost $\beta_k$.
+
+\textit{Variables:}
+I am using the continuous variables $x_i \in [1,\dots,13]$ to represent the flow from column to column.
+Below is a table that maps the variable index to each flow
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Index} & \textbf{Flow Description} \\ \hline
+1 & Feed to Column 1 \\ \hline
+2 & Feed to Column 2 \\ \hline
+3 & Feed to Column 3 \\ \hline
+4 & Output from Column 1 to Column 4 \\ \hline
+5 & Output from Column 1 to Column 5 \\ \hline
+6 & Output from Column 2 to Column 6 \\ \hline
+7 & Output from Column 2 to Column 7 \\ \hline
+8 & Output from Column 4 to Column 8 \\ \hline
+9 & Output from Column 5 to Column 9 \\ \hline
+10 & Output from Column 6 to Column 9 \\ \hline
+11 & Output from Column 7 to Column 10 \\ \hline
+12 & Output from Column 8 to Final Product \\ \hline
+13 & Output from Column 10 to Final Product \\ \hline
+\end{tabular}
+\caption{Mapping of variable indices to flow descriptions.}
+\label{tab:flow_mapping}
+\end{table}
+I am also using variables $y_k$, $k \in [1,\dots,10]$ to denote the binary choice of using distillation column $k$.
+
+\textit{Constraints:}
+We can model our constraints as follows:
+\begin{align*}
+  y_k & \quad & \quad \text{See above for distillation constraints} \\
+   e
+\end{align*}
 
 
 \subsection{Part B: Solve Using GAMS}
