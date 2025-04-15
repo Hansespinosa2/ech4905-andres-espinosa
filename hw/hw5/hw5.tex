@@ -391,7 +391,7 @@ Finally, we can bring them all into pure math below
   1-y_6 + y_9 \geq 1 \\
   1-y_7 + y_{10} \geq 1
 \end{align*}
-Note: These equations are not completely sufficient on themselves, they require that each distillation column has a non-negative cost component.
+Note: These equations are not completely sufficient on themselves, they require that each distillation column has a positive cost component.
 Otherwise, it could be possible for $y_8$ and $y_7$ to be chosen, but it isn't necessary since the optimization should only yield a solution where distillation columns are used if they are needed to.
 \subsection{Model w/o HotCold}
 After having solved the binary logic problems above, I will start by denoting the parameters for the model.
@@ -416,14 +416,14 @@ Below is a table that maps the variable index to each flow
 3 & Feed to Column 3 \\ \hline
 4 & Output from Column 1 to Column 4 \\ \hline
 5 & Output from Column 1 to Column 5 \\ \hline
-6 & Output from Column 2 to Column 6 \\ \hline
-7 & Output from Column 2 to Column 7 \\ \hline
-8 & Output from Column 4 to Column 8 \\ \hline
-9 & Output from Column 5 to Column 9 \\ \hline
-10 & Output from Column 6 to Column 9 \\ \hline
-11 & Output from Column 7 to Column 10 \\ \hline
-12 & Output from Column 8 to Final Product \\ \hline
-13 & Output from Column 10 to Final Product \\ \hline
+6 & Output from Column 2 to Column 8 \\ \hline
+7 & Output from Column 2 to Column 10 \\ \hline
+8 & Output from Column 3 to Column 6 \\ \hline
+9 & Output from Column 3 to Column 7 \\ \hline
+10 & Output from Column 4 to Column 8 \\ \hline
+11 & Output from Column 5 to Column 9 \\ \hline
+12 & Output from Column 6 to 9 \\ \hline
+13 & Output from Column 7 to 10 \\ \hline
 \end{tabular}
 \caption{Mapping of variable indices to flow descriptions.}
 \label{tab:flow_mapping}
@@ -433,13 +433,83 @@ I am also using variables $y_k$, $k \in [1,\dots,10]$ to denote the binary choic
 \textit{Constraints:}
 We can model our constraints as follows:
 \begin{align*}
-  y_k & \quad & \quad \text{See above for distillation constraints} \\
-   e
+  y_k & \quad  \text{See above for distillation constraints} \\
+  x_1,x_4, x_5 \leq S y_1 & \quad \text{BigM Column 1} \\ 
+  x_2, x_6, x_7 \leq S y_2 & \quad \text{BigM Column 2} \\ 
+  x_3, x_8, x_9 \leq S y_3 & \quad \text{BigM Column 3} \\ 
+  x_4, x_{10} \leq S y_4 & \quad \text{BigM Column 4} \\ 
+  x_5, x_{11} \leq S y_5 & \quad \text{BigM Column 5} \\ 
+  x_8, x_{12} \leq S y_6 & \quad \text{BigM Column 6} \\ 
+  x_9, x_{13} \leq S y_7 & \quad \text{BigM Column 7} \\ 
+  x_6, x_{10} \leq S y_8 & \quad \text{BigM Column 8} \\ 
+  x_{11}, x_{12} \leq S y_9 & \quad \text{BigM Column 9} \\ 
+  x_{7}, x_{13} \leq S y_{10} & \quad \text{BigM Column 10} \\ 
+  x_{13} = \frac{1-f_c}{1-f_d}x_{9} \text{Column 7 Flow} \\
+  x_{12} = \frac{1-f_a}{1-f_d} x_{8} \text{Column 6 Flow} \\
+  x_{11} = \frac{1-f_d}{1-f_a} x_5 \text{Column 5 Flow} \\
+  x_{10} = \frac{1-f_b}{1-f_a} x_4 \text{Column 4 Flow}\\ 
+  x_9 + x_8 = (1-f_d) x_3 \text{Column 3 Flow} \\
+  x_7 = (1-f_a-f_b) x_2 \text{Column 2 Lower Flow} \\
+  x_6 = (1-f_c-f_d) x_2 \text{Column 2 Upper Flow} \\
+  x_5 + x_4 = (1-f_a) x_1 \text{Column 1 Flow} \\
+  x_1 + x_2 + x_3 = S \text{Initial Flow}
 \end{align*}
-
+\textit{Objective:}
+We can model the objective function via components.
+For brevity, I will just show the component for a general distillation column.
+\begin{equation*}
+  z_k = \alpha_k y_k + \beta_k * x_k+ heat
+\end{equation*}
+where $x_k$ is the entering flow.
+\subsubsection{Tightening constraints}
+This problem assumes that binary variables will be pushed to zero since they have a positive component in the objective.
+We can tighten this assumption by introducing constraints that bind parent flows to nested children flows.
+So, for example, $x_13$ will not be active if $x_3$ is not active, however we do not have a constraint that directly models that relationship.
+We can introduce these two logic-based constraints to tighten the problem:
+\begin{align*}
+  1-y_3 + y_{10} \leq 1 \\
+  1-y_2 + y_{9} \geq 1
+\end{align*}
 
 \subsection{Part B: Solve Using GAMS}
 Solve the problem using GAMS.
+
+\textbf{Solution:}
+A solution was found and summarized in table \ref{tab:optimal_solution}. 
+Code is available in section \ref{problem2code}.
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Variable} & \textbf{Value} \\ \hline
+$z$ & $581.0000$ \\ \hline
+$x_1$ & $0$ \\ \hline
+$x_2$ & $0$ \\ \hline
+$x_3$ & $1000.0000$ \\ \hline
+$x_4$ & $0$ \\ \hline
+$x_5$ & $0$ \\ \hline
+$x_6$ & $0$ \\ \hline
+$x_7$ & $0$ \\ \hline
+$x_8$ & $800.0000$ \\ \hline
+$x_9$ & $0$ \\ \hline
+$x_{10}$ & $0$ \\ \hline
+$x_{11}$ & $0$ \\ \hline
+$x_{12}$ & $850.0000$ \\ \hline
+$x_{13}$ & $0$ \\ \hline
+$y_1$ & $0$ \\ \hline
+$y_2$ & $0$ \\ \hline
+$y_3$ & $1$ \\ \hline
+$y_4$ & $0$ \\ \hline
+$y_5$ & $0$ \\ \hline
+$y_6$ & $0$ \\ \hline
+$y_7$ & $0$ \\ \hline
+$y_8$ & $1$ \\ \hline
+$y_9$ & $0$ \\ \hline
+$y_{10}$ & $0$ \\ \hline
+\end{tabular}
+\caption{Optimal solution values for the variables.}
+\label{tab:optimal_solution}
+\end{table}
 
 \subsection{Part C: Integer Cut}
 Once the solution is found:
@@ -449,6 +519,41 @@ Once the solution is found:
   \item Solve the problem again to find the next best solution.
 \end{itemize}
 
+I add an integer cut $y_3=0$ and solve to get a worse optimal solution of:
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Variable} & \textbf{Value} \\ \hline
+$z$ & $622.0000$ \\ \hline
+$x_1$ & $0$ \\ \hline
+$x_2$ & $1000.0000$ \\ \hline
+$x_3$ & $0$ \\ \hline
+$x_4$ & $0$ \\ \hline
+$x_5$ & $0$ \\ \hline
+$x_6$ & $450.0000$ \\ \hline
+$x_7$ & $550.0000$ \\ \hline
+$x_8$ & $0$ \\ \hline
+$x_9$ & $0$ \\ \hline
+$x_{10}$ & $0$ \\ \hline
+$x_{11}$ & $0$ \\ \hline
+$x_{12}$ & $0$ \\ \hline
+$x_{13}$ & $0$ \\ \hline
+$y_1$ & $0$ \\ \hline
+$y_2$ & $1.0000$ \\ \hline
+$y_3$ & $0$ \\ \hline
+$y_4$ & $0$ \\ \hline
+$y_5$ & $0$ \\ \hline
+$y_6$ & $0$ \\ \hline
+$y_7$ & $0$ \\ \hline
+$y_8$ & $1.0000$ \\ \hline
+$y_9$ & $0$ \\ \hline
+$y_{10}$ & $1.0000$ \\ \hline
+\end{tabular}
+\caption{Summary of problem with integer cut.}
+\label{tab:variable_summary}
+\end{table}
 \clearpage
 \section{Problem 3}
 \label{prob3}
@@ -667,7 +772,268 @@ GAMS code available in section \ref{problem3code}
   Test passed: False 
 \end{verbatim}
 
+\subsection{Problem 2 Code}
+\label{problem2code}
+\begin{verbatim}
+  GAMS 49.1.0  5c4d4ed6 Feb 15, 2025          DAX-DAC arm 64bit/macOS - 04/14/25 22:09:18 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
 
+
+   1  * I know this is terribly verbose and I should be using sets
+   2  * but I haven't been able to get that logic to work
+   3  Scalars
+   4  f_a /0.15/
+   5  f_b /0.30/
+   6  f_c /0.35/
+   7  f_d /0.20/
+   8  S /1000/
+   9      a_1 / 145 /, b_1 / 0.42 /,
+  10      a_2 / 52  /, b_2 / 0.12 /,
+  11      a_3 / 76  /, b_3 / 0.25 /,
+  12      a_4 / 125 /, b_4 / 0.78 /,
+  13      a_5 / 44  /, b_5 / 0.11 /,
+  14      a_6 / 38  /, b_6 / 0.14 /,
+  15      a_7 / 66  /, b_7 / 0.21 /,
+  16      a_8 / 112 /, b_8 / 0.39 /,
+  17      a_9 / 37  /, b_9 / 0.08 /,
+  18      a_10 / 58 /, b_10 / 0.19 /
+  19  ;
+  20  Variables
+  21  z
+  22  ;
+  23  Positive Variables
+  24  x_1
+  25  x_2
+  26  x_3
+  27  x_4
+  28  x_5
+  29  x_6
+  30  x_7
+  31  x_8
+  32  x_9
+  33  x_10
+  34  x_11
+  35  x_12
+  36  x_13
+  37  ;
+  38  Binary Variables
+  39  y_1
+  40  y_2
+  41  y_3
+  42  y_4
+  43  y_5
+  44  y_6
+  45  y_7
+  46  y_8
+  47  y_9
+  48  y_10
+  49  ;
+  50  Equations
+  51      bin_constraint_1
+  52      bin_constraint_2
+  53      bin_constraint_3
+  54      bin_constraint_4
+  55      bin_constraint_5
+  56      bin_constraint_6
+  57      bin_constraint_7
+  58      bin_constraint_8
+  59      bin_constraint_9
+  60      bin_constraint_10
+  61      bin_constraint_11
+  62      bigm_constraint_1_1
+  63      bigm_constraint_1_4
+  64      bigm_constraint_1_5
+  65      bigm_constraint_2_2
+  66      bigm_constraint_2_6
+  67      bigm_constraint_2_7
+  68      bigm_constraint_3_3
+  69      bigm_constraint_3_8
+  70      bigm_constraint_3_9
+  71      bigm_constraint_4_4
+  72      bigm_constraint_4_10
+  73      bigm_constraint_5_5
+  74      bigm_constraint_5_11
+  75      bigm_constraint_6_8
+  76      bigm_constraint_6_12
+  77      bigm_constraint_7_9
+  78      bigm_constraint_7_13
+  79      bigm_constraint_8_6
+  80      bigm_constraint_8_10
+  81      bigm_constraint_9_11
+  82      bigm_constraint_9_12
+  83      bigm_constraint_10_7
+  84      bigm_constraint_10_13
+  85      flow_constraint_7
+  86      flow_constraint_6
+  87      flow_constraint_5
+  88      flow_constraint_4
+  89      flow_constraint_3
+  90      flow_constraint_2_lower
+  91      flow_constraint_2_upper
+  92      flow_constraint_1
+  93      supply_constraint
+  94      objective_eq
+  95  ;
+  96  bin_constraint_1..      y_1 + y_2 + y_3 =e= 1;
+  97  bin_constraint_2..      1 - y_1 + y_4 + y_5 =g= 1;
+  98  bin_constraint_3..      1 - y_1 + 1 - y_4 + 1 - y_5 =g= 1;
+  99  bin_constraint_4..      1 - y_2 + y_8 =g= 1;
+ 100  bin_constraint_5..      1 - y_2 + y_10 =g= 1;
+ 101  bin_constraint_6..      1 - y_3 + y_6 + y_7 =g= 1;
+ 102  bin_constraint_7..      1 - y_3 + 1 - y_6 + 1 - y_7 =g= 1;
+ 103  bin_constraint_8..      1 - y_4 + y_8 =g= 1;
+ 104  bin_constraint_9..      1 - y_5 + y_9 =g= 1;
+ 105  bin_constraint_10..     1 - y_6 + y_9 =g= 1;
+ 106  bin_constraint_11..     1 - y_7 + y_10 =g= 1;
+ 107   
+ 108  bigm_constraint_1_1..  x_1  =l= S * y_1;
+ 109  bigm_constraint_1_4..  x_4  =l= S * y_1;
+ 110  bigm_constraint_1_5..  x_5  =l= S * y_1;
+ 111   
+ 112  bigm_constraint_2_2..  x_2  =l= S * y_2;
+ 113  bigm_constraint_2_6..  x_6  =l= S * y_2;
+ 114  bigm_constraint_2_7..  x_7  =l= S * y_2;
+ 115   
+ 116  bigm_constraint_3_3..  x_3  =l= S * y_3;
+ 117  bigm_constraint_3_8..  x_8  =l= S * y_3;
+ 118  bigm_constraint_3_9..  x_9  =l= S * y_3;
+ 119   
+ 120  bigm_constraint_4_4..  x_4  =l= S * y_4;
+ 121  bigm_constraint_4_10.. x_10 =l= S * y_4;
+ 122   
+ 123  bigm_constraint_5_5..  x_5  =l= S * y_5;
+ 124  bigm_constraint_5_11.. x_11 =l= S * y_5;
+ 125   
+ 126  bigm_constraint_6_8..  x_8  =l= S * y_6;
+ 127  bigm_constraint_6_12.. x_12 =l= S * y_6;
+ 128   
+ 129  bigm_constraint_7_9..  x_9  =l= S * y_7;
+ 130  bigm_constraint_7_13.. x_13 =l= S * y_7;
+ 131   
+ 132  bigm_constraint_8_6..  x_6  =l= S * y_8;
+ 133  bigm_constraint_8_10.. x_10 =l= S * y_8;
+ 134   
+ 135  bigm_constraint_9_11.. x_11 =l= S * y_9;
+ 136  bigm_constraint_9_12.. x_12 =l= S * y_9;
+ 137   
+ 138  bigm_constraint_10_7.. x_7  =l= S * y_10;
+ 139  bigm_constraint_10_13.. x_13 =l= S * y_10;
+ 140   
+ 141  flow_constraint_7..        x_13 =e= (1 - f_c) / (1 - f_d) * x_9;
+ 142  flow_constraint_6..        x_12 =e= (1 - f_a) / (1 - f_d) * x_8;
+ 143  flow_constraint_5..        x_11 =e= (1 - f_d) / (1 - f_a) * x_5;
+ 144  flow_constraint_4..        x_10 =e= (1 - f_b) / (1 - f_a) * x_4;
+ 145  flow_constraint_3..        x_9 + x_8 =e= (1 - f_d) * x_3;
+ 146  flow_constraint_2_lower..  x_7 =e= (1 - f_a - f_b) * x_2;
+ 147  flow_constraint_2_upper..  x_6 =e= (1 - f_c - f_d) * x_2;
+ 148  flow_constraint_1..        x_5 + x_4 =e= (1 - f_a) * x_1;
+ 149   
+ 150  supply_constraint.. x_1 + x_2 + x_3 =e= S;
+ 151   
+ 152  objective_eq..
+ 153  z =e=
+ 154      a_1*y_1 + b_1*x_1 +
+ 155      a_2*y_2 + b_2*x_2 +
+ 156      a_3*y_3 + b_3*x_3 +
+ 157      a_4*y_4 + b_4*x_4 +
+ 158      a_5*y_5 + b_5*x_5 +
+ 159      a_6*y_6 + b_6*x_8 +
+ 160      a_7*y_7 + b_7*x_9 +
+ 161      a_8*y_8 + b_8*(x_6+x_10) +
+ 162      a_9*y_9 + b_9*(x_11+x_12) +
+ 163      a_10*y_10 + b_10*(x_7+x_13);
+ 164   
+ 165  Model Superstructure / all /;
+ 166  solve Superstructure using MIP minimizing z;
+
+
+
+Proven optimal solution
+MIP Solution:          581.000000    (8 iterations, 0 nodes)
+Final Solve:           581.000000    (0 iterations)
+
+Best possible:         581.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU bin_const~         1.0000         1.0000         1.0000          .          
+---- EQU bin_const~          .              .            +INF             .          
+---- EQU bin_const~        -2.0000          .            +INF             .          
+---- EQU bin_const~          .              .            +INF             .          
+---- EQU bin_const~          .              .            +INF             .          
+---- EQU bin_const~          .       -8.88178E-16        +INF             .          
+---- EQU bin_const~        -2.0000        -2.0000        +INF             .          
+---- EQU bin_const~          .              .            +INF             .          
+---- EQU bin_const~          .             1.0000        +INF             .          
+---- EQU bin_const~          .              .            +INF             .          
+---- EQU bin_const~          .              .            +INF             .          
+---- EQU bigm_cons~        -INF             .              .            -0.0100      
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .            -0.3100      
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF         -200.0000          .              .          
+---- EQU bigm_cons~        -INF        -1000.0000          .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF         -200.0000          .              .          
+---- EQU bigm_cons~        -INF         -150.0000          .              .          
+---- EQU bigm_cons~        -INF             .              .            -0.0150      
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF        -1000.0000          .              .          
+---- EQU bigm_cons~        -INF         -150.0000          .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU bigm_cons~        -INF             .              .              .          
+---- EQU flow_cons~          .              .              .              .          
+---- EQU flow_cons~          .              .              .             0.0800      
+---- EQU flow_cons~          .              .              .              .          
+---- EQU flow_cons~          .              .              .              .          
+---- EQU flow_cons~          .              .              .             0.2250      
+---- EQU flow_cons~          .              .              .              .          
+---- EQU flow_cons~          .              .              .              .          
+---- EQU flow_cons~          .              .              .              .          
+---- EQU supply_co~      1000.0000      1000.0000      1000.0000         0.4300      
+---- EQU objective~          .              .              .             1.0000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR z                 -INF          581.0000        +INF             .          
+---- VAR x_1                 .              .            +INF             .          
+---- VAR x_2                 .              .            +INF             .          
+---- VAR x_3                 .          1000.0000        +INF             .          
+---- VAR x_4                 .              .            +INF            0.7800      
+---- VAR x_5                 .              .            +INF            0.1100      
+---- VAR x_6                 .              .            +INF            0.3900      
+---- VAR x_7                 .              .            +INF            0.1900      
+---- VAR x_8                 .           800.0000        +INF             .          
+---- VAR x_9                 .              .            +INF             .          
+---- VAR x_10                .              .            +INF            0.3900      
+---- VAR x_11                .              .            +INF            0.0800      
+---- VAR x_12                .           850.0000        +INF             .          
+---- VAR x_13                .              .            +INF            0.1900      
+---- VAR y_1                 .              .             1.0000       135.0000      
+---- VAR y_2                 .              .             1.0000      -258.0000      
+---- VAR y_3                 .             1.0000         1.0000        76.0000      
+---- VAR y_4                 .              .             1.0000       125.0000      
+---- VAR y_5                 .              .             1.0000        44.0000      
+---- VAR y_6                 .             1.0000         1.0000        38.0000      
+---- VAR y_7                 .              .             1.0000        51.0000      
+---- VAR y_8                 .              .             1.0000       112.0000      
+---- VAR y_9                 .             1.0000         1.0000        37.0000      
+---- VAR y_10                .              .             1.0000        58.0000      
+
+
+\end{verbatim}
 
 
 \subsection{Problem 3 Code}
