@@ -4,9 +4,12 @@
 \usepackage{graphicx} 
 \usepackage{amssymb}
 \usepackage{amsmath}
-
+\usepackage{algpseudocode}
+\usepackage{algorithm}
 \usepackage{listings}
 \usepackage{xcolor}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -78,8 +81,16 @@ One particular source of inspiration for this project is CVXPY, an open-source c
 
 
 \section{Implementation}
+The implementation of GatorPy can be sectioned into four parts:
+First, the algebraic modeling language syntax that was created by GatorPy, this implementation is available in section \ref{Syntax}.
+Second, the implementation of the Simplex algorithm that receives in a slack form LP and outputs the optimal solution (or an infeasibility/unbounded certificate if applicable).
+This simplex implementation is available in section \ref{Simplex}.
+Third, the Python objects that are created to facilitate the GatorPy modeling language.
+These objects and their overall purpose to the modeling language are available for viewing in section \ref{Objects}.
+Finally, a large portion of the work in this project involved a series of reductions that turn any LP problem into an equivalent form that can be processed by the simplex algorithm.
 
 \subsection{GatorPy Syntax}
+\label{Syntax}
 The overarching goal with the optimization modeling syntax is to maintain a healthy balance between a pythonic syntax and standard optimization linear algebra notation.
 GatorPy relies heavily on the NumPy numerical processing package in Python.
 The general structure of a GatorPy problem involves the following steps:
@@ -97,7 +108,7 @@ The general structure of a GatorPy problem involves the following steps:
     \end{itemize}
 \end{enumerate}
 The simple syntax of GatorPy can be best communicated with an example.
-Consider the following optimization problem with two variables and three constraints.
+Consider the following optimization problem with two variables and three constraints:
 \begin{align*}
   \text{maximize} & \quad \textbf{c}^\top \textbf{y} \\
   \text{subject to} & \quad \textbf{A} \textbf{y} \preceq \textbf{b} \\
@@ -138,9 +149,204 @@ print(solution)
 \end{lstlisting}
 
 \subsection{Simplex Implementation}
+\label{Simplex}
+The implementation of the Simplex algorithm in GatorPy uses  the two-phase simplex method, which ensures feasibility and optimality of the solution. 
+This version of the simplex algorithm is divided into two main phases: an initial feasibility search phase (Phase 1), and an optimality algorithm (Phase 2). 
+The following defines the overarching purpose and goal of each section in the implementation.
+The pseudo-code algorithm is available in Algorithm \ref{alg:two_phase_simplex}
+
+
+\subsubsection{Phase 1: Finding a Feasible Solution}
+The goal of Phase 1 is to find a basic feasible solution (BFS) for the given linear programming problem. If the problem is infeasible, Phase 1 will detect this and terminate. The process involves:
+\begin{enumerate}
+    \item Augmenting the constraint matrix \( A \) with artificial variables to form an auxiliary problem.
+    \item Minimizing the sum of the artificial variables to determine feasibility.
+    \item Using Bland's rule to prevent cycling during pivot selection.
+    \item Removing artificial variables from the basis if a feasible solution is found.
+\end{enumerate}
+
+\subsubsection{Phase 2: Optimizing the Objective Function}
+Once a feasible solution is obtained, Phase 2 optimizes the objective function. The process involves:
+\begin{enumerate}
+    \item Constructing the simplex tableau using the feasible basis obtained from Phase 1.
+    \item Iteratively selecting entering and leaving variables based on Bland's rule and the minimum ratio test.
+    \item Performing pivot operations to update the tableau and improve the objective value.
+    \item Terminating when no entering variable exists, indicating optimality.
+\end{enumerate}
+
+\subsubsection{Key Functions in the Implementation}
+The implementation relies on six key pieces of the full algorithm.
+\begin{itemize}
+    \item \texttt{pivot}: Performs the pivot operation to update the simplex tableau.
+    This algorithm is summarized in Algorithm \ref{alg:pivot}
+    \item \texttt{find\_entering\_variable}: Determines the entering variable based on the specified rule (e.g., Bland's rule).
+    This algorithm is summarized in Algorithm \ref{alg:entering}
+    \item \texttt{find\_leaving\_variable}: Identifies the leaving variable using the minimum ratio test.
+    This algorithm is summarized in Algorithm \ref{alg:leaving}
+    \item \texttt{simplex\_phase\_1}: Implements Phase 1 of the simplex algorithm.
+    This algorithm is summarized in Algorithm \ref{alg:phase1}
+    \item \texttt{simplex\_phase\_2}: Implements Phase 2 of the simplex algorithm.
+    This algorithm is summarized in Algorithm \ref{alg:phase2}
+    \item \texttt{two\_phase\_simplex}: Combines Phase 1 and Phase 2 to solve the linear programming problem.
+    This algorithm is summarized in Algorithm \ref{alg:two_phase_simplex}
+\end{itemize}
+
+
+% 1. Pivot Operation
+\begin{algorithm}
+\caption{Pivot Operation}
+\label{alg:pivot}
+\begin{algorithmic}[1]
+\Require $\textbf{T} \in \mathbb{R}^{m \times n}$, $r$, $c$
+\Ensure $\textbf{T}$
+\State $\textbf{T}_{r, :} \gets \textbf{T}_{r, :} / \textbf{T}{r, c}$ \Comment{normalize pivot row}
+\For{each row $i \neq r$}
+    \State $\textbf{T}{i, :} \gets \textbf{T}{i, :} - \textbf{T}{i, c} \cdot \textbf{T}{r, :}$ \Comment{update rows}
+\EndFor
+\State \Return $T$ \Comment{return updated tableau}
+\end{algorithmic}
+\end{algorithm}
+
+% 2. Find Entering Variable
+\begin{algorithm}
+\caption{Find Entering Variable (Bland's Rule)}
+\label{alg:entering}
+\begin{algorithmic}[1]
+\Require $\textbf{T} \in \mathbb{R}^{m \times n}$ 
+\Ensure $j$, or \texttt{None}
+\For{$j = 1$ to $n - 1$}
+    \If{$\textbf{T}_{m, j} < -\varepsilon$}
+        \State \Return $j$ \Comment{return entering index}
+    \EndIf
+\EndFor
+\State \Return \texttt{None} \Comment{no variables found}
+\end{algorithmic}
+\end{algorithm}
+
+% 3. Find Leaving Variable
+\begin{algorithm}
+\caption{Find Leaving Variable}
+\label{alg:leaving}
+\begin{algorithmic}[1]
+\Require $\textbf{T} \in \mathbb{R}^{m \times n}$, $c$
+\Ensure $r$, or \texttt{None}
+\State Initialize empty list $R$
+\For{$i = 1$ to $m - 1$}
+    \If{$\textbf{T}_{i, c} > \varepsilon$}
+        \State Append $(\textbf{T}_{i, n} / \textbf{T}_{i, c}, i)$ to $R$
+    \EndIf
+\EndFor
+\If{$R$ is empty}
+    \State \Return \texttt{None} \Comment{no variables found}
+\EndIf
+\State $r \gets \arg \min_R q$ \Comment{update row index}
+\State \Return $r$ \Comment{return leaving index}
+\end{algorithmic}
+\end{algorithm}
+
+% 4. Simplex Phase 1
+\begin{algorithm}
+\caption{Simplex Phase 1}
+\label{alg:phase1}
+\begin{algorithmic}[1]
+\Require $\textbf{A}$ $\textbf{b}$
+\Ensure  $\textbf{A}$, $\textbf{b}$, \texttt{basis}, or \texttt{None}
+\State $\textbf{A}_{aux} := [\textbf{A} \; \textbf{I}]$
+\State \textbf{T} := 
+$\begin{bmatrix}
+\textbf{A} & \textbf{I} & \textbf{b} \\
+-\mathbf{1}^\top \textbf{A} & -\mathbf{1}^\top & -\mathbf{1}^\top \textbf{b}
+\end{bmatrix}$
+
+\While{\texttt{len(A\_aux[0]) - len(A[0])}}
+    \State Find entering variable using Bland's rule
+    \If{none found}
+        \State \textbf{break}
+    \EndIf
+    \State Find leaving variable using ratio test
+    \If{none found}
+        \State \Return \texttt{Infeasible}
+    \EndIf
+    \State Perform pivot and update basis
+\EndWhile
+\If{objective value $> \varepsilon$}
+    \State \Return \texttt{Infeasible}
+\EndIf
+\State Remove artificial variables from basis (pivot them out if needed)
+\State \Return Reduced $A$, $b$, basis
+\end{algorithmic}
+\end{algorithm}
+
+% 5. Simplex Phase 2
+\begin{algorithm}
+\caption{Simplex Phase 2}
+\label{alg:phase2}
+\begin{algorithmic}[1]
+\Require Feasible $A$, $b$, cost vector $c$, basis indices
+\Ensure Optimal value, solution, or unbounded
+\State Build tableau with $A$, $b$, and $-c$
+\State Adjust cost row based on basic variables
+\While{true}
+    \State Find entering variable using Bland's rule
+    \If{none found}
+        \State \textbf{break}
+    \EndIf
+    \State Find leaving variable using ratio test
+    \If{none found}
+        \State \Return \texttt{Unbounded}
+    \EndIf
+    \State Perform pivot and update basis
+\EndWhile
+\State Extract solution from tableau using basis
+\State Compute optimal value
+\State \Return Optimal value, solution, feasible = true
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{Two-Phase Simplex Method}
+    \label{alg:two_phase_simplex}
+    \begin{algorithmic}[1]
+    \Require Constraint matrix \( A \), RHS vector \( b \), objective coefficients \( c \)
+    \Ensure Optimal value \( f^* \), solution \( x^* \), feasibility status
+    \State \textbf{Phase 1:} Call \textsc{Simplex-Phase-1} with \( A, b \)
+    \If{infeasible}
+        \State \Return \( \text{None}, \text{None}, \text{False} \)
+    \EndIf
+    \State \textbf{Phase 2:} Call \textsc{Simplex-Phase-2} with reduced \( A, b, -c \), and basis
+    \State \Return \( f^*, x^*, \text{feasible} \)
+    \end{algorithmic}
+\end{algorithm}
+
+
+
+\subsubsection{Example Usage}
+The following Python code demonstrates how to use the two-phase simplex implementation to solve a linear programming problem:
+\begin{lstlisting}[style=mypython, caption={Example Usage of Two-Phase Simplex}]
+import numpy as np
+
+# Define the problem
+A = np.array([[1, 1], [1.2, 0.5]])
+b = np.array([1, 1])
+c = np.array([1.2, 0.5])
+
+# Solve using two-phase simplex
+optimal_value, solution, feasible = two_phase_simplex(A, b, c)
+
+if feasible:
+    print(f"Optimal Value: {optimal_value}")
+    print(f"Solution: {solution}")
+else:
+    print("The problem is infeasible.")
+\end{lstlisting}
+
+This implementation provides a robust and modular approach to solving linear programming problems using the simplex method.
+
 \subsection{Python Objects}
+\label{Objects}
 
 \subsection{LP Reductions}
+\label{Reductions}
 
 \section{Results}
 \subsection{Testing Framework}
