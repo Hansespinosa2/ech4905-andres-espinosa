@@ -4,13 +4,42 @@
 \usepackage{graphicx} 
 \usepackage{amssymb}
 \usepackage{amsmath}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{mypython}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4,
+    language=Python
+}
+
 \hyphenation{op-tical net-works semi-conduc-tor}
 \definecolor{uf_blue}{RGB}{17,27, 150}
 \definecolor{uf_orange}{RGB}{150,100,17}
 
 \begin{document}
 
-\title{GatORPy: A Custom Implemented Linear Programming Solver}
+\title{GatorPy: A Custom Implemented Linear Programming Solver}
 
 \author{
     \begin{minipage}{0.50\textwidth}
@@ -33,25 +62,80 @@
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-
-\section{Project Context}
+GatorPy is a custom Linear Programming solver implemented entirely in Python.
+The purpose of this project is twofold: 
+First, to serve as an educational tool as an example of a simple and custom implementation of an LP solver. 
+Second, to establish a foundation for other students to build upon and contribute to a collaborative open-source University of Florida custom optimization solver.
 
 \subsection{Linear Programming}
-% This should cover the MIP formulation and the general outline of the problem
-% This should also cover the DISPLIB data format and all that.
-\subsection{Simplex Algorithm}
-% Cover Markov Decision Processes
-% As well as DQN
-\subsection{Graph Neural Networks}
-% Cover graph neural networks
 
-\section{Related Work}
-% This can be a full literature review following the structure of:
-% 1) Train Dispatch Problem Formulation
-% 2) Deep Reinforcement Learning with similar problems
-% 3) Graph Neural Networks
-I am \cite{gnndrl:Devailly_2022}
+
+\subsection{Simplex Algorithm}
+
+\subsection{Available Solvers}
+There are numerous available optimization solvers, both commercial and open-source.
+One particular source of inspiration for this project is CVXPY, an open-source convex optimization solver \cite{solvers:diamond2016cvxpy}.
+
+
 \section{Implementation}
+
+\subsection{GatorPy Syntax}
+The overarching goal with the optimization modeling syntax is to maintain a healthy balance between a pythonic syntax and standard optimization linear algebra notation.
+GatorPy relies heavily on the NumPy numerical processing package in Python.
+The general structure of a GatorPy problem involves the following steps:
+\begin{enumerate}
+    \item Create \texttt{Parameter} objects for each parameter in the problem.
+    Each \texttt{Parameter} object takes in a \texttt{np.array} as the value.
+    \item Create \texttt{Variable} objects for each variable in the problem.
+    Each \texttt{Variable} takes in an integer as the shape of the vector.
+    \textit{Note: Each variable must be a vector, this is left as a potential next step in section \ref{future_work}}.
+    \item Create a \texttt{Problem} object representing the overall problem.
+    The \texttt{Problem} object expects a Python \texttt{dict} object with the following key-value pairs:
+    \begin{itemize}
+        \item Either \texttt{"minimize"} or \texttt{"maximize"} as a key with a GatorPy \texttt{Expression} as the value.
+        \item Either \texttt{"subject to"} or \texttt{"constraints"} as a key with a list of GatorPy \texttt{Constraint} objects as the value.
+    \end{itemize}
+\end{enumerate}
+The simple syntax of GatorPy can be best communicated with an example.
+Consider the following optimization problem with two variables and three constraints.
+\begin{align*}
+  \text{maximize} & \quad \textbf{c}^\top \textbf{y} \\
+  \text{subject to} & \quad \textbf{A} \textbf{y} \preceq \textbf{b} \\
+  & \quad \textbf{y} \preceq \textbf{1} \\
+  & \quad \textbf{y} \succeq \textbf{0}
+\end{align*}
+where
+\begin{align*}
+    \textbf{c} = \begin{bmatrix} 1.2 \\ 0.5 \end{bmatrix}, \quad
+    \textbf{A} = \begin{bmatrix} 1 & 1 \\ 1.2 & 0.5 \end{bmatrix}, \quad
+    \textbf{b} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}, \quad
+    \textbf{y} = \begin{bmatrix} y_1 \\ y_2  \end{bmatrix}
+\end{align*}
+
+This above optimization problem can be expressed in GatorPy as:
+\begin{lstlisting}[style=mypython, caption={Solving a Linear Program Symbolically}]
+# Parameters
+A = Parameter(np.array([[1,1],[1.2,0.5]]))
+b = Parameter(np.array([1,1]))
+c = Parameter(np.array([1.2,1]))
+
+# Variables
+y = Variable(2)
+
+# Problem
+problem = Problem({
+    'maximize': c.T @ y,
+    'subject to': [
+        A @ y <= b,
+        y <= 1,
+        y >= 0
+    ]
+})
+
+solution = problem.solve()
+print(solution)
+>>> (1.14, [0.71, 0.29], True)
+\end{lstlisting}
 
 \subsection{Simplex Implementation}
 \subsection{Python Objects}
@@ -64,13 +148,11 @@ I am \cite{gnndrl:Devailly_2022}
 \subsection{Testing Results}
 
 
-\section{Conclusion and Future Work}
+\section{Discussion}
+\subsection{Future Work}
+\label{future_work}
 
-\section{Contributions}
-
-\section{Acknowledgements}
-
-\section{Appendix}
+\subsection{Conclusion}
 
 
 
