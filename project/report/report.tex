@@ -65,22 +65,76 @@
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-GatorPy is a custom Linear Programming solver implemented entirely in Python.
-The purpose of this project is twofold: 
-First, to serve as an educational tool as an example of a simple and custom implementation of an LP solver. 
-Second, to establish a foundation for other students to build upon and contribute to a collaborative open-source University of Florida custom optimization solver.
+\label{sse:introduction}
+GatorPy is a custom Linear Programming (LP) solver implemented entirely in Python. The goal of this project is twofold: First, to serve as an educational tool by providing a clear and simple implementation of an LP solver, exclusively built using Python and NumPy objects. 
+Second, to lay the foundation for an open-source solver that can be enhanced and expanded upon by other UF students, serving as a way for students to dive headfirst into the concepts.
+
+This project report details the implementation of the Simplex algorithm and its modular design, which can easily be built on for future expansions of the solver.
+The rest of the introduction, section \ref{sse:introduction}, serves as a sufficient overview of linear programming, the simplex algorithm, and existing OR solvers.
+The implementation is detailed in section \ref{sse:implementation}, which showcases a few design choices that were made throughout the creation of GatorPy.
+First, the simplistic modeling syntax is shown, then the specific simplex pseudo-code is explained, then, the Python objects are established that run as the backbone to the project, finally, behind-the-scenes reductions that turns a GatorPy problem into a solvable slack form LP is described.
+
 
 \subsection{Linear Programming}
 
+Linear Programming (LP) is a mathematical optimization technique for achieving the best outcome in a mathematical model whose requirements are represented by linear relationships. 
+LP has vast applications across various fields, including economics, supply chain, chemical engineering, and industrial engineering. 
+An LP problem typically involves an objective function, which is to be maximized or minimized, subject to a set of linear constraints.
+
+Formally, an LP problem can be expressed as:
+\[
+\text{minimize} \quad \mathbf{c}^\top \mathbf{x}
+\]
+subject to:
+\[
+\mathbf{A} \mathbf{x} \leq \mathbf{b}
+\]
+where:
+\begin{itemize}
+    \item \(\mathbf{x} \in \mathbb{R}^n\) is the vector of decision variables,
+    \item \(\mathbf{c} \in \mathbb{R}^n\) is the vector of coefficients of the objective function,
+    \item \(\mathbf{A} \in \mathbb{R}^{m \times n}\) is the matrix of coefficients of the constraints,
+    \item \(\mathbf{b} \in \mathbb{R}^m\) is the right-hand side vector of the constraints.
+\end{itemize}
+
+
+LP problems are highly versatile and many problems that are naturally found across domains can be identically turned into an LP or approximated as one.
+The goal of an LP solver is to find the values of \(\mathbf{x}\) that maximize or minimize the objective function while satisfying all the constraints.
 
 \subsection{Simplex Algorithm}
 
+The Simplex algorithm is one of the most widely used methods for solving linear programming problems. It is an iterative method that navigates along the edges of the feasible region (defined by the constraints) to reach the optimal solution. The algorithm was developed by George Dantzig in 1947 and has since become a cornerstone of operational research and optimization.
+
+The Simplex algorithm operates in two primary phases:
+\begin{itemize}
+    \item \textbf{Phase 1}: The algorithm begins by finding a basic feasible solution (BFS), if one exists. This is achieved by adding artificial variables to the problem, converting it into a form that is guaranteed to have a feasible starting point.
+    \item \textbf{Phase 2}: Once a feasible solution is found, Phase 2 proceeds to optimize the objective function. The algorithm iterates by selecting entering and leaving variables and updating the solution until no further improvements can be made.
+\end{itemize}
+
+The key advantages of the Simplex algorithm include its ability to efficiently handle large problems and its ability to identify both optimal solutions and infeasibility/unboundedness in the problem. However, the algorithm's worst-case performance can be exponential in the number of variables, although in practice, it often performs very well.
+
+In GatorPy, the Simplex algorithm is implemented using the two-phase approach, ensuring that the solver can handle both feasible and infeasible LP problems.
+
 \subsection{Available Solvers}
-There are numerous available optimization solvers, both commercial and open-source.
-One particular source of inspiration for this project is CVXPY, an open-source convex optimization solver \cite{solvers:diamond2016cvxpy}.
+
+There are numerous optimization solvers available, both commercial and open-source, that implement LP solvers and other optimization methods. Some of the most popular commercial solvers include:
+\begin{itemize}
+    \item \textbf{CPLEX}: A high-performance commercial optimization solver by IBM that provides a robust set of optimization algorithms, including the Simplex method and interior-point methods.
+    \item \textbf{Gurobi}: Another leading commercial optimization solver, known for its speed and reliability, and used in a wide range of industries.
+\end{itemize}
+
+In the open-source domain, several solvers offer accessible alternatives to commercial solutions:
+\begin{itemize}
+    \item \textbf{GLPK (GNU Linear Programming Kit)}: A popular open-source LP solver that implements both the Simplex method and interior-point methods.
+    \item \textbf{COIN-OR}: A collection of open-source optimization solvers, which includes Clp (the COIN-OR LP solver).
+    \item \textbf{CVXPY}: A Python-based optimization modeling language that provides a high-level interface for solving LP and convex optimization problems. CVXPY allows for easy integration of different solvers and has become a widely adopted tool in academic and industrial settings \cite{solvers:diamond2016cvxpy}.
+\end{itemize}
+
+GatorPy is inspired by these open-source solvers, with a particular focus on educational value and extensibility. By building a custom solver in Python, GatorPy allows for greater transparency and customization, making it an excellent tool for learning about LP and optimization algorithms.
 
 
 \section{Implementation}
+\label{sse:implementation}
 The implementation of GatorPy can be sectioned into four parts:
 First, the algebraic modeling language syntax that was created by GatorPy, this implementation is available in section \ref{Syntax}.
 Second, the implementation of the Simplex algorithm that receives in a slack form LP and outputs the optimal solution (or an infeasibility/unbounded certificate if applicable).
@@ -150,11 +204,11 @@ print(solution)
 
 \subsection{Simplex Implementation}
 \label{Simplex}
-The implementation of the Simplex algorithm in GatorPy uses  the two-phase simplex method, which ensures feasibility and optimality of the solution. 
+The implementation of the Simplex algorithm in GatorPy uses  the two-phase simplex method, which will solve for optimality without needing to explicitly enter a feasible starting point.
 This version of the simplex algorithm is divided into two main phases: an initial feasibility search phase (Phase 1), and an optimality algorithm (Phase 2). 
 The following defines the overarching purpose and goal of each section in the implementation.
-The pseudo-code algorithm is available in Algorithm \ref{alg:two_phase_simplex}
-
+The overall pseudo-code algorithm is available in Algorithm \ref{alg:two_phase_simplex}, while the individual algorithm pseudocodes are located in the Appendix in section \ref{appendix}.
+Here is a high-level overview of how the two phase simplex method is applied in GatorPy.
 
 \subsubsection{Phase 1: Finding a Feasible Solution}
 The goal of Phase 1 is to find a basic feasible solution (BFS) for the given linear programming problem. If the problem is infeasible, Phase 1 will detect this and terminate. The process involves:
@@ -191,131 +245,18 @@ The implementation relies on six key pieces of the full algorithm.
     This algorithm is summarized in Algorithm \ref{alg:two_phase_simplex}
 \end{itemize}
 
-% 1. Pivot Operation
-\begin{algorithm}
-\caption{Pivot Operation}
-\label{alg:pivot}
-\begin{algorithmic}[1]
-\Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$, indices $r$ and $c$
-\Ensure tableau $\textbf{T}$
-\State $\textbf{T}_{r, :} \gets \textbf{T}_{r, :} / \textbf{T}{r, c}$ \Comment{normalize pivot row}
-\For{each row $i \neq r$}
-    \State $\textbf{T}{i, :} \gets \textbf{T}{i, :} - \textbf{T}{i, c} \cdot \textbf{T}{r, :}$ \Comment{update rows}
-\EndFor
-\State \Return $\textbf{T}$ \Comment{return updated tableau}
-\end{algorithmic}
-\end{algorithm}
-
-% 2. Find Entering Variable
-\begin{algorithm}
-\caption{Find Entering Variable (Bland's Rule)}
-\label{alg:entering}
-\begin{algorithmic}[1]
-\Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$ 
-\Ensure index $j$, or None
-\For{$j = 1$ to $n - 1$}
-    \If{$\textbf{T}_{m, j} < -\varepsilon$}
-        \State \Return $j$ \Comment{return entering index}
-    \EndIf
-\EndFor
-\State \Return none \Comment{no variables found}
-\end{algorithmic}
-\end{algorithm}
-
-% 3. Find Leaving Variable
-\begin{algorithm}
-\caption{Find Leaving Variable}
-\label{alg:leaving}
-\begin{algorithmic}[1]
-\Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$, index $c$
-\Ensure index $r$, or None
-\State Initialize empty list $R$
-\For{$i = 1$ to $m - 1$}
-    \If{$\textbf{T}_{i, c} > \varepsilon$}
-        \State Append $(\textbf{T}_{i, n} / \textbf{T}_{i, c}, i)$ to $R$
-    \EndIf
-\EndFor
-\If{$R$ is empty}
-    \State \Return None \Comment{no variables found}
-\EndIf
-\State $r \gets \arg \min_R q$ \Comment{update row index}
-\State \Return $r$ \Comment{return leaving index}
-\end{algorithmic}
-\end{algorithm}
-
-% 4. Simplex Phase 1
-\begin{algorithm}
-\caption{Simplex Phase 1}
-\label{alg:phase1}
-\begin{algorithmic}[1]
-\Require Matrix $\textbf{A}$, vector $\textbf{b}$
-\Ensure  Matrix $\textbf{A}$, vector $\textbf{b}$, list $B$, or None
-\State $\textbf{A}_{aux} := [\textbf{A} \; \textbf{I}]$
-\State \textbf{T} := 
-$\begin{bmatrix}
-\textbf{A} & \textbf{I} & \textbf{b} \\
--\mathbf{1}^\top \textbf{A} & -\mathbf{1}^\top & -\mathbf{1}^\top \textbf{b}
-\end{bmatrix}$
-\State $B := [\text{dim}(\textbf{A})_2,\dots,\text{dim}(\textbf{A}_{aux})_2]$
-\While{true}
-    \State $c \gets $ \texttt{find\_entering\_variable}$(\textbf{T})$
-    \If{$c$ is None}
-        \State \textbf{break}
-    \EndIf
-    \State  $r \gets $ \texttt{find\_leaving\_variable}$(\textbf{T},c)$
-    \If{none found}
-        \State \Return None \Comment{return infeasible}
-    \EndIf
-    \State $\textbf{T} \gets $ \texttt{pivot}($\textbf{T},c,r$)
-\EndWhile
-\If{$T_{-1,-1}$ $> 0$} \Comment{positive objective value}
-    \State \Return None \Comment{return infeasible}
-\EndIf
-\State $\textbf{T} \gets $ \texttt{pivot}($\textbf{T},c,r$) \Comment{remove aux vars}
-\State $\textbf{A}, \textbf{b} \gets \textbf{T}$
-\State \Return $A$, $b$, $B$
-\end{algorithmic}
-\end{algorithm}
-
-% 5. Simplex Phase 2
-\begin{algorithm}
-    \caption{Simplex Phase 2}
-    \label{alg:phase2}
-    \begin{algorithmic}[1]
-    \Require Matrix $\textbf{A}$, vector $\textbf{b}$, cost vector $\textbf{c}$, basis $B$
-    \Ensure Optimal value $f^*$, solution $\textbf{x}^*$, or Unbounded
-    \State $\textbf{T} := \begin{bmatrix} \textbf{A} & \textbf{b} \\ -\textbf{c}^\top & 0 \end{bmatrix}$
-    \State Adjust cost row from $B$ 
-    \While{true}
-        \State $c \gets$ \texttt{find\_entering\_variable}($\textbf{T}$)
-        \If{$c$ is None}
-            \State \textbf{break} \Comment{optimality reached}
-        \EndIf
-        \State $r \gets$ \texttt{find\_leaving\_variable}($\textbf{T}, c$)
-        \If{$r$ is None}
-            \State \Return \texttt{Unbounded}
-        \EndIf
-        \State $\textbf{T} \gets$ \texttt{pivot}($\textbf{T}, r, c$)
-        \State Update basis $B$ with $B[r] \gets c$
-    \EndWhile
-    \State Extract solution $\textbf{x}^*$ from $\textbf{T}$ using basis $B$
-    \State $f^* \gets -\textbf{T}_{-1, -1}$ \Comment{optimal value from cost row}
-    \State \Return $f^*$, $\textbf{x}^*$, feasible = true
-    \end{algorithmic}
-\end{algorithm}
-
 \begin{algorithm}
     \caption{Two-Phase Simplex Method}
-    \label{alg:two_phase}
+    \label{alg:two_phase_simplex}
     \begin{algorithmic}[1]
     \Require matrix $\textbf{A} \in \mathbb{R}^{m \times n}$, vector $\textbf{b} \in \mathbb{R}^{m}$, cost vector $\textbf{c} \in \mathbb{R}^{n}$
-    \Ensure optimal value $f^*$, solution $\textbf{x}^* \in \mathbb{R}^n$, or \texttt{Infeasible}
+    \Ensure optimal value $f^*$, solution $\textbf{x}^* \in \mathbb{R}^n$, Feasibility
     \State $(\textbf{A}', \textbf{b}', B) \gets$ \texttt{simplex\_phase\_1}($\textbf{A}, \textbf{b}$)
-    \If{result is \texttt{None}}
-        \State \Return \texttt{Infeasible}
+    \If{result is None}
+        \State \Return None, None, Infeasible
     \EndIf
     \State $(f^*, \textbf{x}^*) \gets$ \texttt{simplex\_phase\_2}($\textbf{A}', \textbf{b}', \textbf{c}, B$)
-    \State \Return $f^*$, $\textbf{x}^*$
+    \State \Return $f^*$, $\textbf{x}^*$, Feasible
     \end{algorithmic}
 \end{algorithm}
     
@@ -337,7 +278,121 @@ $\begin{bmatrix}
 
 \subsection{Conclusion}
 
-
+\clearpage
+\section{Appendix}
+\label{appendix}
+% 1. Pivot Operation
+\begin{algorithm}
+    \caption{Pivot Operation}
+    \label{alg:pivot}
+    \begin{algorithmic}[1]
+    \Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$, indices $r$ and $c$
+    \Ensure tableau $\textbf{T}$
+    \State $\textbf{T}_{r, :} \gets \textbf{T}_{r, :} / \textbf{T}{r, c}$ \Comment{normalize pivot row}
+    \For{each row $i \neq r$}
+        \State $\textbf{T}{i, :} \gets \textbf{T}{i, :} - \textbf{T}{i, c} \cdot \textbf{T}{r, :}$ \Comment{update rows}
+    \EndFor
+    \State \Return $\textbf{T}$ \Comment{return updated tableau}
+    \end{algorithmic}
+    \end{algorithm}
+    
+    % 2. Find Entering Variable
+    \begin{algorithm}
+    \caption{Find Entering Variable (Bland's Rule)}
+    \label{alg:entering}
+    \begin{algorithmic}[1]
+    \Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$ 
+    \Ensure index $j$, or None
+    \For{$j = 1$ to $n - 1$}
+        \If{$\textbf{T}_{m, j} < -\varepsilon$}
+            \State \Return $j$ \Comment{return entering index}
+        \EndIf
+    \EndFor
+    \State \Return none \Comment{no variables found}
+    \end{algorithmic}
+    \end{algorithm}
+    
+    % 3. Find Leaving Variable
+    \begin{algorithm}
+    \caption{Find Leaving Variable}
+    \label{alg:leaving}
+    \begin{algorithmic}[1]
+    \Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$, index $c$
+    \Ensure index $r$, or None
+    \State Initialize empty list $R$
+    \For{$i = 1$ to $m - 1$}
+        \If{$\textbf{T}_{i, c} > \varepsilon$}
+            \State Append $(\textbf{T}_{i, n} / \textbf{T}_{i, c}, i)$ to $R$
+        \EndIf
+    \EndFor
+    \If{$R$ is empty}
+        \State \Return None \Comment{no variables found}
+    \EndIf
+    \State $r \gets \arg \min_R q$ \Comment{update row index}
+    \State \Return $r$ \Comment{return leaving index}
+    \end{algorithmic}
+    \end{algorithm}
+    
+    % 4. Simplex Phase 1
+    \begin{algorithm}
+    \caption{Simplex Phase 1}
+    \label{alg:phase1}
+    \begin{algorithmic}[1]
+    \Require Matrix $\textbf{A}$, vector $\textbf{b}$
+    \Ensure  Matrix $\textbf{A}$, vector $\textbf{b}$, list $B$, or None
+    \State $\textbf{A}_{aux} := [\textbf{A} \; \textbf{I}]$
+    \State \textbf{T} := 
+    $\begin{bmatrix}
+    \textbf{A} & \textbf{I} & \textbf{b} \\
+    -\mathbf{1}^\top \textbf{A} & -\mathbf{1}^\top & -\mathbf{1}^\top \textbf{b}
+    \end{bmatrix}$
+    \State $B := [\text{dim}(\textbf{A})_2,\dots,\text{dim}(\textbf{A}_{aux})_2]$
+    \While{true}
+        \State $c \gets $ \texttt{find\_entering\_variable}$(\textbf{T})$
+        \If{$c$ is None}
+            \State \textbf{break}
+        \EndIf
+        \State  $r \gets $ \texttt{find\_leaving\_variable}$(\textbf{T},c)$
+        \If{none found}
+            \State \Return None \Comment{return infeasible}
+        \EndIf
+        \State $\textbf{T} \gets $ \texttt{pivot}($\textbf{T},c,r$)
+    \EndWhile
+    \If{$T_{-1,-1}$ $> 0$} \Comment{positive objective value}
+        \State \Return None \Comment{return infeasible}
+    \EndIf
+    \State $\textbf{T} \gets $ \texttt{pivot}($\textbf{T},c,r$) \Comment{remove aux vars}
+    \State $\textbf{A}, \textbf{b} \gets \textbf{T}$
+    \State \Return $A$, $b$, $B$
+    \end{algorithmic}
+    \end{algorithm}
+    
+    % 5. Simplex Phase 2
+    \begin{algorithm}
+        \caption{Simplex Phase 2}
+        \label{alg:phase2}
+        \begin{algorithmic}[1]
+        \Require Matrix $\textbf{A}$, vector $\textbf{b}$, cost vector $\textbf{c}$, basis $B$
+        \Ensure Optimal value $f^*$, solution $\textbf{x}^*$, or Unbounded
+        \State $\textbf{T} := \begin{bmatrix} \textbf{A} & \textbf{b} \\ -\textbf{c}^\top & 0 \end{bmatrix}$
+        \State Adjust cost row from $B$ 
+        \While{true}
+            \State $c \gets$ \texttt{find\_entering\_variable}($\textbf{T}$)
+            \If{$c$ is None}
+                \State \textbf{break} \Comment{optimality reached}
+            \EndIf
+            \State $r \gets$ \texttt{find\_leaving\_variable}($\textbf{T}, c$)
+            \If{$r$ is None}
+                \State \Return \texttt{Unbounded}
+            \EndIf
+            \State $\textbf{T} \gets$ \texttt{pivot}($\textbf{T}, r, c$)
+            \State Update basis $B$ with $B[r] \gets c$
+        \EndWhile
+        \State Extract solution $\textbf{x}^*$ from $\textbf{T}$ using basis $B$
+        \State $f^* \gets -\textbf{T}_{-1, -1}$ \Comment{optimal value from cost row}
+        \State \Return $f^*$, $\textbf{x}^*$, feasible = true
+        \end{algorithmic}
+    \end{algorithm}
 
 
 \bibliographystyle{IEEEtran}
