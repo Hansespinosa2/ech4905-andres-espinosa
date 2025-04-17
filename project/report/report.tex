@@ -64,13 +64,13 @@
 
 
 \begin{abstract}
-GatorPy is a pedagogically motivated Linear Programming (LP) solver implemented in pure Python and NumPy. 
+GatorPy is an educationally motivated Linear Programming (LP) solver implemented in pure Python and NumPy. 
 The project aims to demystify the internal workings of LP solvers by providing a modular, object-oriented framework that transforms symbolic problem descriptions into slack form and solves them using the two-phase Simplex method. 
 The solver supports a custom modeling language and is designed to be readable, extensible, and transparent for students and practitioners embarking on similar projects. 
 
 GatorPy has been validated against CVXPY on a suite of small LPs, successfully passing 6 out of 7 tests. 
-The remaining failure highlights the solver's current limitations in handling auxiliary variable removal, motivating iterative improvements as an open-source UF solver. 
-There are several directions for continued development of GatorPy, including a more robust test suite, performance-oriented reimplementation in a compiled language, and support for mixed-integer programs, convex programs, alternative solver algorithm. 
+The remaining failure shows one of the solver's current limitations, motivating iterative improvements as an open-source UF solver. 
+There are several directions for a collaborative further development of GatorPy, including a more robust test suite, performance-oriented reimplementation in a compiled language, and support for mixed-integer programs, convex programs, alternative solver algorithm. 
 GatorPy offers both a functional LP solver and an exciting opportunity as an open-source educational platform for understanding computational optimization fundamentals.    
 \end{abstract}
 
@@ -81,7 +81,7 @@ GatorPy offers both a functional LP solver and an exciting opportunity as an ope
 GatorPy is a custom Linear Programming (LP) solver implemented entirely in Python. 
 It is built using native Python constructs and NumPy for numerical operations, and follows an object-oriented programming (OOP) approach to ensure modularity and extensibility. 
 GatorPy transforms user-defined LP problems into a structured internal representation, reduces the problem to an equivalent standard form, and applies established solving algorithms to compute optimal solutions.
-This project report outlines the implementation of GatorPy and its modular design, which enables future enhancements to the solver. 
+This project report outlines the implementation of GatorPy and its modular design, encouraging its growth as an open-source solver for UF. 
 
 The remainder of the introduction, Section~\ref{sse:introduction}, provides an overview of linear programming, the simplex algorithm, existing Operations Research (OR) solvers, and the motivation behind developing GatorPy. 
 The implementation is discussed in detail in Section~\ref{sse:implementation}, highlighting key design choices made throughout the development process. 
@@ -113,29 +113,26 @@ where:
     \item \(\mathbf{b} \in \mathbb{R}^m\) is the right-hand side vector of the constraints.
 \end{itemize}
 
-
-LP problems are highly versatile and many problems that are naturally found across domains can be identically turned into an LP or approximated as one.
-The goal of an LP solver is to find the values of \(\mathbf{x}\) that maximize or minimize the objective function while satisfying all the constraints.
+LPs are highly versatile, with numerous real-world problems across various domains either naturally formulated as LPs or effectively approximated as such.
 
 \subsection{Simplex Algorithm}
 
 The Simplex algorithm is one of the most widely used methods for solving linear programming problems. 
-It is an iterative method that navigates along the edges of the feasible region (defined by the constraints) to reach the optimal solution. 
+It is an iterative method that navigates along the edges of the feasible region to reach the optimal solution. 
 The algorithm was developed by George Dantzig in 1947 and has since become a cornerstone of operational research and optimization.
 
 The key advantages of the Simplex algorithm include its ability to efficiently handle large problems and its ability to identify both optimal solutions and infeasibility/unboundedness in the problem. 
-However, the algorithm's worst-case performance can be exponential in the number of variables, although in practice, it often performs very well.
-The Simplex algorithm is also remarkably simple and intuitive, as it works by traversing the corner points of a polyhedron until it lands on the smallest objective-valued corner point.
-This concept is shown visually \cite{img:simplex} in Image~\ref{fig:simplex}.
+The Simplex algorithm is also remarkably intuitive, as it moves from vertex to vertex of a polyhedron to identify the point with the optimal objective value.
+This concept is shown visually  in Image~\ref{fig:simplex}.
 
 \begin{figure}[htbp]
   \centerline{\includegraphics[width=0.25\textwidth]{images/simplex.png}}
-  \caption{Visual interpretation of the Simplex traversal}
+  \caption{Visual interpretation of the Simplex traversal \cite{img:simplex}}
   \label{fig:simplex}
 \end{figure}
 
 Several variants of the Simplex algorithm exist, including primal, dual, and revised forms. 
-In GatorPy, the algorithm is implemented using the two-phase Simplex method, which allows the solver to systematically handle LPs with or without an initially feasible solution. 
+In GatorPy, the algorithm is implemented using the two-phase Simplex method.
 This approach ensures the user can input any LP in the expected modeling language and solver will handle feasibility, detect unboundedness, and return optimal solutions when they exist.
 
 \subsection{Available Solvers}
@@ -143,7 +140,7 @@ This approach ensures the user can input any LP in the expected modeling languag
 There are numerous optimization solvers available, both commercial and open-source, that implement LP solvers and other optimization methods. 
 Some of the most popular commercial solvers include:
 \begin{itemize}
-    \item \textbf{CPLEX}: A high-performance commercial optimization solver by IBM that provides a robust set of optimization algorithms, including the Simplex method and interior-point methods.
+    \item \textbf{CPLEX}: A high-performance commercial optimization solver by IBM.
     \item \textbf{Gurobi}: Another leading commercial optimization solver, known for its speed and reliability, and used in a wide range of industries.
     \item \textbf{Excel Solver}: A built-in optimization tool in Microsoft Excel that allows users to solve LP problems directly within a spreadsheet interface. 
 \end{itemize}
@@ -171,20 +168,20 @@ Second, to lay the groundwork for an open-source solver that can be further deve
 The implementation of GatorPy can be divided into four key parts:
 
 \begin{enumerate}
-    \item \textbf{Algebraic Modeling Language}: The first part involves the creation of a custom algebraic modeling language for GatorPy. 
-    This syntax is designed to strike a balance between pythonic pseudo-code and an algebraic language interface, making it intuitive for formulating linear programming problems. 
-    Further details on its implementation can be found in Section~\ref{Syntax}.
+    \item \textbf{Algebraic Modeling Language:} The first component of this project focuses on developing a custom algebraic modeling language for GatorPy. 
+    This syntax strikes a balance between Pythonic pseudo-code and an algebraic language interface, aiming to provide an intuitive framework for formulating linear programming problems. 
+    A more detailed discussion on its design and implementation can be found in Section~\ref{Syntax}.
     
-    \item \textbf{Simplex Algorithm}: The second part covers the implementation of the Simplex algorithm. 
-    This algorithm takes a linear programming problem in slack form and outputs the optimal solution, or an infeasibility/unboundedness certificate if applicable. 
-    A detailed explanation of the Simplex algorithm implementation is available in Section~\ref{Simplex}.
+    \item \textbf{Simplex Algorithm:} The second component involves the implementation of the Simplex algorithm, which processes a linear programming problem in slack form to yield the optimal solution. 
+    If the problem is infeasible or unbounded, the algorithm provides the appropriate certificates. 
+    A thorough explanation of the Simplex algorithm is provided in Section~\ref{Simplex}.
     
-    \item \textbf{Python Objects}: The third part involves the development of Python objects to support the GatorPy modeling language. 
-    These objects are designed to streamline the modeling process and facilitate problem-solving. 
-    Their purpose and design are discussed in Section~\ref{Objects}.
+    \item \textbf{Python Objects:} The third component is the development of Python objects that support the GatorPy modeling language. 
+    These objects are designed to streamline the modeling process, making it easier to define and solve linear programming problems. 
+    Their purpose, design, and functionality are discussed in Section~\ref{Objects}.
     
-    \item \textbf{Reductions for Slack Form}: A significant portion of this project focuses on a series of reductions that transform any given LP problem into an equivalent form that can be processed by the Simplex algorithm. 
-    This transformation process is integral to the solver's functionality.
+    \item \textbf{Reductions for Slack Form:} A key focus of this project is the implementation of reductions that convert any given LP problem into a form that can be processed by the Simplex algorithm. 
+    This transformation is essential for the solver's operation and is explained in Section~\ref{Reductions}.
 \end{enumerate}
 \subsection{GatorPy Syntax}
 \label{Syntax}
@@ -197,7 +194,7 @@ The structure of a typical GatorPy problem involves the following steps:
     Each \texttt{Parameter} object takes in a \texttt{np.array} as the value.
     \item Create \texttt{Variable} objects for each variable in the problem.
     Each \texttt{Variable} takes in an integer as the shape of the vector.
-    \textit{Note: Each variable must be a vector, this is left as a potential next step in section \ref{future_work}}.
+    \textit{Note: Each variable must be a vector, this is left as a potential next step in section \ref{sss:future_work}}.
     \item Create a \texttt{Problem} object representing the overall problem.
     The \texttt{Problem} object expects a Python \texttt{dict} object with the following key-value pairs:
     \begin{itemize}
@@ -309,6 +306,9 @@ The GatorPy implementation relies on six key pieces of the full algorithm.
 
 The GatorPy solver is built on a foundation of modular Python classes that enable symbolic modeling, expression handling, and LP transformation. 
 The object-oriented design ensures that each mathematical concept—such as a variable, parameter, or constraint is represented by a dedicated object that carries behavior and structure. 
+A fundamental programming concept that is used for these classes is "Operator Overloading".
+Operator Overloading allows for a program to explicitly override the default behavior of an operation.
+This is what allows for the sum of two \texttt{Variable} objects to yield a \texttt{Sum} object.
 This design simplifies user interaction and facilitates internal processing and reduction to slack form. 
 The key classes are outlined below:
 
@@ -323,7 +323,6 @@ The \texttt{Expression} is most importantly defined with a \texttt{parents} attr
 \subsubsection{Variable} 
 The \texttt{Variable} class represents decision variables in an LP. 
 Each \texttt{Variable} object is initialized with a shape (i.e., its dimensionality) and internally stores a NumPy vector of symbolic variables. 
-These variables can be used in expressions just like NumPy arrays, supporting broadcasting and matrix multiplication operations.
 
 \begin{lstlisting}[style=mypython] 
 # Creating a 2x1 vector variable
@@ -357,9 +356,10 @@ lin_op2 = - A @ x_cold
 sum_obj =  lin_op1 + lin_op2
 \end{lstlisting}
 
+
+
 \subsubsection{Constraint} Constraints are created via comparison operations on \texttt{Expression} objects. 
 They encapsulate inequality or equality relationships and are stored in the problem formulation. 
-Constraints are normalized during slack form conversion.
 
 \begin{lstlisting}[style=mypython]
 # Creating a 2x2 matrix A and 2x1 vector b
@@ -397,7 +397,8 @@ prob = Problem({
 solution = prob.solve() 
 \end{lstlisting}
 
-Figure~\ref{fig:opt_problem} provides a visual representation of how GatorPy processes the above complete LP.
+Figure~\ref{fig:opt_problem} provides a visual representation of how GatorPy takes in the \texttt{Parameter} and \texttt{Variable} objects and turns them into complete representation of an LP.
+Each object is connected to the subsequent \texttt{Expression} it contributes to, ultimately forming the final \texttt{Problem} object.
 
 \begin{figure}[htbp]
     \centering
@@ -471,34 +472,37 @@ Figure~\ref{fig:opt_problem} provides a visual representation of how GatorPy pro
 
 \subsection{LP Reductions}
 \label{Reductions}
-In order to solve a general linear programming (LP) problem using the simplex algorithm, the problem must first be transformed into a canonical form known as \emph{slack form}. The \texttt{Problem} class encapsulates this transformation process by reducing arbitrary LP input definitions into a set of structured matrix equalities and a standardized objective. This section outlines the full reduction pipeline used by the \texttt{to\_slack\_form} method.
+In order to solve a general linear programming (LP) problem using the simplex algorithm, the problem must first be transformed into \emph{slack form}. 
+The \texttt{Problem} class encapsulates this transformation process by reducing arbitrary LP input definitions into a set of structured matrix equalities and a standardized objective. 
+This section outlines the full reduction pipeline used by the \texttt{to\_slack\_form} method.
 
-An LP problem is provided as a dictionary with an objective function (\texttt{minimize} or \texttt{maximize}) and a list of constraints under \texttt{subject to} or \texttt{constraints}. Constraints may include inequalities, equalities, or non-negativity conditions.
+An LP problem is provided as a dictionary with an objective function (\texttt{minimize} or \texttt{maximize}) and a list of constraints under \texttt{subject to} or \texttt{constraints}. 
+Constraints may include inequalities, equalities, or non-negativity conditions.
 
-The transformation to slack form proceeds through the following sequential reductions:
+The transformation from a general problem to slack form proceeds through the following sequential reductions:
 
 \begin{enumerate}
-    \item \textbf{Bounded Variable Collection:} Non-negativity constraints are parsed to identify bounded variables (variables with $\geq 0$ restrictions). These are stored in \texttt{bounded\_vars}.
+    \item \textbf{Bounded Variable Collection:} Non-negativity constraints are parsed to identify bounded variables (variables with $\geq 0$ restrictions).
     
     \item \textbf{Non-negativity Stripping:} Non-negativity constraints are removed from the constraint list since they are tracked separately via variable flags.
         
     \item \textbf{Unbounded Variable Identification:} All variables appearing in the constraint set that were not previously identified as bounded are labeled as unbounded.
     
-    \item \textbf{Equality Standardization:} Inequality constraints are transformed into equalities by introducing slack or surplus variables, which are appended to \texttt{bounded\_vars}.
+    \item \textbf{Equality Standardization:} Inequality constraints are transformed into equalities by introducing slack or surplus variables, which are labeled as bounded.
     
-    \item \textbf{Unbounded Variable Decomposition:} Every unbounded variable is replaced with a pair of non-negative variables $(x^+ - x^-)$, and a mapping is stored in \texttt{ub\_b\_map}.
+    \item \textbf{Unbounded Variable Decomposition:} Every unbounded variable is replaced with a pair of bounded variables $(x^+ - x^-)$.
     
-    \item \textbf{Constraint Rewriting:} All existing constraints are rewritten in terms of the new bounded variable representations using the mapping.
+    \item \textbf{Constraint Rewriting:} All existing constraints are rewritten in terms of the new bounded variables.
     
     \item \textbf{Variable Indexing:} The final list of bounded variables is assigned a block index in the variable vector.
     
-    \item \textbf{Variable Vector Creation:} All bounded variables are concatenated into a single flat vector \texttt{x\_big}, representing the problem’s variable space.
-    
-    \item \textbf{Matrix Formulation:} Each equality constraint is converted into a matrix row $(A_i, b_i)$ using \texttt{linear\_equality\_to\_matrix\_equality}, populating the matrices $A$ and $b$.
+    \item \textbf{Matrix Formulation:} Each equality constraint is converted into a matrix row $(A_i, b_i)$ using \texttt{linear\_equality\_to\_matrix\_equality}.
 
-    \item \textbf{Constraint Concatenation:} Each $A_i$ and $b_i$ of each constraint is concatenated into one constraint with $A_{big}, b_{big}$ parameters.
+    \item \textbf{Vector Concatenation:} All bounded variables are concatenated into a single flat vector \texttt{x\_big}, representing the problem’s variable space.
+
+    \item \textbf{Constraint Concatenation:} Each $A_i$ and $b_i$ of each constraint is concatenated into one combined constraint with $A_{big}, b_{big}$ parameters.
     
-    \item \textbf{Objective Vector Construction:} The objective function is linearized and mapped to a vector $c$ aligned with the same variable ordering.
+    \item \textbf{Objective Concatenation:} The objective function is linearized and mapped to a vector $c$ aligned with the same variable ordering.
     
     \item \textbf{Minimization Standardization:} If the problem is a maximization, it is converted to a minimization by negating the objective.
     \item \textbf{Solve: } The \texttt{two\_phase\_simplex} function is called and the problem solution is returned.
@@ -506,17 +510,17 @@ The transformation to slack form proceeds through the following sequential reduc
 
 \subsection{Final Form}
 
-After the transformation, the problem is expressed in the canonical form:
+After the transformation, the problem is expressed in slack form:
 \begin{align*}
-\text{minimize} \quad & c^T x \\
-\text{subject to} \quad & Ax = b \\
-& x \geq 0
+\text{minimize} \quad & \textbf{c}^T \textbf{c} \\
+\text{subject to} \quad & \textbf{A} \textbf{x} = \textbf{b} \\
+& \textbf{x} \succeq 0
 \end{align*}
 
-Where $x$ is the flat vector \texttt{x\_big} composed of all bounded variables, including replacements for unbounded and slack variables. 
-The vectors $c$, $b$ and matrix $A$ are stored in \texttt{c\_big}, \texttt{b\_big}, and \texttt{A\_big} respectively.
+Where $\textbf{x}$ is the flat vector \texttt{x\_big} composed of all bounded variables, including replacements for unbounded and slack variables. 
+The vectors $\textbf{c}$, $\textbf{b}$ and matrix $\textbf{A}$ are stored in \texttt{c\_big}, \texttt{b\_big}, and \texttt{A\_big} respectively.
 
-This slack form representation is then compatible with the two-phase simplex method and fed back in to the algorithm described previously in Algorithm~\ref{alg:two_phase_simplex}
+This slack form representation is now compatible with the two-phase simplex method and is fed back in to the algorithm described previously in Algorithm~\ref{alg:two_phase_simplex}
 
 \section{Results}
 \label{sse:results}
@@ -532,7 +536,7 @@ To use GatorPy, proceed to the ECH4905 - Andres Espinosa repository GitHub link 
 The files for GatorPy are available at \texttt{project/gatorpy}.
 Before attempting to run your own LP, ensure a Python version with NumPy.
 This repository was only tested with Python=3.11 and NumPy=1.26.0.
-The code is likely to work earlier/later versions but the code has not been verified to work with other versions.
+The code is likely to work with earlier/later versions but the code has not been verified to work with other versions.
 To solve your own LP with GatorPy, download this folder, replace the example LP in \texttt{solve.py} with your own LP entered in the GatorPy modeling and finally run the \texttt{solve.py} file.
 
 Publishing GatorPy as a standalone PyPi package available to install with \texttt{pip} is left as a next step in Section~\ref{sss:future_work}.
@@ -579,7 +583,7 @@ However, there are many areas of improvement that this project could benefit fro
 Extensions to MIPs and Convex Programs is an interesting area of further work that could elevate GatorPy.
 Rewriting the repository in another language could prove an incredibly rewarding challenge for learning both OR tools and another programming language.
 
-Overall, GatorPy serves as both a functional solver and a pedagogical tool, offering a hands-on platform for students and practitioners to experiment with and better understand the mechanics of linear programming.
+Overall, GatorPy serves as both a functional solver and a pedagogical tool, offering a hands-on open-source platform for students to experiment with and better understand the mechanics of linear programming.
 
 \clearpage
 \section{Appendix}
