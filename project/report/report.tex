@@ -191,19 +191,18 @@ The implementation relies on six key pieces of the full algorithm.
     This algorithm is summarized in Algorithm \ref{alg:two_phase_simplex}
 \end{itemize}
 
-
 % 1. Pivot Operation
 \begin{algorithm}
 \caption{Pivot Operation}
 \label{alg:pivot}
 \begin{algorithmic}[1]
-\Require $\textbf{T} \in \mathbb{R}^{m \times n}$, $r$, $c$
-\Ensure $\textbf{T}$
+\Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$, indices $r$ and $c$
+\Ensure tableau $\textbf{T}$
 \State $\textbf{T}_{r, :} \gets \textbf{T}_{r, :} / \textbf{T}{r, c}$ \Comment{normalize pivot row}
 \For{each row $i \neq r$}
     \State $\textbf{T}{i, :} \gets \textbf{T}{i, :} - \textbf{T}{i, c} \cdot \textbf{T}{r, :}$ \Comment{update rows}
 \EndFor
-\State \Return $T$ \Comment{return updated tableau}
+\State \Return $\textbf{T}$ \Comment{return updated tableau}
 \end{algorithmic}
 \end{algorithm}
 
@@ -212,14 +211,14 @@ The implementation relies on six key pieces of the full algorithm.
 \caption{Find Entering Variable (Bland's Rule)}
 \label{alg:entering}
 \begin{algorithmic}[1]
-\Require $\textbf{T} \in \mathbb{R}^{m \times n}$ 
-\Ensure $j$, or \texttt{None}
+\Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$ 
+\Ensure index $j$, or None
 \For{$j = 1$ to $n - 1$}
     \If{$\textbf{T}_{m, j} < -\varepsilon$}
         \State \Return $j$ \Comment{return entering index}
     \EndIf
 \EndFor
-\State \Return \texttt{None} \Comment{no variables found}
+\State \Return none \Comment{no variables found}
 \end{algorithmic}
 \end{algorithm}
 
@@ -228,8 +227,8 @@ The implementation relies on six key pieces of the full algorithm.
 \caption{Find Leaving Variable}
 \label{alg:leaving}
 \begin{algorithmic}[1]
-\Require $\textbf{T} \in \mathbb{R}^{m \times n}$, $c$
-\Ensure $r$, or \texttt{None}
+\Require tableau $\textbf{T} \in \mathbb{R}^{m \times n}$, index $c$
+\Ensure index $r$, or None
 \State Initialize empty list $R$
 \For{$i = 1$ to $m - 1$}
     \If{$\textbf{T}_{i, c} > \varepsilon$}
@@ -237,7 +236,7 @@ The implementation relies on six key pieces of the full algorithm.
     \EndIf
 \EndFor
 \If{$R$ is empty}
-    \State \Return \texttt{None} \Comment{no variables found}
+    \State \Return None \Comment{no variables found}
 \EndIf
 \State $r \gets \arg \min_R q$ \Comment{update row index}
 \State \Return $r$ \Comment{return leaving index}
@@ -249,99 +248,77 @@ The implementation relies on six key pieces of the full algorithm.
 \caption{Simplex Phase 1}
 \label{alg:phase1}
 \begin{algorithmic}[1]
-\Require $\textbf{A}$ $\textbf{b}$
-\Ensure  $\textbf{A}$, $\textbf{b}$, \texttt{basis}, or \texttt{None}
+\Require Matrix $\textbf{A}$, vector $\textbf{b}$
+\Ensure  Matrix $\textbf{A}$, vector $\textbf{b}$, list $B$, or None
 \State $\textbf{A}_{aux} := [\textbf{A} \; \textbf{I}]$
 \State \textbf{T} := 
 $\begin{bmatrix}
 \textbf{A} & \textbf{I} & \textbf{b} \\
 -\mathbf{1}^\top \textbf{A} & -\mathbf{1}^\top & -\mathbf{1}^\top \textbf{b}
 \end{bmatrix}$
-
-\While{\texttt{len(A\_aux[0]) - len(A[0])}}
-    \State Find entering variable using Bland's rule
-    \If{none found}
+\State $B := [\text{dim}(\textbf{A})_2,\dots,\text{dim}(\textbf{A}_{aux})_2]$
+\While{true}
+    \State $c \gets $ \texttt{find\_entering\_variable}$(\textbf{T})$
+    \If{$c$ is None}
         \State \textbf{break}
     \EndIf
-    \State Find leaving variable using ratio test
+    \State  $r \gets $ \texttt{find\_leaving\_variable}$(\textbf{T},c)$
     \If{none found}
-        \State \Return \texttt{Infeasible}
+        \State \Return None \Comment{return infeasible}
     \EndIf
-    \State Perform pivot and update basis
+    \State $\textbf{T} \gets $ \texttt{pivot}($\textbf{T},c,r$)
 \EndWhile
-\If{objective value $> \varepsilon$}
-    \State \Return \texttt{Infeasible}
+\If{$T_{-1,-1}$ $> 0$} \Comment{positive objective value}
+    \State \Return None \Comment{return infeasible}
 \EndIf
-\State Remove artificial variables from basis (pivot them out if needed)
-\State \Return Reduced $A$, $b$, basis
+\State $\textbf{T} \gets $ \texttt{pivot}($\textbf{T},c,r$) \Comment{remove aux vars}
+\State $\textbf{A}, \textbf{b} \gets \textbf{T}$
+\State \Return $A$, $b$, $B$
 \end{algorithmic}
 \end{algorithm}
 
 % 5. Simplex Phase 2
 \begin{algorithm}
-\caption{Simplex Phase 2}
-\label{alg:phase2}
-\begin{algorithmic}[1]
-\Require Feasible $A$, $b$, cost vector $c$, basis indices
-\Ensure Optimal value, solution, or unbounded
-\State Build tableau with $A$, $b$, and $-c$
-\State Adjust cost row based on basic variables
-\While{true}
-    \State Find entering variable using Bland's rule
-    \If{none found}
-        \State \textbf{break}
-    \EndIf
-    \State Find leaving variable using ratio test
-    \If{none found}
-        \State \Return \texttt{Unbounded}
-    \EndIf
-    \State Perform pivot and update basis
-\EndWhile
-\State Extract solution from tableau using basis
-\State Compute optimal value
-\State \Return Optimal value, solution, feasible = true
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[H]
-    \caption{Two-Phase Simplex Method}
-    \label{alg:two_phase_simplex}
+    \caption{Simplex Phase 2}
+    \label{alg:phase2}
     \begin{algorithmic}[1]
-    \Require Constraint matrix \( A \), RHS vector \( b \), objective coefficients \( c \)
-    \Ensure Optimal value \( f^* \), solution \( x^* \), feasibility status
-    \State \textbf{Phase 1:} Call \textsc{Simplex-Phase-1} with \( A, b \)
-    \If{infeasible}
-        \State \Return \( \text{None}, \text{None}, \text{False} \)
-    \EndIf
-    \State \textbf{Phase 2:} Call \textsc{Simplex-Phase-2} with reduced \( A, b, -c \), and basis
-    \State \Return \( f^*, x^*, \text{feasible} \)
+    \Require Matrix $\textbf{A}$, vector $\textbf{b}$, cost vector $\textbf{c}$, basis $B$
+    \Ensure Optimal value $f^*$, solution $\textbf{x}^*$, or Unbounded
+    \State $\textbf{T} := \begin{bmatrix} \textbf{A} & \textbf{b} \\ -\textbf{c}^\top & 0 \end{bmatrix}$
+    \State Adjust cost row from $B$ 
+    \While{true}
+        \State $c \gets$ \texttt{find\_entering\_variable}($\textbf{T}$)
+        \If{$c$ is None}
+            \State \textbf{break} \Comment{optimality reached}
+        \EndIf
+        \State $r \gets$ \texttt{find\_leaving\_variable}($\textbf{T}, c$)
+        \If{$r$ is None}
+            \State \Return \texttt{Unbounded}
+        \EndIf
+        \State $\textbf{T} \gets$ \texttt{pivot}($\textbf{T}, r, c$)
+        \State Update basis $B$ with $B[r] \gets c$
+    \EndWhile
+    \State Extract solution $\textbf{x}^*$ from $\textbf{T}$ using basis $B$
+    \State $f^* \gets -\textbf{T}_{-1, -1}$ \Comment{optimal value from cost row}
+    \State \Return $f^*$, $\textbf{x}^*$, feasible = true
     \end{algorithmic}
 \end{algorithm}
 
-
-
-\subsubsection{Example Usage}
-The following Python code demonstrates how to use the two-phase simplex implementation to solve a linear programming problem:
-\begin{lstlisting}[style=mypython, caption={Example Usage of Two-Phase Simplex}]
-import numpy as np
-
-# Define the problem
-A = np.array([[1, 1], [1.2, 0.5]])
-b = np.array([1, 1])
-c = np.array([1.2, 0.5])
-
-# Solve using two-phase simplex
-optimal_value, solution, feasible = two_phase_simplex(A, b, c)
-
-if feasible:
-    print(f"Optimal Value: {optimal_value}")
-    print(f"Solution: {solution}")
-else:
-    print("The problem is infeasible.")
-\end{lstlisting}
-
-This implementation provides a robust and modular approach to solving linear programming problems using the simplex method.
-
+\begin{algorithm}
+    \caption{Two-Phase Simplex Method}
+    \label{alg:two_phase}
+    \begin{algorithmic}[1]
+    \Require matrix $\textbf{A} \in \mathbb{R}^{m \times n}$, vector $\textbf{b} \in \mathbb{R}^{m}$, cost vector $\textbf{c} \in \mathbb{R}^{n}$
+    \Ensure optimal value $f^*$, solution $\textbf{x}^* \in \mathbb{R}^n$, or \texttt{Infeasible}
+    \State $(\textbf{A}', \textbf{b}', B) \gets$ \texttt{simplex\_phase\_1}($\textbf{A}, \textbf{b}$)
+    \If{result is \texttt{None}}
+        \State \Return \texttt{Infeasible}
+    \EndIf
+    \State $(f^*, \textbf{x}^*) \gets$ \texttt{simplex\_phase\_2}($\textbf{A}', \textbf{b}', \textbf{c}, B$)
+    \State \Return $f^*$, $\textbf{x}^*$
+    \end{algorithmic}
+\end{algorithm}
+    
 \subsection{Python Objects}
 \label{Objects}
 
