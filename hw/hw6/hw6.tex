@@ -17,5 +17,35 @@
 \maketitle
 
 \section{Problem 1}
+Consider the following problem:
+
+\[
+\text{minimize } 
+\begin{aligned}
+    Z_1(\mathbf{x}) &= x_1^2 + x_2^2 + x_3^2 + x_4^2 + x_5^2, \\
+    Z_2(\mathbf{x}) &= 3x_1 + 2x_2 - x_3^3 + 0.01(x_4 - x_5)^3,
+\end{aligned}
+\]
+
+\[
+\text{subject to:}
+\]
+\[
+\begin{aligned}
+    x_1 + 2x_2 - x_3 - 0.5x_4 + x_5 &= 2, \\
+    4x_1 - 2x_2 + 0.8x_3 + 0.6x_4 + 0.5x_5^2 &= 0, \\
+    x_1^2 + x_2^2 + x_3^2 + x_4^2 + x_5^2 &\leq 10.
+\end{aligned}
+\]
+
+\subsection{Part A}
+Use the epsilon-constraint method to solve the above nonlinear programming (NLP) problem in GAMS. Upload your code.
+
+\textbf{Solution:}
+
+\subsection{Part B}
+Create a plot with the Pareto front.
+
+\textbf{Solution:} 
 
 \end{document}
