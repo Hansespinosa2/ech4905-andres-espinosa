@@ -271,5 +271,281 @@ Instead of incorporating this into the GAMs, I created a new parameter $E[\gamma
 \end{aligned}
 \]
 
+This Python script was used to find the expected gamma:
+\begin{verbatim}
+# Define the data
+scenarios = [
+    {"probability": 0.025, "gamma_hot": 0.1, "gamma_cold": 3},
+    {"probability": 0.05, "gamma_hot": 0.1, "gamma_cold": 10},
+    {"probability": 0.1, "gamma_hot": 0.1, "gamma_cold": 34},
+    {"probability": 0.15, "gamma_hot": 1.3, "gamma_cold": 3},
+    {"probability": 0.35, "gamma_hot": 1.3, "gamma_cold": 10},
+    {"probability": 0.15, "gamma_hot": 1.3, "gamma_cold": 34},
+    {"probability": 0.1, "gamma_hot": 3, "gamma_cold": 3},
+    {"probability": 0.05, "gamma_hot": 3, "gamma_cold": 10},
+    {"probability": 0.025, "gamma_hot": 3, "gamma_cold": 34},
+]
 
+# Calculate the summation
+summation = sum(
+    scenario["probability"] * (scenario["gamma_hot"] + scenario["gamma_cold"])
+    for scenario in scenarios
+)
+
+# Print the result
+print(f"The summation of the gammas times the probability is: {summation:.3f}")
+>>> The summation of the gammas times the probability is: 16.062
+\end{verbatim}
+
+\subsection{Optimal Solution}
+This section will highlight the optimal solution that was found in GAMS.
+Section~\ref{prob2_code} has the code that was ran in GAMS
+The GAMS output results in this optimal solution:
+
+\begin{table}[htbp]
+\centering
+\caption{Optimization Results}
+\label{tab:optimization_results}
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\textbf{Variable} & \textbf{Lower} & \textbf{Level} & \textbf{Upper} & \textbf{Marginal} \\ \hline
+z\_first\_stage   & -INF           & 622.0000       & +INF           & .                 \\ \hline
+z\_second\_stage  & -INF           & 11869.8180     & +INF           & .                 \\ \hline
+z\_total          & -INF           & 12491.8180     & +INF           & .                 \\ \hline
+x\_1              & .              & .              & +INF           & .                 \\ \hline
+x\_2              & .              & 1000.0000      & +INF           & .                 \\ \hline
+x\_3              & .              & .              & +INF           & .                 \\ \hline
+x\_4              & .              & .              & +INF           & 7.2048            \\ \hline
+x\_5              & .              & .              & +INF           & 7.6591            \\ \hline
+x\_6              & .              & 450.0000       & +INF           & .                 \\ \hline
+x\_7              & .              & 550.0000       & +INF           & .                 \\ \hline
+x\_8              & .              & .              & +INF           & 3.9949            \\ \hline
+x\_9              & .              & .              & +INF           & 6.4742            \\ \hline
+x\_10             & .              & .              & +INF           & 7.4573            \\ \hline
+x\_11             & .              & .              & +INF           & 5.8623            \\ \hline
+x\_12             & .              & .              & +INF           & 5.8623            \\ \hline
+x\_13             & .              & .              & +INF           & 3.7236            \\ \hline
+y\_1              & .              & .              & 1.0000         & -7207.4580        \\ \hline
+y\_2              & .              & 1.0000         & 1.0000         & 52.0000           \\ \hline
+y\_3              & .              & .              & 1.0000         & -3270.3380        \\ \hline
+y\_4              & .              & .              & 1.0000         & 125.0000          \\ \hline
+y\_5              & .              & .              & 1.0000         & 44.0000           \\ \hline
+y\_6              & .              & .              & 1.0000         & 38.0000           \\ \hline
+y\_7              & .              & .              & 1.0000         & 66.0000           \\ \hline
+y\_8              & .              & 1.0000         & 1.0000         & 112.0000          \\ \hline
+y\_9              & .              & .              & 1.0000         & 37.0000           \\ \hline
+y\_10             & .              & 1.0000         & 1.0000         & 58.0000           \\ \hline
+\end{tabular}
+\end{table}
+
+The written explanation of this solution is that 1000 moles are sent to distillation column 2.
+It is then split into A and B on top and C and D on bottom where C and D are split by column 10 and A and B are split by column 8.
+
+\subsection{Problem 2 GAMS Code}
+\label{prob2_code}
+Below is the code that was ran in GAMS
+\begin{verbatim}
+* I know this is terribly verbose and I should be using sets
+* but I haven't been able to get that logic to work
+
+Scalars
+f_a /0.15/
+f_b /0.30/
+f_c /0.35/
+f_d /0.20/
+S /1000/
+    a_1 / 145 /, b_1 / 0.42 /,
+    a_2 / 52  /, b_2 / 0.12 /,
+    a_3 / 76  /, b_3 / 0.25 /,
+    a_4 / 125 /, b_4 / 0.78 /,
+    a_5 / 44  /, b_5 / 0.11 /,
+    a_6 / 38  /, b_6 / 0.14 /,
+    a_7 / 66  /, b_7 / 0.21 /,
+    a_8 / 112 /, b_8 / 0.39 /,
+    a_9 / 37  /, b_9 / 0.08 /,
+    a_10 / 58 /, b_10 / 0.19 /,
+K_1 / 0.028 /
+K_2 / 0.042 /
+K_3 / 0.054 /
+K_6 / 0.024 /
+K_7 / 0.039 /
+K_4 / 0.040 /
+K_5 / 0.047 /
+K_10 / 0.022 /
+K_9 / 0.036 /
+K_8 / 0.044 /
+E_gamma / 16.062 /
+;
+Variables
+z_first_stage
+z_second_stage
+z_total
+;
+Positive Variables
+x_1
+x_2
+x_3
+x_4
+x_5
+x_6
+x_7
+x_8
+x_9
+x_10
+x_11
+x_12
+x_13
+;
+Binary Variables
+y_1
+y_2
+y_3
+y_4
+y_5
+y_6
+y_7
+y_8
+y_9
+y_10
+;
+Equations
+    bin_constraint_1
+    bin_constraint_2
+    bin_constraint_3
+    bin_constraint_4
+    bin_constraint_5
+    bin_constraint_6
+    bin_constraint_7
+    bin_constraint_8
+    bin_constraint_9
+    bin_constraint_10
+    bin_constraint_11
+    bigm_constraint_1_1
+    bigm_constraint_1_4
+    bigm_constraint_1_5
+    bigm_constraint_2_2
+    bigm_constraint_2_6
+    bigm_constraint_2_7
+    bigm_constraint_3_3
+    bigm_constraint_3_8
+    bigm_constraint_3_9
+    bigm_constraint_4_4
+    bigm_constraint_4_10
+    bigm_constraint_5_5
+    bigm_constraint_5_11
+    bigm_constraint_6_8
+    bigm_constraint_6_12
+    bigm_constraint_7_9
+    bigm_constraint_7_13
+    bigm_constraint_8_6
+    bigm_constraint_8_10
+    bigm_constraint_9_11
+    bigm_constraint_9_12
+    bigm_constraint_10_7
+    bigm_constraint_10_13
+    flow_constraint_7
+    flow_constraint_6
+    flow_constraint_5
+    flow_constraint_4
+    flow_constraint_3
+    flow_constraint_2_lower
+    flow_constraint_2_upper
+    flow_constraint_1
+    supply_constraint
+    integer_cut
+    first_stage_objective
+    second_stage_objective
+    total_objective
+;
+bin_constraint_1..      y_1 + y_2 + y_3 =e= 1;
+bin_constraint_2..      1 - y_1 + y_4 + y_5 =g= 1;
+bin_constraint_3..      1 - y_1 + 1 - y_4 + 1 - y_5 =g= 1;
+bin_constraint_4..      1 - y_2 + y_8 =g= 1;
+bin_constraint_5..      1 - y_2 + y_10 =g= 1;
+bin_constraint_6..      1 - y_3 + y_6 + y_7 =g= 1;
+bin_constraint_7..      1 - y_3 + 1 - y_6 + 1 - y_7 =g= 1;
+bin_constraint_8..      1 - y_4 + y_8 =g= 1;
+bin_constraint_9..      1 - y_5 + y_9 =g= 1;
+bin_constraint_10..     1 - y_6 + y_9 =g= 1;
+bin_constraint_11..     1 - y_7 + y_10 =g= 1;
+
+bigm_constraint_1_1..  x_1  =l= S * y_1;
+bigm_constraint_1_4..  x_4  =l= S * y_1;
+bigm_constraint_1_5..  x_5  =l= S * y_1;
+
+bigm_constraint_2_2..  x_2  =l= S * y_2;
+bigm_constraint_2_6..  x_6  =l= S * y_2;
+bigm_constraint_2_7..  x_7  =l= S * y_2;
+
+bigm_constraint_3_3..  x_3  =l= S * y_3;
+bigm_constraint_3_8..  x_8  =l= S * y_3;
+bigm_constraint_3_9..  x_9  =l= S * y_3;
+
+bigm_constraint_4_4..  x_4  =l= S * y_4;
+bigm_constraint_4_10.. x_10 =l= S * y_4;
+
+bigm_constraint_5_5..  x_5  =l= S * y_5;
+bigm_constraint_5_11.. x_11 =l= S * y_5;
+
+bigm_constraint_6_8..  x_8  =l= S * y_6;
+bigm_constraint_6_12.. x_12 =l= S * y_6;
+
+bigm_constraint_7_9..  x_9  =l= S * y_7;
+bigm_constraint_7_13.. x_13 =l= S * y_7;
+
+bigm_constraint_8_6..  x_6  =l= S * y_8;
+bigm_constraint_8_10.. x_10 =l= S * y_8;
+
+bigm_constraint_9_11.. x_11 =l= S * y_9;
+bigm_constraint_9_12.. x_12 =l= S * y_9;
+
+bigm_constraint_10_7.. x_7  =l= S * y_10;
+bigm_constraint_10_13.. x_13 =l= S * y_10;
+
+flow_constraint_7..        x_13 =e= (1 - f_c) / (1 - f_d) * x_9;
+flow_constraint_6..        x_12 =e= (1 - f_a) / (1 - f_d) * x_8;
+flow_constraint_5..        x_11 =e= (1 - f_d) / (1 - f_a) * x_5;
+flow_constraint_4..        x_10 =e= (1 - f_b) / (1 - f_a) * x_4;
+flow_constraint_3..        x_9 + x_8 =e= (1 - f_d) * x_3;
+flow_constraint_2_lower..  x_7 =e= (1 - f_a - f_b) * x_2;
+flow_constraint_2_upper..  x_6 =e= (1 - f_c - f_d) * x_2;
+flow_constraint_1..        x_5 + x_4 =e= (1 - f_a) * x_1;
+
+supply_constraint.. x_1 + x_2 + x_3 =e= S;
+
+integer_cut.. y_3 =e= 0;
+
+first_stage_objective..
+z_first_stage =e=
+    a_1*y_1 + b_1*x_1 +
+    a_2*y_2 + b_2*x_2 +
+    a_3*y_3 + b_3*x_3 +
+    a_4*y_4 + b_4*x_4 +
+    a_5*y_5 + b_5*x_5 +
+    a_6*y_6 + b_6*x_8 +
+    a_7*y_7 + b_7*x_9 +
+    a_8*y_8 + b_8*(x_6+x_10) +
+    a_9*y_9 + b_9*(x_11+x_12) +
+    a_10*y_10 + b_10*(x_7+x_13);
+    
+second_stage_objective..
+z_second_stage =e= E_gamma * 10 * (
+    K_1 * x_1 +
+    K_2 * x_2 +
+    K_3 * x_3 +
+    K_4 * x_4 +
+    K_5 * x_5 +
+    K_6 * x_8 +
+    K_7 * x_9 +
+    K_8 * (x_6 + x_10) +
+    K_9 * (x_11 + x_12) +
+    K_10 * (x_7 + x_13)
+);
+
+total_objective..
+z_total =e= z_first_stage + z_second_stage;
+
+Model Superstructure / all /;
+solve Superstructure using MIP minimizing z_total;
+\end{verbatim}
 \end{document}
