@@ -199,7 +199,77 @@ Unlike the previous case, assume that the parameters $\gamma_{\text{Hot}}$ and $
 Formulate a stochastic optimization problem in GAMS and solve the problem.
 
 \textbf{Solution:}
+\[
+\text{minimize} \quad \sum_{s \in S} p_s \cdot \left( \sum_{k=1}^{10} \left( \alpha_k y_k + \beta_k x_k + \gamma_{\text{Hot},s} Q_k^{\text{Hot}} + \gamma_{\text{Cold},s} Q_k^{\text{Cold}} \right) \right)
+\]
+\[
+\text{subject to:}
+\]
+\[
+\begin{aligned}
+    & \text{Flow balance constraints (as defined in the problem)} \\
+    & \text{Binary constraints for y variables} \\
+    & \text{Big-M constraints for x variables} \\
+    & \text{Supply and demand constraints} \\
+    & \text{Non-negativity constraints for x variables.}
+\end{aligned}
+\]
 
+We can rearrange the summations 
+\[
+\text{minimize} \quad \sum_{k=1}^{10} \left( \alpha_k y_k + \beta_k x_k \right) + \sum_{s \in S} p_s \cdot \sum_{k=1}^{10} \left( \gamma_{\text{Hot},s} Q_k^{\text{Hot}} + \gamma_{\text{Cold},s} Q_k^{\text{Cold}} \right)
+\]
+
+Previously, in HW5 I didn't successfully incorporate the $Q$ and $\gamma$ values.
+Here, the $\gamma$ values are provided per scenario.
+I believe the $Q$ values are equal to the amount of flow passing through the distillation column times the heat duty coefficients.
+So, using the same variables $y$ and $x$ per distillation column that I had previously, we have the below full problem:
+
+
+\[
+    \text{minimize} \quad \sum_{k=1}^{10} \left( \alpha_k y_k + \beta_k x_k \right) + \sum_{s \in S} p_s \cdot \sum_{k=1}^{10} \left( \gamma_{\text{Hot},s} K_k x_k + \gamma_{\text{Cold},s} K_k x_k \right)
+\]
+\[
+\text{subject to:}
+\]
+\[
+\begin{aligned}
+    & \text{Flow balance constraints (as defined in the problem)} \\
+    & \text{Binary constraints for y variables} \\
+    & \text{Big-M constraints for x variables} \\
+    & \text{Supply and demand constraints} \\
+    & \text{Non-negativity constraints for x variables.}
+\end{aligned}
+\]
+
+There are no constraints affected by the uncertainty in the $\gamma$ values.
+Therefore, we solve the same problem as previously but augment the objective function to include this uncertainty.
+For simplicity, we also split the first section $\sum_{k=1}^{10} \left( \alpha_k y_k + \beta_k x_k \right)$ into $z_1$ as the first stage component and the rest $\sum_{s \in S} p_s \cdot \sum_{k=1}^{10} \left( \gamma_{\text{Hot},s} K_k x_k + \gamma_{\text{Cold},s} K_k x_k \right)$ as the second stage component $z_2$.
+Now, $z_T = z_1 + z_2$ is the total objective component.
+
+Another rearrangement we do for simplicity is factoring out the $K x $ term in the second stage component.
+
+\[
+    \text{minimize} \quad \sum_{k=1}^{10} \left( \alpha_k y_k + \beta_k x_k \right) + \sum_{k=1}^{10} K_k x_k \sum_{s \in S} p_s \cdot  \left( \gamma_{\text{Hot},s}  + \gamma_{\text{Cold},s} \right)
+\]
+
+Since this parameter $\sum_{s \in S} p_s \cdot  \left( \gamma_{\text{Hot},s}  + \gamma_{\text{Cold},s} \right)$ is only comprised of parameters, we can actually calculate a new parameter as the expectation of this term.
+Instead of incorporating this into the GAMs, I created a new parameter $E[\gamma] = \sum_{s \in S} p_s \cdot  \left( \gamma_{\text{Hot},s}  + \gamma_{\text{Cold},s} \right)$ and use that to solve the stochastic program below
+\[
+    \text{minimize} \quad \sum_{k=1}^{10} \left( \alpha_k y_k + \beta_k x_k \right) + \sum_{k=1}^{10} K_k x_k E[\gamma]
+\]
+\[
+\text{subject to:}
+\]
+\[
+\begin{aligned}
+    & \text{Flow balance constraints (as defined in the problem)} \\
+    & \text{Binary constraints for y variables} \\
+    & \text{Big-M constraints for x variables} \\
+    & \text{Supply and demand constraints} \\
+    & \text{Non-negativity constraints for x variables.}
+\end{aligned}
+\]
 
 
 \end{document}
